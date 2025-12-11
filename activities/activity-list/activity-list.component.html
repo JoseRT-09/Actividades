@@ -150,7 +150,10 @@
               <mat-icon>visibility</mat-icon>
             </button>
 
-            <button mat-icon-button [routerLink]="['/activities', activity.id, 'edit']" matTooltip="Editar">
+            <button mat-icon-button
+                    [routerLink]="['/activities', activity.id, 'edit']"
+                    matTooltip="Editar"
+                    *ngIf="canEditActivity(activity)">
               <mat-icon>edit</mat-icon>
             </button>
           </td>

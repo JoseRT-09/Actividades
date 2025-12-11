@@ -91,11 +91,11 @@ export class ActivityListComponent implements OnInit {
 
   tipos = [
     { value: '', label: 'Todos' },
-    { value: 'ReuniÃ³n', label: 'ReuniÃ³n' },
+    { value: 'Reunión', label: 'Reunión' },
     { value: 'Evento', label: 'Evento' },
     { value: 'Mantenimiento', label: 'Mantenimiento' },
     { value: 'Asamblea', label: 'Asamblea' },
-    { value: 'CelebraciÃ³n', label: 'CelebraciÃ³n' },
+    { value: 'Celebración', label: 'Celebración' },
     { value: 'Otro', label: 'Otro' }
   ];
 
@@ -205,11 +205,11 @@ export class ActivityListComponent implements OnInit {
 
   getTypeClass(type: string): string {
     const typeMap: Record<string, string> = {
-      'ReuniÃ³n': 'type-meeting',
+      'Reunión': 'type-meeting',
       'Evento': 'type-event',
       'Mantenimiento': 'type-maintenance',
       'Asamblea': 'type-assembly',
-      'CelebraciÃ³n': 'type-celebration',
+      'Celebración': 'type-celebration',
       'Otro': 'type-other'
     };
     return typeMap[type] || 'type-default';
@@ -217,11 +217,11 @@ export class ActivityListComponent implements OnInit {
 
   getTypeIcon(type: string): string {
     const iconMap: Record<string, string> = {
-      'ReuniÃ³n': 'groups',
+      'Reunión': 'groups',
       'Evento': 'event',
       'Mantenimiento': 'build',
       'Asamblea': 'gavel',
-      'CelebraciÃ³n': 'celebration',
+      'Celebración': 'celebration',
       'Otro': 'category'
     };
     return iconMap[type] || 'help_outline';
@@ -245,5 +245,14 @@ export class ActivityListComponent implements OnInit {
       'Cancelada': 'cancel'
     };
     return iconMap[status] || 'help_outline';
+  }
+
+  canEditActivity(activity: Activity): boolean {
+    // Solo admin/superadmin pueden editar Y la actividad NO debe estar completada
+    return this.authService.isAdmin() && activity.estado !== 'Completada';
+  }
+
+  isAdmin(): boolean {
+    return this.authService.isAdmin();
   }
 }
