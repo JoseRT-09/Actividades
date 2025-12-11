@@ -186,7 +186,6 @@ export class ReportDetailComponent implements OnInit {
       'Abierto': 'status-open',
       'En Progreso': 'status-progress',
       'Resuelto': 'status-resolved',
-      'Cerrado': 'status-closed'
     };
     return statusMap[status] || 'status-default';
   }
@@ -196,7 +195,6 @@ export class ReportDetailComponent implements OnInit {
       'Abierto': 'error_outline',
       'En Progreso': 'sync',
       'Resuelto': 'check_circle',
-      'Cerrado': 'archive'
     };
     return iconMap[status] || 'help_outline';
   }
@@ -256,6 +254,17 @@ export class ReportDetailComponent implements OnInit {
 
   // Helper para obtener residencia
   getResidence() {
+
+  canComment(): boolean {
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser || !this.report) return false;
+
+    // Admin y SuperAdmin pueden comentar
+    if (this.authService.isAdmin()) return true;
+
+    // El creador del reporte (residente) también puede comentar
+    return this.report.reportado_por_id === currentUser.id;
+  }
     return this.report?.Residence || this.report?.residencia;
   }
 }

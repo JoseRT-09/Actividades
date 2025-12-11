@@ -46,10 +46,6 @@
             <mat-icon>check_circle</mat-icon>
             <span>Resuelto</span>
           </button>
-          <button mat-menu-item (click)="changeStatus('Cerrado')">
-            <mat-icon>archive</mat-icon>
-            <span>Cerrado</span>
-          </button>
         </mat-menu>
 
         <button 
@@ -60,15 +56,6 @@
         </button>
 
         <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="printReport()">
-            <mat-icon>print</mat-icon>
-            <span>Imprimir</span>
-          </button>
-          <button mat-menu-item>
-            <mat-icon>email</mat-icon>
-            <span>Enviar Actualización</span>
-          </button>
-          <mat-divider></mat-divider>
           <button 
             mat-menu-item 
             (click)="onDelete()"
@@ -224,130 +211,58 @@
       </div>
     </mat-card>
 
-    <!-- Tabs Section -->
+    <!-- Comments Section -->
     <mat-card class="tabs-card no-print">
-      <mat-tab-group>
-        <!-- Comments Tab -->
-        <mat-tab>
-          <ng-template mat-tab-label>
-            <mat-icon>comment</mat-icon>
-            Comentarios ({{ comments.length }})
-          </ng-template>
+      <div class="tab-content">
+        <h3>
+          <mat-icon>comment</mat-icon>
+          Comentarios ({{ comments.length }})
+        </h3>
 
-          <div class="tab-content">
-            <!-- Add Comment Form -->
-            <div class="add-comment-section">
-              <h3>Agregar Comentario</h3>
-              <form [formGroup]="commentForm" (ngSubmit)="addComment()">
-                <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>Escribe un comentario</mat-label>
-                  <textarea 
-                    matInput 
-                    formControlName="comment"
-                    rows="3"
-                    placeholder="Agrega actualizaciones, notas o comentarios..."
-                  ></textarea>
-                </mat-form-field>
-                <button 
-                  mat-raised-button 
-                  color="primary"
-                  type="submit"
-                  [disabled]="!commentForm.get('comment')?.value || isSavingComment"
-                >
-                  <mat-spinner *ngIf="isSavingComment" diameter="20"></mat-spinner>
-                  <mat-icon *ngIf="!isSavingComment">send</mat-icon>
-                  <span *ngIf="!isSavingComment">Enviar Comentario</span>
-                </button>
-              </form>
+        <!-- Add Comment Form - Solo visible para admin/superadmin y creador -->
+        <div class="add-comment-section" *ngIf="canComment()">
+          <form [formGroup]="commentForm" (ngSubmit)="addComment()">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Escribe un comentario</mat-label>
+              <textarea 
+                matInput 
+                formControlName="comment"
+                rows="3"
+                placeholder="Agrega actualizaciones, notas o comentarios..."
+              ></textarea>
+            </mat-form-field>
+            <button 
+              mat-raised-button 
+              color="primary"
+              type="submit"
+              [disabled]="!commentForm.get('comment')?.value || isSavingComment"
+            >
+              <mat-spinner *ngIf="isSavingComment" diameter="20"></mat-spinner>
+              <mat-icon *ngIf="!isSavingComment">send</mat-icon>
+              <span *ngIf="!isSavingComment">Enviar Comentario</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Comments List -->
+        <div class="comments-list">
+          <div class="comment-item" *ngFor="let comment of comments">
+            <div class="comment-avatar">
+              {{ getUserInitials(comment.usuario.nombre, comment.usuario.apellido) }}
             </div>
-
-            <!-- Comments List -->
-            <div class="comments-list">
-              <div class="comment-item" *ngFor="let comment of comments">
-                <div class="comment-avatar">
-                  {{ getUserInitials(comment.usuario.nombre, comment.usuario.apellido) }}
-                </div>
-                <div class="comment-content">
-                  <div class="comment-header">
-                    <span class="comment-author">{{ comment.usuario.nombre }} {{ comment.usuario.apellido }}</span>
-                    <span class="comment-time">{{ comment.fecha | timeAgo }}</span>
-                  </div>
-                  <p class="comment-text">{{ comment.texto }}</p>
-                </div>
+            <div class="comment-content">
+              <div class="comment-header">
+                <span class="comment-author">{{ comment.usuario.nombre }} {{ comment.usuario.apellido }}</span>
+                <span class="comment-time">{{ comment.fecha | timeAgo }}</span>
               </div>
-
-              <div class="no-comments" *ngIf="comments.length === 0">
-                <mat-icon>chat_bubble_outline</mat-icon>
-                <p>No hay comentarios aún</p>
-              </div>
+              <p class="comment-text">{{ comment.texto }}</p>
             </div>
           </div>
-        </mat-tab>
 
-        <!-- Activity Log Tab -->
-        <mat-tab>
-          <ng-template mat-tab-label>
-            <mat-icon>history</mat-icon>
-            Historial de Cambios
-          </ng-template>
-
-          <div class="tab-content">
-            <div class="activity-log">
-              <div class="activity-item">
-                <div class="activity-icon created">
-                  <mat-icon>add_circle</mat-icon>
-                </div>
-                <div class="activity-content">
-                  <span class="activity-title">Reporte creado</span>
-                  <span class="activity-time">{{ report.created_at | date: 'dd/MM/yyyy HH:mm' }}</span>
-                </div>
-              </div>
-
-              <div class="activity-item" *ngIf="report.updated_at !== report.created_at">
-                <div class="activity-icon updated">
-                  <mat-icon>edit</mat-icon>
-                </div>
-                <div class="activity-content">
-                  <span class="activity-title">Reporte actualizado</span>
-                  <span class="activity-time">{{ report.updated_at | date: 'dd/MM/yyyy HH:mm' }}</span>
-                </div>
-              </div>
-
-              <div class="activity-item" *ngIf="report.fecha_resolucion">
-                <div class="activity-icon resolved">
-                  <mat-icon>check_circle</mat-icon>
-                </div>
-                <div class="activity-content">
-                  <span class="activity-title">Reporte resuelto</span>
-                  <span class="activity-time">{{ report.fecha_resolucion | date: 'dd/MM/yyyy HH:mm' }}</span>
-                </div>
-              </div>
-            </div>
+          <div class="no-comments" *ngIf="comments.length === 0">
+            <mat-icon>chat_bubble_outline</mat-icon>
+            <p>No hay comentarios aún</p>
           </div>
-        </mat-tab>
-      </mat-tab-group>
-    </mat-card>
-
-    <!-- Metadata Card -->
-    <mat-card class="metadata-card no-print">
-      <h3>
-        <mat-icon>info</mat-icon>
-        Información del Sistema
-      </h3>
-      <mat-divider></mat-divider>
-
-      <div class="metadata-grid">
-        <div class="metadata-item">
-          <span class="metadata-label">ID del Reporte:</span>
-          <span class="metadata-value">#{{ report.id }}</span>
-        </div>
-        <div class="metadata-item">
-          <span class="metadata-label">Creado:</span>
-          <span class="metadata-value">{{ report.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
-        </div>
-        <div class="metadata-item">
-          <span class="metadata-label">Última Actualización:</span>
-          <span class="metadata-value">{{ report.updated_at | date:'dd/MM/yyyy HH:mm' }}</span>
         </div>
       </div>
     </mat-card>

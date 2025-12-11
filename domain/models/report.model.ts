@@ -16,7 +16,7 @@ export enum ReportPriority {
   CRITICA = 'Crítica'
 }
 
-export type ReportStatus = 'Abierto' | 'En Progreso' | 'Resuelto' | 'Cerrado';
+export type ReportStatus = 'Abierto' | 'En Progreso' | 'Resuelto';
 
 export interface Report {
   id: number;
@@ -61,7 +61,6 @@ export interface ReportStatistics {
     abierto: number;
     enProgreso: number;
     resuelto: number;
-    cerrado: number;
   };
   byPriority: {
     critica: number;

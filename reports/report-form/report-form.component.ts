@@ -141,12 +141,6 @@ export class ReportFormComponent implements OnInit {
       icon: 'check_circle',
       color: '#4caf50'
     },
-    {
-      value: 'Cerrado',
-      label: 'Cerrado',
-      icon: 'archive',
-      color: '#9e9e9e'
-    }
   ];
 
   ngOnInit(): void {
