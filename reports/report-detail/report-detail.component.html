@@ -1,0 +1,355 @@
+<div class="report-detail-container">
+  <!-- Header -->
+  <div class="page-header no-print">
+    <div class="header-content">
+      <button mat-icon-button class="back-button" routerLink="/reports">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>report_problem</mat-icon>
+          Detalle del Reporte
+        </h1>
+        <p class="page-subtitle">Información completa del reporte de incidencia</p>
+      </div>
+
+      <div class="header-actions" *ngIf="report">
+        <button 
+          mat-raised-button 
+          color="primary"
+          (click)="onEdit()"
+          [disabled]="!canEdit()"
+        >
+          <mat-icon>edit</mat-icon>
+          Editar
+        </button>
+
+        <button 
+          mat-button 
+          [matMenuTriggerFor]="statusMenu"
+        >
+          <mat-icon>sync</mat-icon>
+          Cambiar Estado
+        </button>
+
+        <mat-menu #statusMenu="matMenu">
+          <button mat-menu-item (click)="changeStatus('Abierto')">
+            <mat-icon>error_outline</mat-icon>
+            <span>Abierto</span>
+          </button>
+          <button mat-menu-item (click)="changeStatus('En Progreso')">
+            <mat-icon>sync</mat-icon>
+            <span>En Progreso</span>
+          </button>
+          <button mat-menu-item (click)="changeStatus('Resuelto')">
+            <mat-icon>check_circle</mat-icon>
+            <span>Resuelto</span>
+          </button>
+          <button mat-menu-item (click)="changeStatus('Cerrado')">
+            <mat-icon>archive</mat-icon>
+            <span>Cerrado</span>
+          </button>
+        </mat-menu>
+
+        <button 
+          mat-button 
+          [matMenuTriggerFor]="menu"
+        >
+          <mat-icon>more_vert</mat-icon>
+        </button>
+
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="printReport()">
+            <mat-icon>print</mat-icon>
+            <span>Imprimir</span>
+          </button>
+          <button mat-menu-item>
+            <mat-icon>email</mat-icon>
+            <span>Enviar Actualización</span>
+          </button>
+          <mat-divider></mat-divider>
+          <button 
+            mat-menu-item 
+            (click)="onDelete()"
+            [disabled]="!canDelete()"
+            class="delete-option"
+          >
+            <mat-icon>delete</mat-icon>
+            <span>Eliminar Reporte</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando información del reporte...</p>
+  </div>
+
+  <!-- Report Detail Content -->
+  <div class="detail-wrapper" *ngIf="!isLoading && report">
+    <!-- Main Info Card -->
+    <mat-card class="main-info-card">
+      <div class="info-header">
+        <div class="report-title-section">
+          <div class="type-icon" [class]="getTypeClass(report.tipo)">
+            <mat-icon>{{ getTypeIcon(report.tipo) }}</mat-icon>
+          </div>
+          <div class="title-content">
+            <h2>{{ report.titulo }}</h2>
+            <p class="time-ago">
+              <mat-icon>schedule</mat-icon>
+              {{ getCreatedDate() | timeAgo }}
+            </p>
+          </div>
+        </div>
+
+        <div class="status-badges">
+          <mat-chip [class]="getTypeClass(report.tipo)" class="type-chip-large">
+            <mat-icon>{{ getTypeIcon(report.tipo) }}</mat-icon>
+            {{ report.tipo }}
+          </mat-chip>
+
+          <mat-chip [class]="getPriorityClass(report.prioridad)" class="priority-chip-large">
+            <mat-icon>{{ getPriorityIcon(report.prioridad) }}</mat-icon>
+            {{ report.prioridad }}
+          </mat-chip>
+
+          <mat-chip [class]="getStatusClass(report.estado)" class="status-chip-large">
+            <mat-icon>{{ getStatusIcon(report.estado) }}</mat-icon>
+            {{ report.estado }}
+          </mat-chip>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Description Section -->
+      <div class="description-section">
+        <h3>
+          <mat-icon>description</mat-icon>
+          Descripción
+        </h3>
+        <p>{{ report.descripcion }}</p>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Details Grid -->
+      <div class="details-grid">
+        <!-- Reporter Info -->
+        <div class="detail-card">
+          <h4>
+            <mat-icon>person</mat-icon>
+            Reportado Por
+          </h4>
+          <div class="user-info" *ngIf="report.reportadoPor">
+            <div class="user-avatar">
+              {{ getUserInitials(report.reportadoPor.nombre, report.reportadoPor.apellido) }}
+            </div>
+            <div class="user-details">
+              <span class="user-name">{{ getReporterName() }}</span>
+              <span class="user-email">{{ report.reportadoPor.email }}</span>
+              <span class="user-phone" *ngIf="report.reportadoPor.telefono">
+                <mat-icon>phone</mat-icon>
+                {{ report.reportadoPor.telefono }}
+              </span>
+            </div>
+          </div>
+          <div *ngIf="!report.reportadoPor" class="no-data">
+            <span>Información no disponible</span>
+          </div>
+        </div>
+
+        <!-- Location Info -->
+        <div class="detail-card">
+          <h4>
+            <mat-icon>location_on</mat-icon>
+            Ubicación
+          </h4>
+          <div class="location-info">
+            <div class="location-item" *ngIf="getResidence()">
+              <mat-icon>home</mat-icon>
+              <div>
+                <span class="location-label">Residencia</span>
+                <span class="location-value">
+                  Unidad {{ getResidence()?.numero_unidad }}
+                  <span *ngIf="getResidence()?.bloque"> - Bloque {{ getResidence()?.bloque }}</span>
+                </span>
+              </div>
+            </div>
+            <div class="location-item" *ngIf="!getResidence()">
+              <mat-icon>public</mat-icon>
+              <div>
+                <span class="location-label">Área</span>
+                <span class="location-value">Área común o general</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timeline Info -->
+        <div class="detail-card">
+          <h4>
+            <mat-icon>timeline</mat-icon>
+            Línea de Tiempo
+          </h4>
+          <div class="timeline-info">
+            <div class="timeline-item">
+              <mat-icon>event</mat-icon>
+              <div>
+                <span class="timeline-label">Creado</span>
+                <span class="timeline-value">{{ report.created_at | date: 'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+            </div>
+            <div class="timeline-item" *ngIf="report.fecha_resolucion">
+              <mat-icon>check_circle</mat-icon>
+              <div>
+                <span class="timeline-label">Resuelto</span>
+                <span class="timeline-value">{{ report.fecha_resolucion | date: 'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <mat-icon>update</mat-icon>
+              <div>
+                <span class="timeline-label">Última Actualización</span>
+                <span class="timeline-value">{{ report.updated_at | date: 'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Tabs Section -->
+    <mat-card class="tabs-card no-print">
+      <mat-tab-group>
+        <!-- Comments Tab -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>comment</mat-icon>
+            Comentarios ({{ comments.length }})
+          </ng-template>
+
+          <div class="tab-content">
+            <!-- Add Comment Form -->
+            <div class="add-comment-section">
+              <h3>Agregar Comentario</h3>
+              <form [formGroup]="commentForm" (ngSubmit)="addComment()">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Escribe un comentario</mat-label>
+                  <textarea 
+                    matInput 
+                    formControlName="comment"
+                    rows="3"
+                    placeholder="Agrega actualizaciones, notas o comentarios..."
+                  ></textarea>
+                </mat-form-field>
+                <button 
+                  mat-raised-button 
+                  color="primary"
+                  type="submit"
+                  [disabled]="!commentForm.get('comment')?.value || isSavingComment"
+                >
+                  <mat-spinner *ngIf="isSavingComment" diameter="20"></mat-spinner>
+                  <mat-icon *ngIf="!isSavingComment">send</mat-icon>
+                  <span *ngIf="!isSavingComment">Enviar Comentario</span>
+                </button>
+              </form>
+            </div>
+
+            <!-- Comments List -->
+            <div class="comments-list">
+              <div class="comment-item" *ngFor="let comment of comments">
+                <div class="comment-avatar">
+                  {{ getUserInitials(comment.usuario.nombre, comment.usuario.apellido) }}
+                </div>
+                <div class="comment-content">
+                  <div class="comment-header">
+                    <span class="comment-author">{{ comment.usuario.nombre }} {{ comment.usuario.apellido }}</span>
+                    <span class="comment-time">{{ comment.fecha | timeAgo }}</span>
+                  </div>
+                  <p class="comment-text">{{ comment.texto }}</p>
+                </div>
+              </div>
+
+              <div class="no-comments" *ngIf="comments.length === 0">
+                <mat-icon>chat_bubble_outline</mat-icon>
+                <p>No hay comentarios aún</p>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Activity Log Tab -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>history</mat-icon>
+            Historial de Cambios
+          </ng-template>
+
+          <div class="tab-content">
+            <div class="activity-log">
+              <div class="activity-item">
+                <div class="activity-icon created">
+                  <mat-icon>add_circle</mat-icon>
+                </div>
+                <div class="activity-content">
+                  <span class="activity-title">Reporte creado</span>
+                  <span class="activity-time">{{ report.created_at | date: 'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+              </div>
+
+              <div class="activity-item" *ngIf="report.updated_at !== report.created_at">
+                <div class="activity-icon updated">
+                  <mat-icon>edit</mat-icon>
+                </div>
+                <div class="activity-content">
+                  <span class="activity-title">Reporte actualizado</span>
+                  <span class="activity-time">{{ report.updated_at | date: 'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+              </div>
+
+              <div class="activity-item" *ngIf="report.fecha_resolucion">
+                <div class="activity-icon resolved">
+                  <mat-icon>check_circle</mat-icon>
+                </div>
+                <div class="activity-content">
+                  <span class="activity-title">Reporte resuelto</span>
+                  <span class="activity-time">{{ report.fecha_resolucion | date: 'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card>
+
+    <!-- Metadata Card -->
+    <mat-card class="metadata-card no-print">
+      <h3>
+        <mat-icon>info</mat-icon>
+        Información del Sistema
+      </h3>
+      <mat-divider></mat-divider>
+
+      <div class="metadata-grid">
+        <div class="metadata-item">
+          <span class="metadata-label">ID del Reporte:</span>
+          <span class="metadata-value">#{{ report.id }}</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Creado:</span>
+          <span class="metadata-value">{{ report.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Última Actualización:</span>
+          <span class="metadata-value">{{ report.updated_at | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+</div>

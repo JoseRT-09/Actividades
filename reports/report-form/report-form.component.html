@@ -1,0 +1,241 @@
+<div class="report-form-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <button mat-icon-button class="back-button" routerLink="/reports">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>{{ isEditMode ? 'edit' : 'add' }}</mat-icon>
+          {{ isEditMode ? 'Editar Reporte' : 'Nuevo Reporte' }}
+        </h1>
+        <p class="page-subtitle">
+          {{ isEditMode ? 'Modifica los datos del reporte' : 'Completa el formulario para crear un nuevo reporte' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando datos...</p>
+  </div>
+
+  <!-- Form -->
+  <div class="form-wrapper" *ngIf="!isLoading">
+    <mat-card class="form-card">
+      <form [formGroup]="reportForm" (ngSubmit)="onSubmit()">
+        
+        <!-- Información Básica -->
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>info</mat-icon>
+            <h2>Información Básica</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="form-grid">
+            <!-- Título -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Título del Reporte</mat-label>
+              <input 
+                matInput 
+                formControlName="titulo"
+                placeholder="Ej: Fuga de agua en área común"
+              >
+              <mat-icon matPrefix>title</mat-icon>
+              <mat-error *ngIf="reportForm.get('titulo')?.invalid">
+                {{ getErrorMessage('titulo') }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Descripción -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Descripción Detallada</mat-label>
+              <textarea 
+                matInput 
+                formControlName="descripcion"
+                rows="4"
+                placeholder="Describe el problema o incidencia con el mayor detalle posible..."
+              ></textarea>
+              <mat-icon matPrefix>description</mat-icon>
+              <mat-hint>Mínimo 10 caracteres</mat-hint>
+              <mat-error *ngIf="reportForm.get('descripcion')?.invalid">
+                {{ getErrorMessage('descripcion') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Clasificación -->
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>category</mat-icon>
+            <h2>Clasificación</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="form-grid">
+            <!-- Tipo -->
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo de Reporte</mat-label>
+              <mat-select formControlName="tipo">
+                <mat-option *ngFor="let tipo of tipos" [value]="tipo.value">
+                  <div class="select-option">
+                    <mat-icon>{{ tipo.icon }}</mat-icon>
+                    <div class="option-content">
+                      <span class="option-label">{{ tipo.label }}</span>
+                      <span class="option-description">{{ tipo.description }}</span>
+                    </div>
+                  </div>
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>category</mat-icon>
+            </mat-form-field>
+
+            <!-- Prioridad -->
+            <mat-form-field appearance="outline">
+              <mat-label>Prioridad</mat-label>
+              <mat-select formControlName="prioridad">
+                <mat-option *ngFor="let prioridad of prioridades" [value]="prioridad.value">
+                  <div class="select-option">
+                    <mat-icon [style.color]="prioridad.color">{{ prioridad.icon }}</mat-icon>
+                    <div class="option-content">
+                      <span class="option-label">{{ prioridad.label }}</span>
+                      <span class="option-description">{{ prioridad.description }}</span>
+                    </div>
+                  </div>
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>flag</mat-icon>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Ubicación y Estado -->
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>location_on</mat-icon>
+            <h2>Ubicación y Estado</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="form-grid">
+            <!-- Residencia -->
+            <mat-form-field appearance="outline">
+              <mat-label>Residencia (Opcional)</mat-label>
+              <mat-select formControlName="residencia_id">
+                <mat-option [value]="null">Área común o general</mat-option>
+                <mat-option *ngFor="let residence of residences" [value]="residence.id">
+                  Unidad {{ residence.numero_unidad }}
+                  <span *ngIf="residence.bloque"> - Bloque {{ residence.bloque }}</span>
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>home</mat-icon>
+              <mat-hint>Deja vacío si es un área común</mat-hint>
+            </mat-form-field>
+
+            <!-- Estado -->
+            <mat-form-field appearance="outline">
+              <mat-label>Estado del Reporte</mat-label>
+              <mat-select formControlName="estado">
+                <mat-option *ngFor="let estado of estados" [value]="estado.value">
+                  <div class="select-option">
+                    <mat-icon [style.color]="estado.color">{{ estado.icon }}</mat-icon>
+                    <span>{{ estado.label }}</span>
+                  </div>
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>sync</mat-icon>
+            </mat-form-field>
+
+            <!-- Fecha Reporte -->
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha del Reporte</mat-label>
+              <input 
+                matInput 
+                [matDatepicker]="pickerReporte" 
+                formControlName="fecha_reporte"
+              >
+              <mat-datepicker-toggle matIconSuffix [for]="pickerReporte"></mat-datepicker-toggle>
+              <mat-datepicker #pickerReporte></mat-datepicker>
+              <mat-icon matPrefix>event</mat-icon>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Notas Adicionales -->
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>notes</mat-icon>
+            <h2>Notas Adicionales</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Notas Internas (Opcional)</mat-label>
+            <textarea 
+              matInput 
+              formControlName="notas_adicionales"
+              rows="3"
+              placeholder="Comentarios internos, seguimiento, etc..."
+            ></textarea>
+            <mat-icon matPrefix>note</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <!-- Preview Card -->
+        <div class="preview-card" *ngIf="reportForm.get('titulo')?.value">
+          <h3>
+            <mat-icon>visibility</mat-icon>
+            Vista Previa del Reporte
+          </h3>
+          <div class="preview-content">
+            <div class="preview-header">
+              <mat-icon>{{ getTypeIcon(reportForm.get('tipo')?.value) }}</mat-icon>
+              <h4>{{ reportForm.get('titulo')?.value }}</h4>
+            </div>
+            <div class="preview-badges">
+              <mat-chip class="preview-chip">
+                Tipo: {{ reportForm.get('tipo')?.value }}
+              </mat-chip>
+              <mat-chip class="preview-chip">
+                Prioridad: {{ reportForm.get('prioridad')?.value }}
+              </mat-chip>
+              <mat-chip class="preview-chip">
+                Estado: {{ reportForm.get('estado')?.value }}
+              </mat-chip>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button 
+            mat-stroked-button 
+            type="button"
+            (click)="onCancel()"
+            [disabled]="isSaving"
+          >
+            <mat-icon>close</mat-icon>
+            Cancelar
+          </button>
+
+          <button 
+            mat-raised-button 
+            color="primary"
+            type="submit"
+            [disabled]="reportForm.invalid || isSaving"
+          >
+            <mat-spinner *ngIf="isSaving" diameter="20"></mat-spinner>
+            <mat-icon *ngIf="!isSaving">{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+            <span *ngIf="!isSaving">{{ isEditMode ? 'Guardar Cambios' : 'Crear Reporte' }}</span>
+          </button>
+        </div>
+      </form>
+    </mat-card>
+  </div>
+</div>
