@@ -10,21 +10,26 @@ exports.getAllReports = async (req, res) => {
 
     const where = {};
     if (tipo) where.tipo = tipo;
-    
+
     // Manejar múltiples estados con IN
     if (estado) {
       const estados = estado.split(',').map(e => e.trim());
       where.estado = { [Op.in]: estados };
     }
-    
+
     if (prioridad) where.prioridad = prioridad;
     if (residencia_id) where.residencia_id = residencia_id;
-    
+
     if (search) {
       where[Op.or] = [
         { titulo: { [Op.iLike]: `%${search}%` } },
         { descripcion: { [Op.iLike]: `%${search}%` } }
       ];
+    }
+
+    // Si es residente, solo puede ver sus propios reportes
+    if (req.user.rol === 'Residente') {
+      where.reportado_por_id = req.user.id;
     }
     
     const { count, rows } = await Report.findAndCountAll({
@@ -214,7 +219,6 @@ exports.getReportsStatistics = async (req, res) => {
     const openReports = await Report.count({ where: { estado: ESTADOS_REPORTE.ABIERTO } });
     const inProgressReports = await Report.count({ where: { estado: ESTADOS_REPORTE.EN_PROGRESO } });
     const resolvedReports = await Report.count({ where: { estado: ESTADOS_REPORTE.RESUELTO } });
-    const closedReports = await Report.count({ where: { estado: ESTADOS_REPORTE.CERRADO } });
 
     const criticalReports = await Report.count({ where: { prioridad: PRIORIDADES_REPORTE.CRITICA } });
     const highPriorityReports = await Report.count({ where: { prioridad: PRIORIDADES_REPORTE.ALTA } });
@@ -233,8 +237,7 @@ exports.getReportsStatistics = async (req, res) => {
       byStatus: {
         abierto: openReports,
         enProgreso: inProgressReports,
-        resuelto: resolvedReports,
-        cerrado: closedReports
+        resuelto: resolvedReports
       },
       byPriority: {
         critica: criticalReports,

@@ -48,8 +48,7 @@ const Report = sequelize.define('Report', {
     type: DataTypes.ENUM(
       'Abierto',
       'En Progreso',
-      'Resuelto',
-      'Cerrado'
+      'Resuelto'
     ),
     allowNull: false,
     defaultValue: 'Abierto'
