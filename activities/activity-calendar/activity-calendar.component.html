@@ -1,0 +1,232 @@
+<div class="calendar-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>event</mat-icon>
+          Calendario de Actividades
+        </h1>
+        <p class="page-subtitle">Gestiona y visualiza todas las actividades del complejo</p>
+      </div>
+
+      <div class="header-actions">
+        <button mat-raised-button color="primary" routerLink="/activities/new">
+          <mat-icon>add</mat-icon>
+          Nueva Actividad
+        </button>
+        <button mat-stroked-button routerLink="/activities/list">
+          <mat-icon>list</mat-icon>
+          Ver Lista
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="calendar-content">
+
+    <!-- Sidebar con actividades del dÃ­a y prÃ³ximas -->
+    <div class="sidebar-section">
+
+      <!-- Actividades de hoy -->
+      <mat-card class="today-card">
+        <h3>
+          <mat-icon>today</mat-icon>
+          Actividades de Hoy
+        </h3>
+        <mat-divider></mat-divider>
+
+        <div class="activity-list" *ngIf="getTodayActivities().length > 0">
+          <div class="activity-item" *ngFor="let activity of getTodayActivities()">
+            <div class="activity-time">
+              <mat-icon>schedule</mat-icon>
+              {{ activity.fecha_inicio | date: 'HH:mm' }}
+            </div>
+            <div class="activity-info">
+              <h4>{{ activity.titulo }}</h4>
+              <p>{{ activity.ubicacion }}</p>
+            </div>
+            <mat-icon class="activity-icon" [class]="getTypeClass(activity.tipo)">
+              {{ getTypeIcon(activity.tipo) }}
+            </mat-icon>
+          </div>
+        </div>
+
+        <div class="no-activities" *ngIf="getTodayActivities().length === 0">
+          <mat-icon>event_available</mat-icon>
+          <p>No hay actividades programadas para hoy</p>
+        </div>
+      </mat-card>
+
+      <!-- PrÃ³ximas Actividades -->
+      <mat-card class="upcoming-card">
+        <h3>
+          <mat-icon>upcoming</mat-icon>
+          Proximas Actividades
+        </h3>
+        <mat-divider></mat-divider>
+
+        <div class="activity-list">
+          <a
+            class="upcoming-item"
+            *ngFor="let activity of getUpcomingActivities()"
+            [routerLink]="['/activities', activity.id]"
+          >
+            <div class="upcoming-date">
+              <span class="date-day">{{ activity.fecha_inicio | date: 'd' }}</span>
+              <span class="date-month">{{ activity.fecha_inicio | date: 'MMM' }}</span>
+            </div>
+            <div class="upcoming-info">
+              <h4>{{ activity.titulo }}</h4>
+              <p>
+                <mat-icon>schedule</mat-icon>
+                {{ activity.fecha_inicio | date: 'HH:mm' }}
+              </p>
+            </div>
+            <mat-chip [class]="getTypeClass(activity.tipo)" class="type-chip-small">
+              {{ activity.tipo }}
+            </mat-chip>
+          </a>
+        </div>
+
+        <div class="no-activities" *ngIf="getUpcomingActivities().length === 0">
+          <mat-icon>event_busy</mat-icon>
+          <p>No hay actividades proximas</p>
+        </div>
+      </mat-card>
+
+    </div>
+
+    <!-- Main Calendar -->
+    <div class="calendar-main">
+
+      <mat-card class="calendar-card">
+
+        <!-- Calendar Controls -->
+        <div class="calendar-controls">
+          <div class="month-navigation">
+            <button mat-icon-button (click)="previousMonth()">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+
+            <h2 class="current-month">{{ getMonthYear() | titlecase }}</h2>
+
+            <button mat-icon-button (click)="nextMonth()">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </div>
+
+          <div class="calendar-actions">
+            <button mat-button (click)="goToToday()">
+              <mat-icon>today</mat-icon>
+              Hoy
+            </button>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Loading -->
+        <div class="loading-overlay" *ngIf="isLoading">
+          <mat-spinner diameter="50"></mat-spinner>
+        </div>
+
+        <!-- Calendar Grid -->
+        <div class="calendar-grid" *ngIf="!isLoading">
+
+          <!-- Week Header -->
+          <div class="calendar-header">
+            <div class="day-header" *ngFor="let day of weekDays">
+              {{ day }}
+            </div>
+          </div>
+
+          <!-- Calendar Days -->
+          <div class="calendar-body">
+
+            <div
+              class="calendar-day"
+              *ngFor="let day of calendarDays"
+              [class.other-month]="!day.isCurrentMonth"
+              [class.today]="day.isToday"
+              [class.has-activities]="day.activities.length > 0"
+              (click)="selectDate(day)"
+            >
+              <div class="day-number">
+                {{ day.date.getDate() }}
+
+                <span class="activity-badge" *ngIf="day.activities.length > 0">
+                  {{ day.activities.length }}
+                </span>
+              </div>
+
+              <div class="day-activities">
+
+                <div
+                  class="activity-dot"
+                  *ngFor="let activity of day.activities.slice(0, 3)"
+                  [class]="getTypeClass(activity.tipo)"
+                  [matTooltip]="activity.titulo"
+                  [routerLink]="['/activities', activity.id]"
+                >
+                  <mat-icon>{{ getTypeIcon(activity.tipo) }}</mat-icon>
+                  <span class="activity-title">{{ activity.titulo }}</span>
+                </div>
+
+                <div class="more-activities" *ngIf="day.activities.length > 3">
+                  +{{ day.activities.length - 3 }} mÃ¡s
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </mat-card>
+
+      <!-- Legend -->
+      <mat-card class="legend-card">
+        <h3>
+          <mat-icon>info</mat-icon>
+          Tipos de Actividades
+        </h3>
+
+        <div class="legend-items">
+          <div class="legend-item">
+            <div class="legend-color type-meeting"></div>
+            <span>Reunión</span>
+          </div>
+
+          <div class="legend-item">
+            <div class="legend-color type-event"></div>
+            <span>Evento</span>
+          </div>
+
+          <div class="legend-item">
+            <div class="legend-color type-maintenance"></div>
+            <span>Mantenimiento</span>
+          </div>
+
+          <div class="legend-item">
+            <div class="legend-color type-assembly"></div>
+            <span>Asamblea</span>
+          </div>
+
+          <div class="legend-item">
+            <div class="legend-color type-celebration"></div>
+            <span>Celebración</span>
+          </div>
+
+          <div class="legend-item">
+            <div class="legend-color type-other"></div>
+            <span>Otro</span>
+          </div>
+        </div>
+
+      </mat-card>
+
+    </div>
+  </div>
+</div>

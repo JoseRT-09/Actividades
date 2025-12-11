@@ -1,0 +1,291 @@
+<div class="activity-detail-container">
+  <!-- Header -->
+  <div class="page-header no-print">
+    <div class="header-content">
+      <button mat-icon-button class="back-button" routerLink="/activities">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>event</mat-icon>
+          Detalle de la Actividad
+        </h1>
+        <p class="page-subtitle">InformaciÃ³n completa de la actividad</p>
+      </div>
+
+      <div class="header-actions" *ngIf="activity">
+        <button mat-raised-button color="primary" (click)="onEdit()" [disabled]="!canEdit()">
+          <mat-icon>edit</mat-icon>
+          Editar
+        </button>
+
+        <button mat-button [matMenuTriggerFor]="menu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="sendInvitations()">
+            <mat-icon>email</mat-icon>
+            <span>Enviar Invitaciones</span>
+          </button>
+          <button mat-menu-item (click)="printActivity()">
+            <mat-icon>print</mat-icon>
+            <span>Imprimir</span>
+          </button>
+          <button mat-menu-item (click)="exportActivity()">
+            <mat-icon>download</mat-icon>
+            <span>Exportar</span>
+          </button>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="onDelete()" [disabled]="!canDelete()" class="delete-option">
+            <mat-icon>delete</mat-icon>
+            <span>Eliminar Actividad</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando informaciÃ³n de la actividad...</p>
+  </div>
+
+  <!-- Activity Detail Content -->
+  <div class="detail-wrapper" *ngIf="!isLoading && activity">
+    <!-- Main Info Card -->
+    <mat-card class="main-info-card">
+      <div class="info-header">
+        <div class="activity-title-section">
+          <div class="type-icon" [class]="getTypeClass(activity.tipo)">
+            <mat-icon>{{ getTypeIcon(activity.tipo) }}</mat-icon>
+          </div>
+          <div class="title-content">
+            <h2>{{ activity.titulo }}</h2>
+            <p class="time-ago">
+              <mat-icon>schedule</mat-icon>
+              {{ activity.fecha_inicio | timeAgo }}
+            </p>
+          </div>
+        </div>
+
+        <div class="status-badges">
+          <mat-chip [class]="getTypeClass(activity.tipo)" class="type-chip-large">
+            <mat-icon>{{ getTypeIcon(activity.tipo) }}</mat-icon>
+            {{ activity.tipo }}
+          </mat-chip>
+
+          <mat-chip [class]="getStatusClass(activity.estado)" class="status-chip-large">
+            <mat-icon>{{ getStatusIcon(activity.estado) }}</mat-icon>
+            {{ activity.estado }}
+          </mat-chip>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Description Section -->
+      <div class="description-section">
+        <h3>
+          <mat-icon>description</mat-icon>
+          DescripciÃ³n
+        </h3>
+        <p>{{ activity.descripcion }}</p>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Details Grid -->
+      <div class="details-grid">
+        <!-- Date & Time -->
+        <div class="detail-card">
+          <h4>
+            <mat-icon>event</mat-icon>
+            Fecha y Hora
+          </h4>
+          <div class="detail-items">
+            <div class="detail-item">
+              <mat-icon>event</mat-icon>
+              <div>
+                <span class="detail-label">Inicio</span>
+                <span class="detail-value">{{ activity.fecha_inicio | date: 'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+            </div>
+            <div class="detail-item" *ngIf="activity.fecha_fin">
+              <mat-icon>event_busy</mat-icon>
+              <div>
+                <span class="detail-label">Fin</span>
+                <span class="detail-value">{{ activity.fecha_fin | date: 'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+            </div>
+            <div class="detail-item" *ngIf="activity.fecha_fin">
+              <mat-icon>schedule</mat-icon>
+              <div>
+                <span class="detail-label">DuraciÃ³n</span>
+                <span class="detail-value">{{ getDuration() }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Location -->
+        <div class="detail-card">
+          <h4>
+            <mat-icon>location_on</mat-icon>
+            UbicaciÃ³n
+          </h4>
+          <div class="location-info">
+            <mat-icon>place</mat-icon>
+            <div>
+              <span class="location-name">{{ activity.ubicacion }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Organizer -->
+        <div class="detail-card">
+          <h4>
+            <mat-icon>person</mat-icon>
+            Organizador
+          </h4>
+          <div class="user-info" *ngIf="activity.organizador">
+            <div class="user-avatar">
+              {{ getUserInitials(activity.organizador.nombre, activity.organizador.apellido) }}
+            </div>
+            <div class="user-details">
+              <span class="user-name">{{ getOrganizerName() }}</span>
+              <span class="user-email">{{ activity.organizador.email }}</span>
+              <span class="user-phone" *ngIf="activity.organizador.telefono">
+                <mat-icon>phone</mat-icon>
+                {{ activity.organizador.telefono }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Participants -->
+        <div class="detail-card">
+          <h4>
+            <mat-icon>people</mat-icon>
+            Participantes
+          </h4>
+          <div class="participants-info">
+            <div class="participants-count">
+              <mat-icon>group</mat-icon>
+              <div>
+                <span class="count-label">Confirmados</span>
+                <span class="count-value">{{ getConfirmedCount() }} / {{ activity.max_participantes || 'âˆž' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="notes-section" *ngIf="activity.notas">
+        <mat-divider></mat-divider>
+        <h3>
+          <mat-icon>notes</mat-icon>
+          Notas Adicionales
+        </h3>
+        <p>{{ activity.notas }}</p>
+      </div>
+    </mat-card>
+
+    <!-- Tabs Section -->
+    <mat-card class="tabs-card no-print">
+      <mat-tab-group>
+        <!-- Participants Tab -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>people</mat-icon>
+            Participantes ({{ participants.length }})
+          </ng-template>
+
+          <div class="tab-content">
+            <mat-list>
+              <mat-list-item *ngFor="let participant of participants">
+                <div class="participant-item">
+                  <div class="participant-avatar">
+                    {{ getUserInitials(participant.nombre, participant.apellido) }}
+                  </div>
+                  <div class="participant-info">
+                    <span class="participant-name">{{ participant.nombre }} {{ participant.apellido }}</span>
+                    <span class="participant-email">{{ participant.email }}</span>
+                  </div>
+                  <mat-chip [class]="participant.confirmado ? 'confirmed' : 'pending'">
+                    <mat-icon>{{ participant.confirmado ? 'check_circle' : 'schedule' }}</mat-icon>
+                    {{ participant.confirmado ? 'Confirmado' : 'Pendiente' }}
+                  </mat-chip>
+                </div>
+              </mat-list-item>
+            </mat-list>
+
+            <div class="no-participants" *ngIf="participants.length === 0">
+              <mat-icon>people_outline</mat-icon>
+              <p>No hay participantes registrados aÃºn</p>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Activity Log Tab -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>history</mat-icon>
+            Historial
+          </ng-template>
+
+          <div class="tab-content">
+            <div class="activity-log">
+              <div class="log-item">
+                <div class="log-icon created">
+                  <mat-icon>add_circle</mat-icon>
+                </div>
+                <div class="log-content">
+                  <span class="log-title">Actividad creada</span>
+                  <span class="log-time">{{ activity.created_at | date: 'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+              </div>
+
+              <div class="log-item" *ngIf="activity.updated_at !== activity.created_at">
+                <div class="log-icon updated">
+                  <mat-icon>edit</mat-icon>
+                </div>
+                <div class="log-content">
+                  <span class="log-title">Actividad actualizada</span>
+                  <span class="log-time">{{ activity.updated_at | date: 'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card>
+
+    <!-- Metadata Card -->
+    <mat-card class="metadata-card no-print">
+      <h3>
+        <mat-icon>info</mat-icon>
+        InformaciÃ³n del Sistema
+      </h3>
+      <mat-divider></mat-divider>
+
+      <div class="metadata-grid">
+        <div class="metadata-item">
+          <span class="metadata-label">ID de la Actividad:</span>
+          <span class="metadata-value">#{{ activity.id }}</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Creada:</span>
+          <span class="metadata-value">{{ activity.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Ãšltima ActualizaciÃ³n:</span>
+          <span class="metadata-value">{{ activity.updated_at | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+</div>

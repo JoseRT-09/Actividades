@@ -1,0 +1,185 @@
+<div class="activities-container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>event_note</mat-icon>
+          Lista de Actividades
+        </h1>
+        <p class="page-subtitle">Vista detallada de todas las actividades</p>
+      </div>
+
+      <div class="header-actions">
+        <button mat-raised-button color="primary" routerLink="/activities/new">
+          <mat-icon>add</mat-icon>
+          Nueva Actividad
+        </button>
+        <button mat-stroked-button routerLink="/activities">
+          <mat-icon>calendar_month</mat-icon>
+          Ver Calendario
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters Card -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <form [formGroup]="filterForm" class="filters-form">
+
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Buscar</mat-label>
+          <input matInput formControlName="search" placeholder="TÃ­tulo, ubicaciÃ³n, organizador...">
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo</mat-label>
+          <mat-select formControlName="tipo">
+            <mat-option *ngFor="let tipo of tipos" [value]="tipo.value">
+              {{ tipo.label }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>category</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Estado</mat-label>
+          <mat-select formControlName="estado">
+            <mat-option *ngFor="let estado of estados" [value]="estado.value">
+              {{ estado.label }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>sync</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha Inicio</mat-label>
+          <input matInput [matDatepicker]="pickerInicio" formControlName="fecha_inicio">
+          <mat-datepicker-toggle matIconSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+          <mat-datepicker #pickerInicio></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha Fin</mat-label>
+          <input matInput [matDatepicker]="pickerFin" formControlName="fecha_fin">
+          <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
+          <mat-datepicker #pickerFin></mat-datepicker>
+        </mat-form-field>
+
+        <button mat-icon-button color="warn" (click)="clearFilters()" matTooltip="Limpiar filtros">
+          <mat-icon>clear</mat-icon>
+        </button>
+
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Table Card -->
+  <mat-card class="table-card">
+
+    <div class="loading-overlay" *ngIf="isLoading">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Cargando actividades...</p>
+    </div>
+
+    <div class="table-container" *ngIf="!isLoading">
+
+      <table mat-table [dataSource]="dataSource" matSort class="activities-table">
+        
+        <!-- TÃ­tulo -->
+        <ng-container matColumnDef="titulo">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>TÃ­tulo</th>
+          <td mat-cell *matCellDef="let activity">
+            <div class="title-cell">
+              <mat-icon [class]="getTypeClass(activity.tipo)">
+                {{ getTypeIcon(activity.tipo) }}
+              </mat-icon>
+              <div class="title-content">
+                <span class="title-text">{{ activity.titulo }}</span>
+                <span class="title-date">{{ activity.fecha_inicio | timeAgo }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Tipo -->
+        <ng-container matColumnDef="tipo">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
+          <td mat-cell *matCellDef="let activity">
+            <mat-chip [class]="getTypeClass(activity.tipo)">
+              <mat-icon>{{ getTypeIcon(activity.tipo) }}</mat-icon>
+              {{ activity.tipo }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Fecha -->
+        <ng-container matColumnDef="fecha_inicio">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha y Hora</th>
+          <td mat-cell *matCellDef="let activity">
+            <div class="date-cell">
+              <mat-icon>event</mat-icon>
+              <div>
+                <span>{{ activity.fecha_inicio | date:'dd/MM/yyyy' }}</span>
+                <br>
+                <span>{{ activity.fecha_inicio | date:'HH:mm' }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Estado -->
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let activity">
+            <mat-chip [class]="getStatusClass(activity.estado)">
+              <mat-icon>{{ getStatusIcon(activity.estado) }}</mat-icon>
+              {{ activity.estado }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Acciones -->
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let activity">
+            <button mat-icon-button [routerLink]="['/activities', activity.id]" matTooltip="Ver detalles">
+              <mat-icon>visibility</mat-icon>
+            </button>
+
+            <button mat-icon-button [routerLink]="['/activities', activity.id, 'edit']" matTooltip="Editar">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+        <tr class="mat-row no-data-row" *matNoDataRow>
+          <td [attr.colspan]="displayedColumns.length">
+            <div class="no-data-message">
+              <mat-icon>search_off</mat-icon>
+              <p>No se encontraron actividades</p>
+              <button mat-button color="primary" (click)="clearFilters()">Limpiar filtros</button>
+            </div>
+          </td>
+        </tr>
+
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="totalActivities"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
+      [pageSizeOptions]="[5,10,25,50]"
+      (page)="onPageChange($event)"
+      showFirstLastButtons
+    ></mat-paginator>
+
+  </mat-card>
+</div>

@@ -1,0 +1,192 @@
+<div class="activity-form-container">
+  <div class="page-header">
+    <div class="header-content">
+      <button mat-icon-button class="back-button" routerLink="/activities">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>{{ isEditMode ? 'edit' : 'add' }}</mat-icon>
+          {{ isEditMode ? 'Editar Actividad' : 'Nueva Actividad' }}
+        </h1>
+        <p class="page-subtitle">
+          {{ isEditMode ? 'Modifica los datos de la actividad' : 'Completa el formulario para crear una actividad' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando datos...</p>
+  </div>
+
+  <div class="form-wrapper" *ngIf="!isLoading">
+    <mat-card class="form-card">
+      <form [formGroup]="activityForm" (ngSubmit)="onSubmit()">
+        
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>info</mat-icon>
+            <h2>InformaciÃ³n General</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="form-grid">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>TÃ­tulo de la Actividad</mat-label>
+              <input matInput formControlName="titulo" placeholder="Ej: Asamblea General de Propietarios">
+              <mat-icon matPrefix>title</mat-icon>
+              <mat-error *ngIf="activityForm.get('titulo')?.invalid">
+                {{ getErrorMessage('titulo') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>DescripciÃ³n</mat-label>
+              <textarea matInput formControlName="descripcion" rows="4" placeholder="Describe la actividad..."></textarea>
+              <mat-icon matPrefix>description</mat-icon>
+              <mat-error *ngIf="activityForm.get('descripcion')?.invalid">
+                {{ getErrorMessage('descripcion') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo de Actividad</mat-label>
+              <mat-select formControlName="tipo">
+                <mat-option *ngFor="let tipo of tipos" [value]="tipo.value">
+                  <div class="select-option">
+                    <mat-icon>{{ tipo.icon }}</mat-icon>
+                    <div class="option-content">
+                      <span class="option-label">{{ tipo.label }}</span>
+                      <span class="option-description">{{ tipo.description }}</span>
+                    </div>
+                  </div>
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>category</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Estado</mat-label>
+              <mat-select formControlName="estado">
+                <mat-option *ngFor="let estado of estados" [value]="estado.value">
+                  <div class="select-option">
+                    <mat-icon [style.color]="estado.color">{{ estado.icon }}</mat-icon>
+                    <span>{{ estado.label }}</span>
+                  </div>
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>sync</mat-icon>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>schedule</mat-icon>
+            <h2>Fecha y Hora</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha y Hora de Inicio</mat-label>
+              <input matInput [matDatepicker]="pickerInicio" formControlName="fecha_inicio">
+              <mat-datepicker-toggle matIconSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+              <mat-datepicker #pickerInicio></mat-datepicker>
+              <mat-icon matPrefix>event</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha y Hora de Fin (Opcional)</mat-label>
+              <input matInput [matDatepicker]="pickerFin" formControlName="fecha_fin">
+              <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
+              <mat-datepicker #pickerFin></mat-datepicker>
+              <mat-icon matPrefix>event_busy</mat-icon>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>location_on</mat-icon>
+            <h2>UbicaciÃ³n y Participantes</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>UbicaciÃ³n</mat-label>
+              <input matInput formControlName="ubicacion" placeholder="SalÃ³n de eventos, Ãrea comÃºn...">
+              <mat-icon matPrefix>place</mat-icon>
+              <mat-error *ngIf="activityForm.get('ubicacion')?.invalid">
+                {{ getErrorMessage('ubicacion') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>MÃ¡ximo de Participantes (Opcional)</mat-label>
+              <input matInput type="number" formControlName="max_participantes" placeholder="Deja vacÃ­o si no hay lÃ­mite">
+              <mat-icon matPrefix>people</mat-icon>
+              <mat-hint>NÃºmero mÃ¡ximo de asistentes permitidos</mat-hint>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>notes</mat-icon>
+            <h2>Notas Adicionales</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Notas (Opcional)</mat-label>
+            <textarea matInput formControlName="notas" rows="3" placeholder="Observaciones o informaciÃ³n adicional..."></textarea>
+            <mat-icon matPrefix>note</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <div class="preview-card" *ngIf="activityForm.get('titulo')?.value">
+          <h3>
+            <mat-icon>visibility</mat-icon>
+            Vista Previa
+          </h3>
+          <div class="preview-content">
+            <div class="preview-item">
+              <span class="preview-label">TÃ­tulo:</span>
+              <span class="preview-value">{{ activityForm.get('titulo')?.value }}</span>
+            </div>
+            <div class="preview-item">
+              <span class="preview-label">Tipo:</span>
+              <span class="preview-value">{{ activityForm.get('tipo')?.value }}</span>
+            </div>
+            <div class="preview-item">
+              <span class="preview-label">Fecha:</span>
+              <span class="preview-value">{{ activityForm.get('fecha_inicio')?.value | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div class="preview-item">
+              <span class="preview-label">UbicaciÃ³n:</span>
+              <span class="preview-value">{{ activityForm.get('ubicacion')?.value }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button mat-stroked-button type="button" (click)="onCancel()" [disabled]="isSaving">
+            <mat-icon>close</mat-icon>
+            Cancelar
+          </button>
+
+          <button mat-raised-button color="primary" type="submit" [disabled]="activityForm.invalid || isSaving">
+            <mat-spinner *ngIf="isSaving" diameter="20"></mat-spinner>
+            <mat-icon *ngIf="!isSaving">{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+            <span *ngIf="!isSaving">{{ isEditMode ? 'Guardar Cambios' : 'Crear Actividad' }}</span>
+          </button>
+        </div>
+      </form>
+    </mat-card>
+  </div>
+</div>
