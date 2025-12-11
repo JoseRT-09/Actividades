@@ -1,0 +1,413 @@
+const { Amenity, AmenityReservation, User } = require('../models');
+const { Op } = require('sequelize');
+
+// Obtener todas las amenidades
+exports.getAllAmenities = async (req, res) => {
+  try {
+    const { estado, page = 1, limit = 10 } = req.query;
+    const offset = (page - 1) * limit;
+
+    const where = {};
+    if (estado) where.estado = estado; // Usando 'estado' como en el modelo
+
+    const { count, rows } = await Amenity.findAndCountAll({
+      where,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [['nombre', 'ASC']]
+    });
+
+    res.json({
+      total: count,
+      pages: Math.ceil(count / limit),
+      currentPage: parseInt(page),
+      amenities: rows
+    });
+  } catch (error) {
+    console.error('Error al obtener amenidades:', error);
+    res.status(500).json({ message: 'Error al obtener amenidades', error: error.message });
+  }
+};
+
+// Obtener amenidad por ID
+exports.getAmenityById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const amenity = await Amenity.findByPk(id);
+
+    if (!amenity) {
+      return res.status(404).json({ message: 'Amenidad no encontrada' });
+    }
+
+    res.json({ amenity });
+  } catch (error) {
+    console.error('Error al obtener amenidad:', error);
+    res.status(500).json({ message: 'Error al obtener amenidad', error: error.message });
+  }
+};
+
+// Crear amenidad
+exports.createAmenity = async (req, res) => {
+  try {
+    const {
+      nombre,
+      descripcion,
+      tipo,
+      ubicacion,
+      capacidad_maxima, // Campo corregido
+      horario_inicio, // Campo corregido
+      horario_fin, // Campo corregido
+      disponible_reserva, // Campo correcto
+      requiere_aprobacion, // Campo correcto
+      costo_reserva, // Campo corregido
+      reglas,
+      imagen_url
+    } = req.body;
+
+    const amenity = await Amenity.create({
+      nombre,
+      descripcion,
+      tipo,
+      ubicacion,
+      capacidad_maxima,
+      estado: 'Disponible',
+      horario_inicio,
+      horario_fin,
+      disponible_reserva: disponible_reserva !== undefined ? disponible_reserva : true,
+      requiere_aprobacion: requiere_aprobacion || false,
+      costo_reserva: costo_reserva || 0.00,
+      reglas,
+      imagen_url
+    });
+
+    res.status(201).json({
+      message: 'Amenidad creada exitosamente',
+      amenity
+    });
+  } catch (error) {
+    console.error('Error al crear amenidad:', error);
+    res.status(500).json({ message: 'Error al crear amenidad', error: error.message });
+  }
+};
+
+// Actualizar amenidad
+exports.updateAmenity = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      nombre,
+      descripcion,
+      tipo,
+      ubicacion,
+      capacidad_maxima, // Campo corregido
+      estado,
+      horario_inicio, // Campo corregido
+      horario_fin, // Campo corregido
+      disponible_reserva, // Campo correcto
+      requiere_aprobacion, // Campo correcto
+      costo_reserva, // Campo corregido
+      reglas,
+      imagen_url
+    } = req.body;
+
+    const amenity = await Amenity.findByPk(id);
+    if (!amenity) {
+      return res.status(404).json({ message: 'Amenidad no encontrada' });
+    }
+
+    await amenity.update({
+      nombre: nombre || amenity.nombre,
+      descripcion: descripcion || amenity.descripcion,
+      tipo: tipo || amenity.tipo,
+      ubicacion: ubicacion || amenity.ubicacion,
+      capacidad_maxima: capacidad_maxima !== undefined ? capacidad_maxima : amenity.capacidad_maxima,
+      estado: estado || amenity.estado,
+      horario_inicio: horario_inicio || amenity.horario_inicio,
+      horario_fin: horario_fin || amenity.horario_fin,
+      disponible_reserva: disponible_reserva !== undefined ? disponible_reserva : amenity.disponible_reserva,
+      requiere_aprobacion: requiere_aprobacion !== undefined ? requiere_aprobacion : amenity.requiere_aprobacion,
+      costo_reserva: costo_reserva !== undefined ? costo_reserva : amenity.costo_reserva,
+      reglas: reglas || amenity.reglas,
+      imagen_url: imagen_url || amenity.imagen_url
+    });
+
+    res.json({
+      message: 'Amenidad actualizada exitosamente',
+      amenity
+    });
+  } catch (error) {
+    console.error('Error al actualizar amenidad:', error);
+    res.status(500).json({ message: 'Error al actualizar amenidad', error: error.message });
+  }
+};
+
+// Implementación del método faltante en rutas
+exports.updateAmenityAvailability = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { estado } = req.body;
+
+    if (!['Disponible', 'Ocupada', 'Mantenimiento', 'Fuera de Servicio'].includes(estado)) {
+      return res.status(400).json({ message: 'Estado de amenidad inválido' });
+    }
+    
+    const amenity = await Amenity.findByPk(id);
+    if (!amenity) {
+      return res.status(404).json({ message: 'Amenidad no encontrada' });
+    }
+
+    await amenity.update({ estado });
+
+    res.json({
+      message: 'Estado de amenidad actualizado exitosamente',
+      amenity
+    });
+  } catch (error) {
+    console.error('Error al actualizar estado de amenidad:', error);
+    res.status(500).json({ message: 'Error al actualizar estado de amenidad', error: error.message });
+  }
+};
+
+// Eliminar amenidad
+exports.deleteAmenity = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const amenity = await Amenity.findByPk(id);
+    if (!amenity) {
+      return res.status(404).json({ message: 'Amenidad no encontrada' });
+    }
+
+    await amenity.destroy();
+    res.json({ message: 'Amenidad eliminada exitosamente' });
+  } catch (error) {
+    console.error('Error al eliminar amenidad:', error);
+    res.status(500).json({ message: 'Error al eliminar amenidad', error: error.message });
+  }
+};
+
+// ===== RESERVAS DE AMENIDADES (Lógica de Reserva Corregida) =====
+
+// Obtener todas las reservas
+exports.getAllReservations = async (req, res) => {
+  try {
+    const { amenidad_id, residente_id, estado, page = 1, limit = 10 } = req.query;
+    const offset = (page - 1) * limit;
+
+    const where = {};
+    if (amenidad_id) where.amenidad_id = amenidad_id;
+    if (residente_id) where.residente_id = residente_id;
+    if (estado) where.estado = estado;
+
+    const { count, rows } = await AmenityReservation.findAndCountAll({
+      where,
+      include: [
+        {
+          model: Amenity,
+          attributes: ['id', 'nombre', 'ubicacion', 'costo_reserva'] // Campo corregido
+        },
+        {
+          model: User,
+          as: 'residente',
+          attributes: ['id', 'nombre', 'apellido', 'email', 'telefono']
+        }
+      ],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [['fecha_reserva', 'DESC'], ['hora_inicio', 'DESC']]
+    });
+
+    res.json({
+      total: count,
+      pages: Math.ceil(count / limit),
+      currentPage: parseInt(page),
+      reservations: rows
+    });
+  } catch (error) {
+    console.error('Error al obtener reservas:', error);
+    res.status(500).json({ message: 'Error al obtener reservas', error: error.message });
+  }
+};
+
+// Crear reserva
+exports.createReservation = async (req, res) => {
+  try {
+    const {
+      amenidad_id,
+      fecha_reserva,
+      hora_inicio,
+      hora_fin,
+      motivo
+    } = req.body;
+
+    // Verificar que la amenidad existe
+    const amenity = await Amenity.findByPk(amenidad_id);
+    if (!amenity) {
+      return res.status(404).json({ message: 'Amenidad no encontrada' });
+    }
+
+    // Verificar si requiere reserva (Usando el campo correcto del modelo Amenity.js)
+    if (!amenity.disponible_reserva) { 
+      return res.status(400).json({ message: 'Esta amenidad no está disponible para reserva' });
+    }
+
+    // Verificar disponibilidad (no debe haber otra reserva confirmada en el mismo horario)
+    const conflictingReservation = await AmenityReservation.findOne({
+      where: {
+        amenidad_id,
+        fecha_reserva,
+        estado: ['Pendiente', 'Confirmada'],
+        [Op.or]: [
+          {
+            hora_inicio: { [Op.between]: [hora_inicio, hora_fin] }
+          },
+          {
+            hora_fin: { [Op.between]: [hora_inicio, hora_fin] }
+          },
+          {
+            [Op.and]: [
+              { hora_inicio: { [Op.lte]: hora_inicio } },
+              { hora_fin: { [Op.gte]: hora_fin } }
+            ]
+          }
+        ]
+      }
+    });
+
+    if (conflictingReservation) {
+      return res.status(400).json({ 
+        message: 'Ya existe una reserva en este horario',
+        conflictingReservation
+      });
+    }
+
+    const reservation = await AmenityReservation.create({
+      amenidad_id,
+      residente_id: req.user.id,
+      fecha_reserva,
+      hora_inicio,
+      hora_fin,
+      motivo,
+      // Lógica de estado inicial: Pendiente si requiere aprobación, Confirmada si no.
+      estado: amenity.requiere_aprobacion ? 'Pendiente' : 'Confirmada' 
+    });
+
+    const reservationWithDetails = await AmenityReservation.findByPk(reservation.id, {
+      include: [
+        {
+          model: Amenity,
+          attributes: ['id', 'nombre', 'ubicacion', 'costo_reserva'] // Campo corregido
+        },
+        {
+          model: User,
+          as: 'residente',
+          attributes: ['id', 'nombre', 'apellido']
+        }
+      ]
+    });
+
+    res.status(201).json({
+      message: 'Reserva creada exitosamente',
+      reservation: reservationWithDetails
+    });
+  } catch (error) {
+    console.error('Error al crear reserva:', error);
+    res.status(500).json({ message: 'Error al crear reserva', error: error.message });
+  }
+};
+
+// Actualizar estado de reserva
+exports.updateReservationStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { estado } = req.body;
+
+    const reservation = await AmenityReservation.findByPk(id);
+    if (!reservation) {
+      return res.status(404).json({ message: 'Reserva no encontrada' });
+    }
+
+    await reservation.update({ estado });
+
+    const updatedReservation = await AmenityReservation.findByPk(id, {
+      include: [
+        {
+          model: Amenity,
+          attributes: ['id', 'nombre', 'ubicacion']
+        },
+        {
+          model: User,
+          as: 'residente',
+          attributes: ['id', 'nombre', 'apellido']
+        }
+      ]
+    });
+
+    res.json({
+      message: 'Estado de reserva actualizado exitosamente',
+      reservation: updatedReservation
+    });
+  } catch (error) {
+    console.error('Error al actualizar reserva:', error);
+    res.status(500).json({ message: 'Error al actualizar reserva', error: error.message });
+  }
+};
+
+// Cancelar reserva
+exports.cancelReservation = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const reservation = await AmenityReservation.findByPk(id);
+    if (!reservation) {
+      return res.status(404).json({ message: 'Reserva no encontrada' });
+    }
+
+    // Verificar que el usuario sea el dueño de la reserva o un administrador
+    if (reservation.residente_id !== req.user.id && 
+        req.user.rol !== 'Administrador' && 
+        req.user.rol !== 'SuperAdmin') {
+      return res.status(403).json({ message: 'No tienes permiso para cancelar esta reserva' });
+    }
+
+    await reservation.update({ estado: 'Cancelada' });
+
+    res.json({
+      message: 'Reserva cancelada exitosamente',
+      reservation
+    });
+  } catch (error) {
+    console.error('Error al cancelar reserva:', error);
+    res.status(500).json({ message: 'Error al cancelar reserva', error: error.message });
+  }
+};
+
+// Obtener reservas disponibles para una fecha
+exports.getAvailableSlots = async (req, res) => {
+  try {
+    const { amenidad_id, fecha_reserva } = req.query;
+
+    if (!amenidad_id || !fecha_reserva) {
+      return res.status(400).json({ message: 'amenidad_id y fecha_reserva son requeridos' });
+    }
+
+    const reservations = await AmenityReservation.findAll({
+      where: {
+        amenidad_id,
+        fecha_reserva,
+        estado: ['Pendiente', 'Confirmada']
+      },
+      order: [['hora_inicio', 'ASC']]
+    });
+
+    res.json({
+      amenidad_id,
+      fecha_reserva,
+      reservedSlots: reservations,
+      count: reservations.length
+    });
+  } catch (error) {
+    console.error('Error al obtener horarios disponibles:', error);
+    res.status(500).json({ message: 'Error al obtener horarios disponibles', error: error.message });
+  }
+};
