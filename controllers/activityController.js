@@ -1,9 +1,30 @@
 const { Activity, User } = require('../models');
 const { Op } = require('sequelize');
 
+// Función para actualizar automáticamente el estado de actividades completadas
+const updateCompletedActivities = async () => {
+  try {
+    const now = new Date();
+    await Activity.update(
+      { estado: 'Completada' },
+      {
+        where: {
+          fecha_fin: { [Op.lte]: now },
+          estado: { [Op.in]: ['Programada', 'En Curso'] }
+        }
+      }
+    );
+  } catch (error) {
+    console.error('Error al actualizar actividades completadas:', error);
+  }
+};
+
 // Obtener todas las actividades
   exports.getAllActivities = async (req, res) => {
   try {
+    // Actualizar actividades completadas automáticamente
+    await updateCompletedActivities();
+
     console.log("\nðŸŸ¦ [Controller] getAllActivities() ejecutado");
     console.log("ðŸŸ¦ Query recibido:", req.query);
 
@@ -73,6 +94,9 @@ const { Op } = require('sequelize');
 // Obtener actividad por ID
 exports.getActivityById = async (req, res) => {
   try {
+    // Actualizar actividades completadas automáticamente
+    await updateCompletedActivities();
+
     const { id } = req.params;
     const activity = await Activity.findByPk(id, {
       include: [
@@ -196,13 +220,17 @@ exports.updateActivity = async (req, res) => {
 exports.cancelActivity = async (req, res) => {
   try {
     const { id } = req.params;
+    const { motivo } = req.body;
 
     const activity = await Activity.findByPk(id);
     if (!activity) {
       return res.status(404).json({ message: 'Actividad no encontrada' });
     }
 
-    await activity.update({ estado: 'Cancelada' });
+    await activity.update({
+      estado: 'Cancelada',
+      notas: motivo ? `${activity.notas ? activity.notas + '\n\n' : ''}Motivo de cancelación: ${motivo}` : activity.notas
+    });
 
     res.json({
       message: 'Actividad cancelada exitosamente',
@@ -214,9 +242,53 @@ exports.cancelActivity = async (req, res) => {
   }
 };
 
-// Obtener prÃ³ximas actividades
+// Reprogramar actividad cancelada
+exports.rescheduleActivity = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { fecha_inicio, fecha_fin } = req.body;
+
+    const activity = await Activity.findByPk(id);
+    if (!activity) {
+      return res.status(404).json({ message: 'Actividad no encontrada' });
+    }
+
+    if (activity.estado !== 'Cancelada') {
+      return res.status(400).json({ message: 'Solo se pueden reprogramar actividades canceladas' });
+    }
+
+    await activity.update({
+      fecha_inicio,
+      fecha_fin: fecha_fin || activity.fecha_fin,
+      estado: 'Programada'
+    });
+
+    const updatedActivity = await Activity.findByPk(id, {
+      include: [
+        {
+          model: User,
+          as: 'organizador',
+          attributes: ['id', 'nombre', 'apellido']
+        }
+      ]
+    });
+
+    res.json({
+      message: 'Actividad reprogramada exitosamente',
+      activity: updatedActivity
+    });
+  } catch (error) {
+    console.error('Error al reprogramar actividad:', error);
+    res.status(500).json({ message: 'Error al reprogramar actividad', error: error.message });
+  }
+};
+
+// Obtener próximas actividades
 exports.getUpcomingActivities = async (req, res) => {
   try {
+    // Actualizar actividades completadas automáticamente
+    await updateCompletedActivities();
+
     const now = new Date();
 
     const activities = await Activity.findAll({

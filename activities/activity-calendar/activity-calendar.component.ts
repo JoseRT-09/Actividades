@@ -60,7 +60,7 @@ export class ActivityCalendarComponent implements OnInit {
   activities: Activity[] = [];
   isLoading = true;
 
-  weekDays = ['Dom', 'Lun', 'Mar', 'MiÃ©', 'Jue', 'Vie', 'SÃ¡b'];
+  weekDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
   constructor() {
     this.currentMonth = new Date(

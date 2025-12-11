@@ -85,6 +85,16 @@ router.post('/:id/cancel',
   activityController.cancelActivity
 );
 
+// Reprogramar actividad
+router.post('/:id/reschedule',
+  (req, res, next) => {
+    console.log("✔ Ruta coincidió:  POST /:id/reschedule");
+    next();
+  },
+  authorizeRoles(ROLES.ADMINISTRADOR, ROLES.SUPER_ADMIN),
+  activityController.rescheduleActivity
+);
+
 // Eliminar actividad
 router.delete('/:id',
   (req, res, next) => {

@@ -16,6 +16,7 @@ import { DeleteActivityUseCase } from '../../../domain/use-cases/activity/delete
 import { Activity, ActivityStatus, ActivityType } from '../../../domain/models/activity.model';
 import { NotificationService } from '../../../core/services/notification.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { ActivityService } from '../../../core/services/activity.service';
 import { TimeAgoPipe } from '../../../shared/pipes/time-ago.pipe';
 
 @Component({
@@ -46,6 +47,7 @@ export class ActivityDetailComponent implements OnInit {
   private deleteActivity = inject(DeleteActivityUseCase);
   private notificationService = inject(NotificationService);
   private authService = inject(AuthService);
+  private activityService = inject(ActivityService);
 
   // Exponer enums al template
   ActivityType = ActivityType;
@@ -202,5 +204,61 @@ export class ActivityDetailComponent implements OnInit {
 
   exportActivity(): void {
     this.notificationService.info('Exportando actividad...');
+  }
+
+  onCancel(): void {
+    if (!this.activity) return;
+
+    const motivo = prompt('¿Por qué deseas cancelar esta actividad? (Opcional)');
+    if (motivo === null) return; // Usuario canceló el diálogo
+
+    this.activityService.cancelActivity(this.activityId, motivo).subscribe({
+      next: () => {
+        this.notificationService.success('Actividad cancelada correctamente');
+        this.loadActivity(); // Recargar para ver el estado actualizado
+      },
+      error: () => {
+        this.notificationService.error('Error al cancelar actividad');
+      }
+    });
+  }
+
+  canCancel(): boolean {
+    return this.authService.isAdmin() &&
+           this.activity?.estado === ActivityStatus.PROGRAMADA;
+  }
+
+  canReschedule(): boolean {
+    return this.authService.isAdmin() &&
+           this.activity?.estado === ActivityStatus.CANCELADA;
+  }
+
+  onReschedule(): void {
+    if (!this.activity) return;
+
+    const fechaInicio = prompt(
+      'Ingresa la nueva fecha y hora de inicio (formato: YYYY-MM-DD HH:MM:SS):',
+      new Date(this.activity.fecha_inicio).toISOString().slice(0, 19).replace('T', ' ')
+    );
+
+    if (!fechaInicio) return; // Usuario canceló
+
+    const fechaFin = this.activity.fecha_fin ? prompt(
+      'Ingresa la nueva fecha y hora de fin (formato: YYYY-MM-DD HH:MM:SS, opcional):',
+      new Date(this.activity.fecha_fin).toISOString().slice(0, 19).replace('T', ' ')
+    ) : undefined;
+
+    this.activityService.rescheduleActivity(this.activityId, {
+      fecha_inicio: fechaInicio,
+      fecha_fin: fechaFin
+    }).subscribe({
+      next: () => {
+        this.notificationService.success('Actividad reprogramada correctamente');
+        this.loadActivity(); // Recargar para ver los cambios
+      },
+      error: () => {
+        this.notificationService.error('Error al reprogramar actividad');
+      }
+    });
   }
 }

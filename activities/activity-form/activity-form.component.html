@@ -4,7 +4,7 @@
       <button mat-icon-button class="back-button" routerLink="/activities">
         <mat-icon>arrow_back</mat-icon>
       </button>
-      
+
       <div class="title-section">
         <h1 class="page-title">
           <mat-icon>{{ isEditMode ? 'edit' : 'add' }}</mat-icon>
@@ -25,17 +25,17 @@
   <div class="form-wrapper" *ngIf="!isLoading">
     <mat-card class="form-card">
       <form [formGroup]="activityForm" (ngSubmit)="onSubmit()">
-        
+
         <div class="form-section">
           <div class="section-header">
             <mat-icon>info</mat-icon>
-            <h2>InformaciÃ³n General</h2>
+            <h2>Información General</h2>
           </div>
           <mat-divider></mat-divider>
 
           <div class="form-grid">
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>TÃ­tulo de la Actividad</mat-label>
+              <mat-label>Título de la Actividad</mat-label>
               <input matInput formControlName="titulo" placeholder="Ej: Asamblea General de Propietarios">
               <mat-icon matPrefix>title</mat-icon>
               <mat-error *ngIf="activityForm.get('titulo')?.invalid">
@@ -44,7 +44,7 @@
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>DescripciÃ³n</mat-label>
+              <mat-label>Descripción</mat-label>
               <textarea matInput formControlName="descripcion" rows="4" placeholder="Describe la actividad..."></textarea>
               <mat-icon matPrefix>description</mat-icon>
               <mat-error *ngIf="activityForm.get('descripcion')?.invalid">
@@ -67,19 +67,6 @@
               </mat-select>
               <mat-icon matPrefix>category</mat-icon>
             </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Estado</mat-label>
-              <mat-select formControlName="estado">
-                <mat-option *ngFor="let estado of estados" [value]="estado.value">
-                  <div class="select-option">
-                    <mat-icon [style.color]="estado.color">{{ estado.icon }}</mat-icon>
-                    <span>{{ estado.label }}</span>
-                  </div>
-                </mat-option>
-              </mat-select>
-              <mat-icon matPrefix>sync</mat-icon>
-            </mat-form-field>
           </div>
         </div>
 
@@ -92,19 +79,37 @@
 
           <div class="form-grid">
             <mat-form-field appearance="outline">
-              <mat-label>Fecha y Hora de Inicio</mat-label>
+              <mat-label>Fecha de Inicio</mat-label>
               <input matInput [matDatepicker]="pickerInicio" formControlName="fecha_inicio">
               <mat-datepicker-toggle matIconSuffix [for]="pickerInicio"></mat-datepicker-toggle>
               <mat-datepicker #pickerInicio></mat-datepicker>
               <mat-icon matPrefix>event</mat-icon>
+              <mat-error *ngIf="activityForm.get('fecha_inicio')?.invalid">
+                {{ getErrorMessage('fecha_inicio') }}
+              </mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>Fecha y Hora de Fin (Opcional)</mat-label>
+              <mat-label>Hora de Inicio</mat-label>
+              <input matInput type="time" formControlName="hora_inicio">
+              <mat-icon matPrefix>access_time</mat-icon>
+              <mat-error *ngIf="activityForm.get('hora_inicio')?.invalid">
+                {{ getErrorMessage('hora_inicio') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha de Fin (Opcional)</mat-label>
               <input matInput [matDatepicker]="pickerFin" formControlName="fecha_fin">
               <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
               <mat-datepicker #pickerFin></mat-datepicker>
               <mat-icon matPrefix>event_busy</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Hora de Fin (Opcional)</mat-label>
+              <input matInput type="time" formControlName="hora_fin">
+              <mat-icon matPrefix>access_time</mat-icon>
             </mat-form-field>
           </div>
         </div>
@@ -112,14 +117,14 @@
         <div class="form-section">
           <div class="section-header">
             <mat-icon>location_on</mat-icon>
-            <h2>UbicaciÃ³n y Participantes</h2>
+            <h2>Ubicación y Participantes</h2>
           </div>
           <mat-divider></mat-divider>
 
           <div class="form-grid">
             <mat-form-field appearance="outline">
-              <mat-label>UbicaciÃ³n</mat-label>
-              <input matInput formControlName="ubicacion" placeholder="SalÃ³n de eventos, Ãrea comÃºn...">
+              <mat-label>Ubicación</mat-label>
+              <input matInput formControlName="ubicacion" placeholder="Salón de eventos, Área común...">
               <mat-icon matPrefix>place</mat-icon>
               <mat-error *ngIf="activityForm.get('ubicacion')?.invalid">
                 {{ getErrorMessage('ubicacion') }}
@@ -127,10 +132,10 @@
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>MÃ¡ximo de Participantes (Opcional)</mat-label>
-              <input matInput type="number" formControlName="max_participantes" placeholder="Deja vacÃ­o si no hay lÃ­mite">
+              <mat-label>Máximo de Participantes (Opcional)</mat-label>
+              <input matInput type="number" formControlName="max_participantes" placeholder="Deja vacío si no hay límite">
               <mat-icon matPrefix>people</mat-icon>
-              <mat-hint>NÃºmero mÃ¡ximo de asistentes permitidos</mat-hint>
+              <mat-hint>Número máximo de asistentes permitidos</mat-hint>
             </mat-form-field>
           </div>
         </div>
@@ -144,7 +149,7 @@
 
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Notas (Opcional)</mat-label>
-            <textarea matInput formControlName="notas" rows="3" placeholder="Observaciones o informaciÃ³n adicional..."></textarea>
+            <textarea matInput formControlName="notas" rows="3" placeholder="Observaciones o información adicional..."></textarea>
             <mat-icon matPrefix>note</mat-icon>
           </mat-form-field>
         </div>
@@ -156,19 +161,22 @@
           </h3>
           <div class="preview-content">
             <div class="preview-item">
-              <span class="preview-label">TÃ­tulo:</span>
+              <span class="preview-label">Título:</span>
               <span class="preview-value">{{ activityForm.get('titulo')?.value }}</span>
             </div>
             <div class="preview-item">
               <span class="preview-label">Tipo:</span>
               <span class="preview-value">{{ activityForm.get('tipo')?.value }}</span>
             </div>
-            <div class="preview-item">
-              <span class="preview-label">Fecha:</span>
-              <span class="preview-value">{{ activityForm.get('fecha_inicio')?.value | date:'dd/MM/yyyy HH:mm' }}</span>
+            <div class="preview-item" *ngIf="activityForm.get('fecha_inicio')?.value">
+              <span class="preview-label">Fecha y Hora:</span>
+              <span class="preview-value">
+                {{ activityForm.get('fecha_inicio')?.value | date:'dd/MM/yyyy' }}
+                <span *ngIf="activityForm.get('hora_inicio')?.value"> a las {{ activityForm.get('hora_inicio')?.value }}</span>
+              </span>
             </div>
             <div class="preview-item">
-              <span class="preview-label">UbicaciÃ³n:</span>
+              <span class="preview-label">Ubicación:</span>
               <span class="preview-value">{{ activityForm.get('ubicacion')?.value }}</span>
             </div>
           </div>

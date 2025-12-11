@@ -31,7 +31,7 @@
 
         <mat-form-field appearance="outline" class="search-field">
           <mat-label>Buscar</mat-label>
-          <input matInput formControlName="search" placeholder="TÃ­tulo, ubicaciÃ³n, organizador...">
+          <input matInput formControlName="search" placeholder="Título, ubicación, organizador...">
           <mat-icon matPrefix>search</mat-icon>
         </mat-form-field>
 
@@ -89,9 +89,9 @@
 
       <table mat-table [dataSource]="dataSource" matSort class="activities-table">
         
-        <!-- TÃ­tulo -->
+        <!-- Título -->
         <ng-container matColumnDef="titulo">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>TÃ­tulo</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Título</th>
           <td mat-cell *matCellDef="let activity">
             <div class="title-cell">
               <mat-icon [class]="getTypeClass(activity.tipo)">

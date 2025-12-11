@@ -1,10 +1,10 @@
 // Enums
 export enum ActivityType {
-  REUNION = 'ReuniÃ³n',
+  REUNION = 'Reunión',
   EVENTO = 'Evento',
   MANTENIMIENTO = 'Mantenimiento',
   ASAMBLEA = 'Asamblea',
-  CELEBRACION = 'CelebraciÃ³n',
+  CELEBRACION = 'Celebración',
   OTRO = 'Otro'
 }
 

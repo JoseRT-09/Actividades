@@ -91,4 +91,19 @@ export class ActivityService {
       {}
     );
   }
+
+  cancelActivity(id: number, motivo?: string): Observable<{ message: string; activity: Activity }> {
+    return this.http.post<{ message: string; activity: Activity }>(
+      `${this.apiUrl}/${id}/cancel`,
+      { motivo }
+    );
+  }
+
+  rescheduleActivity(id: number, data: { fecha_inicio: string; fecha_fin?: string }): Observable<{ message: string; activity: Activity }> {
+    return this.http.post<{ message: string; activity: Activity }>(
+      `${this.apiUrl}/${id}/reschedule`,
+      data
+    );
+  }
 }
+

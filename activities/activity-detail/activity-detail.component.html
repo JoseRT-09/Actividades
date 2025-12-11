@@ -11,7 +11,7 @@
           <mat-icon>event</mat-icon>
           Detalle de la Actividad
         </h1>
-        <p class="page-subtitle">InformaciÃ³n completa de la actividad</p>
+        <p class="page-subtitle">Información completa de la actividad</p>
       </div>
 
       <div class="header-actions" *ngIf="activity">
@@ -38,6 +38,15 @@
             <span>Exportar</span>
           </button>
           <mat-divider></mat-divider>
+          <button mat-menu-item (click)="onCancel()" [disabled]="!canCancel()" *ngIf="canCancel()">
+            <mat-icon color="warn">cancel</mat-icon>
+            <span>Cancelar Actividad</span>
+          </button>
+          <button mat-menu-item (click)="onReschedule()" [disabled]="!canReschedule()" *ngIf="canReschedule()">
+            <mat-icon color="primary">event_repeat</mat-icon>
+            <span>Reprogramar Actividad</span>
+          </button>
+          <mat-divider *ngIf="canCancel() || canReschedule()"></mat-divider>
           <button mat-menu-item (click)="onDelete()" [disabled]="!canDelete()" class="delete-option">
             <mat-icon>delete</mat-icon>
             <span>Eliminar Actividad</span>
@@ -90,7 +99,7 @@
       <div class="description-section">
         <h3>
           <mat-icon>description</mat-icon>
-          DescripciÃ³n
+          Descripción
         </h3>
         <p>{{ activity.descripcion }}</p>
       </div>
@@ -123,7 +132,7 @@
             <div class="detail-item" *ngIf="activity.fecha_fin">
               <mat-icon>schedule</mat-icon>
               <div>
-                <span class="detail-label">DuraciÃ³n</span>
+                <span class="detail-label">Duración</span>
                 <span class="detail-value">{{ getDuration() }}</span>
               </div>
             </div>
@@ -134,7 +143,7 @@
         <div class="detail-card">
           <h4>
             <mat-icon>location_on</mat-icon>
-            UbicaciÃ³n
+            Ubicación
           </h4>
           <div class="location-info">
             <mat-icon>place</mat-icon>
@@ -268,7 +277,7 @@
     <mat-card class="metadata-card no-print">
       <h3>
         <mat-icon>info</mat-icon>
-        InformaciÃ³n del Sistema
+        Información del Sistema
       </h3>
       <mat-divider></mat-divider>
 

@@ -15,7 +15,7 @@ const Activity = sequelize.define('Activity', {
     type: DataTypes.TEXT
   },
   tipo: {
-    type: DataTypes.ENUM('ReuniÃ³n', 'Evento', 'Mantenimiento', 'Asamblea', 'CelebraciÃ³n', 'Otro'),
+    type: DataTypes.ENUM('Reunión', 'Evento', 'Mantenimiento', 'Asamblea', 'Celebración', 'Otro'),
     allowNull: false,
     defaultValue: 'Evento'
   },
