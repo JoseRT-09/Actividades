@@ -254,6 +254,8 @@ export class ReportDetailComponent implements OnInit {
 
   // Helper para obtener residencia
   getResidence() {
+    return this.report?.Residence || this.report?.residencia;
+  }
 
   canComment(): boolean {
     const currentUser = this.authService.getCurrentUser();
@@ -264,7 +266,5 @@ export class ReportDetailComponent implements OnInit {
 
     // El creador del reporte (residente) también puede comentar
     return this.report.reportado_por_id === currentUser.id;
-  }
-    return this.report?.Residence || this.report?.residencia;
   }
 }
