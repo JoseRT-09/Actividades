@@ -14,8 +14,8 @@
         <p class="page-subtitle">Información completa de la actividad</p>
       </div>
 
-      <div class="header-actions" *ngIf="activity">
-        <button mat-raised-button color="primary" (click)="onEdit()" [disabled]="!canEdit()">
+      <div class="header-actions" *ngIf="activity && canEdit()">
+        <button mat-raised-button color="primary" (click)="onEdit()">
           <mat-icon>edit</mat-icon>
           Editar
         </button>
@@ -25,19 +25,6 @@
         </button>
 
         <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="sendInvitations()">
-            <mat-icon>email</mat-icon>
-            <span>Enviar Invitaciones</span>
-          </button>
-          <button mat-menu-item (click)="printActivity()">
-            <mat-icon>print</mat-icon>
-            <span>Imprimir</span>
-          </button>
-          <button mat-menu-item (click)="exportActivity()">
-            <mat-icon>download</mat-icon>
-            <span>Exportar</span>
-          </button>
-          <mat-divider></mat-divider>
           <button mat-menu-item (click)="onCancel()" [disabled]="!canCancel()" *ngIf="canCancel()">
             <mat-icon color="warn">cancel</mat-icon>
             <span>Cancelar Actividad</span>

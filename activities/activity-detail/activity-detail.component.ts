@@ -172,23 +172,13 @@ export class ActivityDetailComponent implements OnInit {
   }
 
   canEdit(): boolean {
-    return this.authService.isAdmin();
+    // Solo admin/superadmin pueden editar Y la actividad NO debe estar completada
+    return this.authService.isAdmin() &&
+           this.activity?.estado !== ActivityStatus.COMPLETADA;
   }
 
   canDelete(): boolean {
     return this.authService.isAdmin();
-  }
-
-  sendInvitations(): void {
-    this.notificationService.info('Enviando invitaciones...');
-  }
-
-  printActivity(): void {
-    window.print();
-  }
-
-  exportActivity(): void {
-    this.notificationService.info('Exportando actividad...');
   }
 
   onCancel(): void {
