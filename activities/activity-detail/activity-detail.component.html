@@ -161,7 +161,7 @@
           </h4>
           <div class="user-info" *ngIf="activity.organizador">
             <div class="user-avatar">
-              {{ getUserInitials(activity.organizador.nombre, activity.organizador.apellido) }}
+              {{ activity.organizador.nombre.charAt(0) }}{{ activity.organizador.apellido.charAt(0) }}
             </div>
             <div class="user-details">
               <span class="user-name">{{ getOrganizerName() }}</span>
@@ -170,23 +170,6 @@
                 <mat-icon>phone</mat-icon>
                 {{ activity.organizador.telefono }}
               </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Participants -->
-        <div class="detail-card">
-          <h4>
-            <mat-icon>people</mat-icon>
-            Participantes
-          </h4>
-          <div class="participants-info">
-            <div class="participants-count">
-              <mat-icon>group</mat-icon>
-              <div>
-                <span class="count-label">Confirmados</span>
-                <span class="count-value">{{ getConfirmedCount() }} / {{ activity.max_participantes || 'âˆž' }}</span>
-              </div>
             </div>
           </div>
         </div>
