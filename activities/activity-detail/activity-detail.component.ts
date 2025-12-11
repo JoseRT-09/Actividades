@@ -57,13 +57,6 @@ export class ActivityDetailComponent implements OnInit {
   isLoading = true;
   activityId!: number;
 
-  // Mock data para participantes (en una implementaciÃ³n real vendrÃ­a del backend)
-  participants = [
-    { id: 1, nombre: 'Juan', apellido: 'PÃ©rez', email: 'juan@email.com', confirmado: true },
-    { id: 2, nombre: 'MarÃ­a', apellido: 'GarcÃ­a', email: 'maria@email.com', confirmado: true },
-    { id: 3, nombre: 'Carlos', apellido: 'LÃ³pez', email: 'carlos@email.com', confirmado: false }
-  ];
-
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
@@ -163,10 +156,6 @@ export class ActivityDetailComponent implements OnInit {
     return `${this.activity.organizador.nombre} ${this.activity.organizador.apellido}`;
   }
 
-  getUserInitials(firstName: string, lastName: string): string {
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-  }
-
   getDuration(): string {
     if (!this.activity?.fecha_fin) return 'Sin duraciÃ³n definida';
     
@@ -180,10 +169,6 @@ export class ActivityDetailComponent implements OnInit {
       return `${hours}h ${minutes}m`;
     }
     return `${minutes}m`;
-  }
-
-  getConfirmedCount(): number {
-    return this.participants.filter(p => p.confirmado).length;
   }
 
   canEdit(): boolean {

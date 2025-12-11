@@ -10,7 +10,7 @@
         <p class="page-subtitle">Gestiona y visualiza todas las actividades del complejo</p>
       </div>
 
-      <div class="header-actions">
+      <div class="header-actions" *ngIf="isAdmin()">
         <button mat-raised-button color="primary" routerLink="/activities/new">
           <mat-icon>add</mat-icon>
           Nueva Actividad
