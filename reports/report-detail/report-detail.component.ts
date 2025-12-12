@@ -20,6 +20,7 @@ import { UpdateReportUseCase } from '../../../domain/use-cases/report/update-rep
 import { Report, ReportStatus, ReportType, ReportPriority } from '../../../domain/models/report.model';
 import { NotificationService } from '../../../core/services/notification.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { ReportService } from '../../../core/services/report.service';
 import { TimeAgoPipe } from '../../../shared/pipes/time-ago.pipe';
 
 @Component({
@@ -54,6 +55,7 @@ export class ReportDetailComponent implements OnInit {
   private updateReport = inject(UpdateReportUseCase);
   private notificationService = inject(NotificationService);
   private authService = inject(AuthService);
+  private reportService = inject(ReportService);
 
   report: Report | null = null;
   isLoading = true;
@@ -61,7 +63,7 @@ export class ReportDetailComponent implements OnInit {
   commentForm!: FormGroup;
   isSavingComment = false;
 
-  // Mock comments (en una implementación real vendrían del backend)
+  // Comentarios reales del backend
   comments: any[] = [];
 
   ngOnInit(): void {
@@ -83,17 +85,29 @@ export class ReportDetailComponent implements OnInit {
 
   loadReport(): void {
     this.isLoading = true;
-    
+
     // El useCase debe devolver el objeto desempaquetado si el service lo devuelve envuelto { report: Report }
     this.getReportById.execute(this.reportId).subscribe({
       next: (report) => {
         this.report = report;
         this.isLoading = false;
+        this.loadComments(); // Cargar comentarios después de cargar el reporte
       },
       error: (error) => {
         this.notificationService.error('Error al cargar reporte');
         this.router.navigate(['/reports']);
         this.isLoading = false;
+      }
+    });
+  }
+
+  loadComments(): void {
+    this.reportService.getCommentsByReport(this.reportId).subscribe({
+      next: (response) => {
+        this.comments = response.comments;
+      },
+      error: (error) => {
+        console.error('Error al cargar comentarios:', error);
       }
     });
   }
@@ -138,23 +152,22 @@ export class ReportDetailComponent implements OnInit {
 
   addComment(): void {
     const comment = this.commentForm.get('comment')?.value;
-    if (!comment.trim()) return;
+    if (!comment || !comment.trim()) return;
 
     this.isSavingComment = true;
 
-    // Simular guardado de comentario
-    setTimeout(() => {
-      const currentUser = this.authService.getCurrentUser();
-      this.comments.unshift({
-        id: Date.now(),
-        texto: comment,
-        usuario: currentUser,
-        fecha: new Date()
-      });
-      this.commentForm.reset();
-      this.isSavingComment = false;
-      this.notificationService.success('Comentario agregado');
-    }, 500);
+    this.reportService.createComment(this.reportId, comment).subscribe({
+      next: (response) => {
+        this.notificationService.success('Comentario agregado');
+        this.commentForm.reset();
+        this.loadComments(); // Recargar comentarios
+        this.isSavingComment = false;
+      },
+      error: (error) => {
+        this.notificationService.error('Error al agregar comentario');
+        this.isSavingComment = false;
+      }
+    });
   }
 
   getTypeClass(type: ReportType): string {

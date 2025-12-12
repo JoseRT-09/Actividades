@@ -254,9 +254,9 @@
             <div class="comment-content">
               <div class="comment-header">
                 <span class="comment-author">{{ comment.usuario.nombre }} {{ comment.usuario.apellido }}</span>
-                <span class="comment-time">{{ comment.fecha | timeAgo }}</span>
+                <span class="comment-time">{{ comment.created_at | timeAgo }}</span>
               </div>
-              <p class="comment-text">{{ comment.texto }}</p>
+              <p class="comment-text">{{ comment.comment }}</p>
             </div>
           </div>
 
