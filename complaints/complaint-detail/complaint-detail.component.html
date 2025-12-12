@@ -1,0 +1,329 @@
+<div class="complaint-detail-container">
+  <!-- Header -->
+  <div class="page-header no-print">
+    <div class="header-content">
+      <button mat-icon-button class="back-button" routerLink="/complaints">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>campaign</mat-icon>
+          Detalle de la Queja
+        </h1>
+        <p class="page-subtitle">Información completa de la queja</p>
+      </div>
+
+      <div class="header-actions" *ngIf="complaint">
+        <button 
+          mat-raised-button 
+          color="accent"
+          (click)="onEdit()"
+          [disabled]="!canEdit()"
+        >
+          <mat-icon>edit</mat-icon>
+          Editar
+        </button>
+
+        <button mat-button [matMenuTriggerFor]="statusMenu" *ngIf="canChangeStatus()">
+          <mat-icon>sync</mat-icon>
+          Cambiar Estado
+        </button>
+
+        <mat-menu #statusMenu="matMenu">
+          <button mat-menu-item (click)="changeStatus('Nueva')">
+            <mat-icon>fiber_new</mat-icon>
+            <span>Nueva</span>
+          </button>
+          <button mat-menu-item (click)="changeStatus('En Revisión')">
+            <mat-icon>rate_review</mat-icon>
+            <span>En Revisión</span>
+          </button>
+          <button mat-menu-item (click)="changeStatus('En Proceso')">
+            <mat-icon>sync</mat-icon>
+            <span>En Proceso</span>
+          </button>
+          <button mat-menu-item (click)="changeStatus('Resuelta')">
+            <mat-icon>check_circle</mat-icon>
+            <span>Resuelta</span>
+          </button>
+        </mat-menu>
+
+        <button mat-button [matMenuTriggerFor]="menu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="printComplaint()">
+            <mat-icon>print</mat-icon>
+            <span>Imprimir</span>
+          </button>
+          <button mat-menu-item (click)="notifyUser()">
+            <mat-icon>email</mat-icon>
+            <span>Notificar al Usuario</span>
+          </button>
+          <mat-divider></mat-divider>
+          <button 
+            mat-menu-item 
+            (click)="onDelete()"
+            [disabled]="!canDelete()"
+            class="delete-option"
+          >
+            <mat-icon>delete</mat-icon>
+            <span>Eliminar Queja</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando información de la queja...</p>
+  </div>
+
+  <!-- Complaint Detail Content -->
+  <div class="detail-wrapper" *ngIf="!isLoading && complaint">
+    <!-- Main Info Card -->
+    <mat-card class="main-info-card">
+      <div class="info-header">
+        <div class="complaint-title-section">
+          <div class="category-icon" [class]="getCategoryClass(complaint.categoria)">
+            <mat-icon>{{ getCategoryIcon(complaint.categoria) }}</mat-icon>
+          </div>
+          <div class="title-content">
+            <h2>{{ complaint.asunto }}</h2>
+            <p class="time-ago">
+              <mat-icon>schedule</mat-icon>
+              {{ complaint.fecha_queja | timeAgo }}
+            </p>
+          </div>
+        </div>
+
+        <div class="status-badges">
+          <mat-chip [class]="getCategoryClass(complaint.categoria)" class="chip-large">
+            <mat-icon>{{ getCategoryIcon(complaint.categoria) }}</mat-icon>
+            {{ complaint.categoria }}
+          </mat-chip>
+
+          <mat-chip [class]="getPriorityClass(complaint.prioridad)" class="chip-large">
+            <mat-icon>{{ getPriorityIcon(complaint.prioridad) }}</mat-icon>
+            {{ complaint.prioridad }}
+          </mat-chip>
+
+          <mat-chip [class]="getStatusClass(complaint.estado)" class="chip-large">
+            <mat-icon>{{ getStatusIcon(complaint.estado) }}</mat-icon>
+            {{ complaint.estado }}
+          </mat-chip>
+
+          <mat-chip class="anonymous-chip" *ngIf="complaint.es_anonima">
+            <mat-icon>person_off</mat-icon>
+            Anónima
+          </mat-chip>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Description Section -->
+      <div class="description-section">
+        <h3>
+          <mat-icon>description</mat-icon>
+          Descripción
+        </h3>
+        <p>{{ complaint.descripcion || complaint.cuerpo_mensaje }}</p>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Details Grid -->
+      <div class="details-grid">
+        <!-- Reported By -->
+        <div class="detail-card">
+          <h4>
+            <mat-icon>person</mat-icon>
+            Reportado Por
+          </h4>
+          <div class="user-info">
+            <div class="user-avatar">
+              {{ getUserInitials() }}
+            </div>
+            <div class="user-details">
+              <span class="user-name">{{ getUserName() }}</span>
+              <span class="user-email" *ngIf="(complaint.usuario || complaint.autor) && !complaint.es_anonima">
+                {{ complaint.usuario?.email || complaint.autor?.email }}
+              </span>
+              <span class="user-phone" *ngIf="complaint.usuario?.telefono || complaint.autor?.telefono">
+                <mat-icon>phone</mat-icon>
+                {{ complaint.usuario?.telefono || complaint.autor?.telefono }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Residence -->
+        <div class="detail-card">
+          <h4>
+            <mat-icon>home</mat-icon>
+            Residencia
+          </h4>
+          <div class="residence-info">
+            <mat-icon>{{ complaint.residencia ? 'home' : 'public' }}</mat-icon>
+            <div>
+              <span class="residence-name">{{ getResidenceName() }}</span>
+              <span class="residence-type" *ngIf="complaint.residencia">
+                <span *ngIf="complaint.residencia.bloque">Bloque {{ complaint.residencia.bloque }}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Date -->
+        <div class="detail-card">
+          <h4>
+            <mat-icon>event</mat-icon>
+            Fecha de la Queja
+          </h4>
+          <div class="date-info">
+            <span class="date-full">{{ complaint.fecha_queja | date:'fullDate':'':'es' }}</span>
+            <span class="date-time">{{ complaint.fecha_queja | date:'shortTime' }}</span>
+          </div>
+        </div>
+
+        <!-- Priority Level -->
+        <div class="detail-card">
+          <h4>
+            <mat-icon>flag</mat-icon>
+            Nivel de Prioridad
+          </h4>
+          <div class="priority-info" [class]="getPriorityClass(complaint.prioridad)">
+            <mat-icon>{{ getPriorityIcon(complaint.prioridad) }}</mat-icon>
+            <span>{{ complaint.prioridad }}</span>
+          </div>
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Tabs Section -->
+    <mat-card class="tabs-card no-print">
+      <mat-tab-group>
+        <!-- Comments Tab -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>comment</mat-icon>
+            Comentarios ({{ comments.length }})
+          </ng-template>
+
+          <div class="tab-content">
+            <!-- Add Comment Form -->
+            <div class="add-comment-section">
+              <h4>
+                <mat-icon>add_comment</mat-icon>
+                Agregar Comentario
+              </h4>
+              <form [formGroup]="commentForm" (ngSubmit)="onSubmitComment()">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Escribe tu comentario</mat-label>
+                  <textarea
+                    matInput
+                    formControlName="contenido"
+                    rows="3"
+                    placeholder="Agrega información adicional o actualizaciones sobre la queja..."
+                  ></textarea>
+                  <mat-hint>Mínimo 10 caracteres</mat-hint>
+                </mat-form-field>
+                <button 
+                  mat-raised-button 
+                  color="primary" 
+                  type="submit"
+                  [disabled]="commentForm.invalid || isSavingComment"
+                >
+                  <mat-spinner *ngIf="isSavingComment" diameter="20"></mat-spinner>
+                  <mat-icon *ngIf="!isSavingComment">send</mat-icon>
+                  <span *ngIf="!isSavingComment">Enviar Comentario</span>
+                </button>
+              </form>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <!-- Comments List -->
+            <div class="comments-list">
+              <div class="comment-item" *ngFor="let comment of comments" 
+                   [class.admin-comment]="comment.esAdministrador">
+                <div class="comment-avatar">
+                  <mat-icon *ngIf="comment.esAdministrador">admin_panel_settings</mat-icon>
+                  <mat-icon *ngIf="!comment.esAdministrador">person</mat-icon>
+                </div>
+                <div class="comment-content">
+                  <div class="comment-header">
+                    <span class="comment-author">{{ comment.usuario }}</span>
+                    <mat-chip class="admin-badge" *ngIf="comment.esAdministrador">
+                      Administrador
+                    </mat-chip>
+                    <span class="comment-date">{{ comment.fecha | timeAgo }}</span>
+                  </div>
+                  <p class="comment-text">{{ comment.comentario }}</p>
+                </div>
+              </div>
+
+              <div class="no-comments" *ngIf="comments.length === 0">
+                <mat-icon>chat_bubble_outline</mat-icon>
+                <p>No hay comentarios aún</p>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Activity Log Tab -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>history</mat-icon>
+            Historial de Actividad
+          </ng-template>
+
+          <div class="tab-content">
+            <div class="activity-timeline">
+              <div class="timeline-item" *ngFor="let activity of activityLog">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <div class="activity-header">
+                    <span class="activity-action">{{ activity.accion }}</span>
+                    <span class="activity-date">{{ activity.fecha | timeAgo }}</span>
+                  </div>
+                  <p class="activity-user">Por: {{ activity.usuario }}</p>
+                  <p class="activity-details" *ngIf="activity.detalles">{{ activity.detalles }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card>
+
+    <!-- Metadata Card -->
+    <mat-card class="metadata-card no-print">
+      <h3>
+        <mat-icon>info</mat-icon>
+        Información del Sistema
+      </h3>
+      <mat-divider></mat-divider>
+
+      <div class="metadata-grid">
+        <div class="metadata-item">
+          <span class="metadata-label">ID de la Queja:</span>
+          <span class="metadata-value">#{{ complaint.id }}</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Creada:</span>
+          <span class="metadata-value">{{ complaint.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Última Actualización:</span>
+          <span class="metadata-value">{{ complaint.updated_at | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+</div>

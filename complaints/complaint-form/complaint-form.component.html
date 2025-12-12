@@ -1,0 +1,197 @@
+<div class="complaint-form-container">
+  <div class="page-header">
+    <div class="header-content">
+      <button mat-icon-button class="back-button" routerLink="/complaints">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>{{ isEditMode ? 'edit' : 'add' }}</mat-icon>
+          {{ isEditMode ? 'Editar Queja' : 'Nueva Queja' }}
+        </h1>
+        <p class="page-subtitle">
+          {{ isEditMode ? 'Modifica los datos de la queja' : 'Completa el formulario para registrar tu queja' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando datos...</p>
+  </div>
+
+  <div class="form-wrapper" *ngIf="!isLoading">
+    <mat-card class="form-card">
+      <form [formGroup]="complaintForm" (ngSubmit)="onSubmit()">
+        
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>info</mat-icon>
+            <h2>Información de la Queja</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="form-grid">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Asunto</mat-label>
+              <input matInput formControlName="asunto" placeholder="Ej: Ruido excesivo en horas de descanso">
+              <mat-icon matPrefix>title</mat-icon>
+              <mat-error *ngIf="complaintForm.get('asunto')?.invalid">
+                {{ getErrorMessage('asunto') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Descripción Detallada</mat-label>
+              <textarea matInput formControlName="descripcion" rows="5" 
+                placeholder="Describe en detalle la situación que motiva tu queja..."></textarea>
+              <mat-icon matPrefix>description</mat-icon>
+              <mat-hint>Mínimo 20 caracteres</mat-hint>
+              <mat-error *ngIf="complaintForm.get('descripcion')?.invalid">
+                {{ getErrorMessage('descripcion') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Categoría</mat-label>
+              <mat-select formControlName="categoria">
+                <mat-option *ngFor="let cat of categorias" [value]="cat.value">
+                  <div class="select-option">
+                    <mat-icon>{{ cat.icon }}</mat-icon>
+                    <div class="option-content">
+                      <span class="option-label">{{ cat.label }}</span>
+                      <span class="option-description">{{ cat.description }}</span>
+                    </div>
+                  </div>
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>category</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Prioridad</mat-label>
+              <mat-select formControlName="prioridad">
+                <mat-option *ngFor="let prioridad of prioridades" [value]="prioridad.value">
+                  <div class="select-option">
+                    <mat-icon [style.color]="prioridad.color">{{ prioridad.icon }}</mat-icon>
+                    <div class="option-content">
+                      <span class="option-label">{{ prioridad.label }}</span>
+                      <span class="option-description">{{ prioridad.description }}</span>
+                    </div>
+                  </div>
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>flag</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" *ngIf="canEditStatus()">
+              <mat-label>Estado</mat-label>
+              <mat-select formControlName="estado">
+                <mat-option *ngFor="let estado of estados" [value]="estado.value">
+                  <div class="select-option">
+                    <mat-icon>{{ estado.icon }}</mat-icon>
+                    <span>{{ estado.label }}</span>
+                  </div>
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>sync</mat-icon>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>home</mat-icon>
+            <h2>Ubicación (Opcional)</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Residencia Relacionada</mat-label>
+            <mat-select formControlName="residencia_id">
+              <mat-option [value]="null">Queja General (no asociada a residencia)</mat-option>
+              <mat-option *ngFor="let residence of residences" [value]="residence.id">
+                Unidad {{ residence.numero_unidad }}
+                <span *ngIf="residence.bloque"> - Bloque {{ residence.bloque }}</span>
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>location_on</mat-icon>
+            <mat-hint>Selecciona una residencia si la queja está relacionada con una unidad específica</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>privacy_tip</mat-icon>
+            <h2>Privacidad</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="privacy-option">
+            <mat-checkbox formControlName="es_anonima" color="primary">
+              <div class="checkbox-content">
+                <mat-icon>person_off</mat-icon>
+                <div>
+                  <span class="checkbox-label">Queja Anónima</span>
+                  <span class="checkbox-description">
+                    Tu identidad no será revelada al procesar esta queja. 
+                    Solo el personal administrativo tendrá acceso a tus datos.
+                  </span>
+                </div>
+              </div>
+            </mat-checkbox>
+          </div>
+        </div>
+
+        <div class="preview-card" *ngIf="complaintForm.get('asunto')?.value">
+          <h3>
+            <mat-icon>visibility</mat-icon>
+            Vista Previa
+          </h3>
+          <div class="preview-content">
+            <div class="preview-item">
+              <span class="preview-label">Asunto:</span>
+              <span class="preview-value">{{ complaintForm.get('asunto')?.value }}</span>
+            </div>
+            <div class="preview-item">
+              <span class="preview-label">Categoría:</span>
+              <span class="preview-value">{{ complaintForm.get('categoria')?.value }}</span>
+            </div>
+            <div class="preview-item">
+              <span class="preview-label">Prioridad:</span>
+              <span class="preview-value">{{ complaintForm.get('prioridad')?.value }}</span>
+            </div>
+            <div class="preview-item">
+              <span class="preview-label">Estado:</span>
+              <span class="preview-value">{{ complaintForm.get('estado')?.value }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <mat-icon>info</mat-icon>
+          <div>
+            <strong>Importante:</strong>
+            <p>Las quejas son revisadas por el equipo de administración dentro de las próximas 48 horas. 
+            Recibirás notificaciones sobre el estado de tu queja.</p>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button mat-stroked-button type="button" (click)="onCancel()" [disabled]="isSaving">
+            <mat-icon>close</mat-icon>
+            Cancelar
+          </button>
+
+          <button mat-raised-button color="primary" type="submit" [disabled]="complaintForm.invalid || isSaving">
+            <mat-spinner *ngIf="isSaving" diameter="20"></mat-spinner>
+            <mat-icon *ngIf="!isSaving">{{ isEditMode ? 'save' : 'send' }}</mat-icon>
+            <span *ngIf="!isSaving">{{ isEditMode ? 'Guardar Cambios' : 'Enviar Queja' }}</span>
+          </button>
+        </div>
+      </form>
+    </mat-card>
+  </div>
+</div>

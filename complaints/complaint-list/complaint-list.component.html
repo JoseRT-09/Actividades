@@ -1,0 +1,337 @@
+<div class="complaints-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>campaign</mat-icon>
+          Sistema de Quejas
+        </h1>
+        <p class="page-subtitle">Gestiona todas las quejas y reclamos del complejo</p>
+      </div>
+
+      <div class="header-actions">
+        <button mat-raised-button color="primary" routerLink="/complaints/new">
+          <mat-icon>add</mat-icon>
+          Nueva Queja
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters Card -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <form [formGroup]="filterForm" class="filters-form">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Buscar</mat-label>
+          <input 
+            matInput 
+            formControlName="search" 
+            placeholder="Asunto, descripción..."
+          >
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Categoría</mat-label>
+          <mat-select formControlName="categoria">
+            <mat-option *ngFor="let cat of categorias" [value]="cat.value">
+              {{ cat.label }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>category</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Estado</mat-label>
+          <mat-select formControlName="estado">
+            <mat-option *ngFor="let estado of estados" [value]="estado.value">
+              {{ estado.label }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>sync</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Prioridad</mat-label>
+          <mat-select formControlName="prioridad">
+            <mat-option *ngFor="let prioridad of prioridades" [value]="prioridad.value">
+              {{ prioridad.label }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>flag</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha Inicio</mat-label>
+          <input matInput [matDatepicker]="pickerInicio" formControlName="fecha_inicio">
+          <mat-datepicker-toggle matIconSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+          <mat-datepicker #pickerInicio></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha Fin</mat-label>
+          <input matInput [matDatepicker]="pickerFin" formControlName="fecha_fin">
+          <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
+          <mat-datepicker #pickerFin></mat-datepicker>
+        </mat-form-field>
+
+        <button 
+          mat-icon-button 
+          color="warn" 
+          (click)="clearFilters()"
+          matTooltip="Limpiar filtros"
+        >
+          <mat-icon>clear</mat-icon>
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Stats Summary -->
+  <div class="stats-summary">
+    <div class="stat-item">
+      <mat-icon>campaign</mat-icon>
+      <div class="stat-content">
+        <span class="stat-value">{{ totalComplaints }}</span>
+        <span class="stat-label">Total Quejas</span>
+      </div>
+    </div>
+    <div class="stat-item new">
+      <mat-icon [matBadge]="getNewCount()" matBadgeColor="warn" aria-hidden="false">fiber_new</mat-icon>
+      <div class="stat-content">
+        <span class="stat-value">{{ getNewCount() }}</span>
+        <span class="stat-label">Nuevas</span>
+      </div>
+    </div>
+    <div class="stat-item process">
+      <mat-icon>sync</mat-icon>
+      <div class="stat-content">
+        <span class="stat-value">{{ getInProcessCount() }}</span>
+        <span class="stat-label">En Proceso</span>
+      </div>
+    </div>
+    <div class="stat-item urgent">
+      <mat-icon [matBadge]="getUrgentCount()" matBadgeColor="warn" aria-hidden="false">priority_high</mat-icon>
+      <div class="stat-content">
+        <span class="stat-value">{{ getUrgentCount() }}</span>
+        <span class="stat-label">Urgentes</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <mat-card class="table-card">
+    <!-- Loading State -->
+    <div class="loading-overlay" *ngIf="isLoading">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Cargando quejas...</p>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container" *ngIf="!isLoading">
+      <table mat-table [dataSource]="dataSource" matSort class="complaints-table">
+        
+        <!-- Asunto Column -->
+        <ng-container matColumnDef="asunto">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Asunto</th>
+          <td mat-cell *matCellDef="let complaint">
+            <div class="subject-cell">
+              <mat-icon [class]="getCategoryClass(complaint.categoria)">{{ getCategoryIcon(complaint.categoria) }}</mat-icon>
+              <div class="subject-content">
+                <span class="subject-text">{{ complaint.asunto }}</span>
+                <span class="subject-date">{{ complaint.fecha_queja | timeAgo }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Categoría Column -->
+        <ng-container matColumnDef="categoria">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Categoría</th>
+          <td mat-cell *matCellDef="let complaint">
+            <mat-chip [class]="getCategoryClass(complaint.categoria)" class="category-chip">
+              <mat-icon>{{ getCategoryIcon(complaint.categoria) }}</mat-icon>
+              {{ complaint.categoria }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Prioridad Column -->
+        <ng-container matColumnDef="prioridad">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Prioridad</th>
+          <td mat-cell *matCellDef="let complaint">
+            <mat-chip [class]="getPriorityClass(complaint.prioridad)" class="priority-chip">
+              <mat-icon>{{ getPriorityIcon(complaint.prioridad) }}</mat-icon>
+              {{ complaint.prioridad }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Usuario Column -->
+        <ng-container matColumnDef="usuario">
+          <th mat-header-cell *matHeaderCellDef>Reportado Por</th>
+          <td mat-cell *matCellDef="let complaint">
+            <div class="user-cell" *ngIf="complaint.usuario || complaint.autor">
+              <div class="user-avatar-small">
+                {{ getUserInitials(complaint) }}
+              </div>
+              <span>{{ getUserName(complaint) }}</span>
+            </div>
+            <span class="no-data" *ngIf="!complaint.usuario && !complaint.autor">-</span>
+          </td>
+        </ng-container>
+
+        <!-- Residencia Column -->
+        <ng-container matColumnDef="residencia">
+          <th mat-header-cell *matHeaderCellDef>Residencia</th>
+          <td mat-cell *matCellDef="let complaint">
+            <div class="residence-cell" *ngIf="complaint.residencia">
+              <mat-icon>home</mat-icon>
+              <span>Unidad {{ complaint.residencia.numero_unidad }}</span>
+            </div>
+            <span class="no-data" *ngIf="!complaint.residencia">General</span>
+          </td>
+        </ng-container>
+
+        <!-- Estado Column -->
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+          <td mat-cell *matCellDef="let complaint">
+            <mat-chip [class]="getStatusClass(complaint.estado)" class="status-chip">
+              <mat-icon>{{ getStatusIcon(complaint.estado) }}</mat-icon>
+              {{ complaint.estado }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Fecha Column -->
+        <ng-container matColumnDef="fecha">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
+          <td mat-cell *matCellDef="let complaint">
+            <div class="date-cell">
+              <mat-icon>event</mat-icon>
+              <span>{{ complaint.fecha_queja | date: 'dd/MM/yyyy' }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Acciones Column -->
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let complaint">
+            <div class="action-buttons">
+              <button 
+                mat-icon-button 
+                color="primary"
+                [routerLink]="['/complaints', complaint.id]"
+                matTooltip="Ver detalles"
+              >
+                <mat-icon>visibility</mat-icon>
+              </button>
+
+              <button 
+                mat-icon-button 
+                color="accent"
+                [routerLink]="['/complaints', complaint.id, 'edit']"
+                [disabled]="!canEdit(complaint)"
+                matTooltip="Editar"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+
+              <button 
+                mat-icon-button 
+                [matMenuTriggerFor]="statusMenu"
+                matTooltip="Cambiar estado"
+              >
+                <mat-icon>sync</mat-icon>
+              </button>
+
+              <mat-menu #statusMenu="matMenu">
+                <button mat-menu-item (click)="changeStatus(complaint, 'Nueva')">
+                  <mat-icon>fiber_new</mat-icon>
+                  <span>Nueva</span>
+                </button>
+                <button mat-menu-item (click)="changeStatus(complaint, 'En Revisión')">
+                  <mat-icon>rate_review</mat-icon>
+                  <span>En Revisión</span>
+                </button>
+                <button mat-menu-item (click)="changeStatus(complaint, 'En Proceso')">
+                  <mat-icon>sync</mat-icon>
+                  <span>En Proceso</span>
+                </button>
+                <button mat-menu-item (click)="changeStatus(complaint, 'Resuelta')">
+                  <mat-icon>check_circle</mat-icon>
+                  <span>Resuelta</span>
+                </button>
+              </mat-menu>
+
+              <button 
+                mat-icon-button 
+                [matMenuTriggerFor]="menu"
+                matTooltip="Más opciones"
+              >
+                <mat-icon>more_vert</mat-icon>
+              </button>
+
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item>
+                  <mat-icon>print</mat-icon>
+                  <span>Imprimir</span>
+                </button>
+                <button mat-menu-item>
+                  <mat-icon>email</mat-icon>
+                  <span>Notificar al Usuario</span>
+                </button>
+                <mat-divider></mat-divider>
+                <button 
+                  mat-menu-item 
+                  (click)="onDelete(complaint)"
+                  [disabled]="!canDelete()"
+                  class="delete-option"
+                >
+                  <mat-icon>delete</mat-icon>
+                  <span>Eliminar</span>
+                </button>
+              </mat-menu>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: displayedColumns;"
+          class="table-row"
+          [class.urgent-row]="row.prioridad === 'Urgente'"
+        ></tr>
+
+        <!-- No Data Row -->
+        <tr class="mat-row no-data-row" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+            <div class="no-data-message">
+              <mat-icon>search_off</mat-icon>
+              <p>No se encontraron quejas</p>
+              <button mat-button color="primary" (click)="clearFilters()">
+                Limpiar filtros
+              </button>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Paginator -->
+    <mat-paginator
+      [length]="totalComplaints"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[5, 10, 25, 50]"
+      [pageIndex]="pageIndex"
+      (page)="onPageChange($event)"
+      showFirstLastButtons
+    >
+    </mat-paginator>
+  </mat-card>
+</div>
