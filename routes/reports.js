@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const reportController = require('../controllers/reportController');
+const reportCommentController = require('../controllers/reportCommentController');
 const { authenticateToken, authorizeRoles } = require('../middlewares/auth');
 const { ROLES } = require('../config/constants');
 
@@ -38,9 +39,20 @@ router.get('/statistics/summary',
 );
 
 // Eliminar reporte (Solo Admin y SuperAdmin)
-router.delete('/:id', 
+router.delete('/:id',
   authorizeRoles(ROLES.ADMINISTRADOR, ROLES.SUPER_ADMIN),
   reportController.deleteReport
 );
+
+// ===== RUTAS DE COMENTARIOS =====
+
+// Obtener comentarios de un reporte
+router.get('/:reportId/comments', reportCommentController.getCommentsByReport);
+
+// Crear comentario en un reporte
+router.post('/:reportId/comments', reportCommentController.createComment);
+
+// Eliminar comentario
+router.delete('/comments/:commentId', reportCommentController.deleteComment);
 
 module.exports = router;

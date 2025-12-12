@@ -243,6 +243,11 @@ export class ReportDetailComponent implements OnInit {
     return this.authService.isAdmin();
   }
 
+  canChangeStatus(): boolean {
+    // Solo admin y superadmin pueden cambiar el estado
+    return this.authService.isAdmin();
+  }
+
   printReport(): void {
     window.print();
   }

@@ -25,9 +25,10 @@
           Editar
         </button>
 
-        <button 
-          mat-button 
+        <button
+          mat-button
           [matMenuTriggerFor]="statusMenu"
+          *ngIf="canChangeStatus()"
         >
           <mat-icon>sync</mat-icon>
           Cambiar Estado
