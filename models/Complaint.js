@@ -56,7 +56,6 @@ const Complaint = sequelize.define('Complaint', {
       'En Revisión',
       'En Proceso',
       'Resuelta',
-      'Cerrada',
       'Rechazada'
     ),
     allowNull: false,

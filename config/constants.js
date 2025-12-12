@@ -32,7 +32,6 @@ module.exports = {
     EN_REVISION: 'En Revisión',
     EN_PROCESO: 'En Proceso',
     RESUELTA: 'Resuelta',
-    CERRADA: 'Cerrada',
     RECHAZADA: 'Rechazada'
   },
   PRIORIDADES_QUEJA: {

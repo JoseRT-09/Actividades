@@ -9,7 +9,7 @@ export interface Complaint {
   descripcion: string;
   categoria: 'Ruido' | 'Convivencia' | 'Mascotas' | 'Estacionamiento' | 'Áreas Comunes' | 'Limpieza' | 'Seguridad' | 'Mantenimiento' | 'Administración' | 'Otro';
   prioridad: 'Baja' | 'Media' | 'Alta' | 'Urgente';
-  estado: 'Nueva' | 'En Revisión' | 'En Proceso' | 'Resuelta' | 'Cerrada' | 'Rechazada';
+  estado: 'Nueva' | 'En Revisión' | 'En Proceso' | 'Resuelta' | 'Rechazada';
   usuario_id: number;
   residencia_id?: number;
   fecha_queja: string;
@@ -79,7 +79,7 @@ export class ComplaintService {
   }
 
   updateComplaint(id: number, data: Partial<CreateComplaintData & {
-    estado?: 'Nueva' | 'En Revisión' | 'En Proceso' | 'Resuelta' | 'Cerrada' | 'Rechazada';
+    estado?: 'Nueva' | 'En Revisión' | 'En Proceso' | 'Resuelta' | 'Rechazada';
   }>): Observable<{ message: string; complaint: Complaint }> {
     return this.http.put<{ message: string; complaint: Complaint }>(`${this.apiUrl}/${id}`, data);
   }
@@ -97,5 +97,22 @@ export class ComplaintService {
 
   deleteComplaint(id: number): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
+  }
+
+  // ===== MÉTODOS DE COMENTARIOS =====
+
+  getCommentsByComplaint(complaintId: number): Observable<{ comments: any[] }> {
+    return this.http.get<{ comments: any[] }>(`${this.apiUrl}/${complaintId}/comments`);
+  }
+
+  createComment(complaintId: number, comment: string): Observable<{ message: string; comment: any }> {
+    return this.http.post<{ message: string; comment: any }>(
+      `${this.apiUrl}/${complaintId}/comments`,
+      { comment }
+    );
+  }
+
+  deleteComment(commentId: number): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/comments/${commentId}`);
   }
 }

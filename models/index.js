@@ -68,6 +68,25 @@ if (db.Report && db.User && db.ReportComment && db.Residence) {
   db.Residence.hasMany(db.Report, { foreignKey: 'residencia_id', as: 'reports' });
 }
 
+// Asociaciones para Complaint
+if (db.Complaint && db.User && db.ComplaintComment && db.Residence) {
+  // Asociaciones para Complaint
+  db.Complaint.belongsTo(db.User, { foreignKey: 'usuario_id', as: 'usuario' });
+  db.Complaint.belongsTo(db.Residence, { foreignKey: 'residencia_id', as: 'residencia' });
+  db.Complaint.hasMany(db.ComplaintComment, { foreignKey: 'complaint_id', as: 'comments' });
+
+  // Asociaciones para ComplaintComment
+  db.ComplaintComment.belongsTo(db.Complaint, { foreignKey: 'complaint_id', as: 'complaint' });
+  db.ComplaintComment.belongsTo(db.User, { foreignKey: 'user_id', as: 'usuario' });
+
+  // Asociaciones para User (quejas)
+  db.User.hasMany(db.Complaint, { foreignKey: 'usuario_id', as: 'quejasCreadas' });
+  db.User.hasMany(db.ComplaintComment, { foreignKey: 'user_id', as: 'complaintComments' });
+
+  // Asociaciones para Residence (quejas)
+  db.Residence.hasMany(db.Complaint, { foreignKey: 'residencia_id', as: 'complaints' });
+}
+
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 

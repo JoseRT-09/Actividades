@@ -38,6 +38,11 @@ exports.getAllComplaints = async (req, res) => {
       if (fecha_fin) where.fecha_queja[Op.lte] = new Date(fecha_fin);
     }
 
+    // Si es residente, solo puede ver sus propias quejas
+    if (req.user.rol === 'Residente') {
+      where.usuario_id = req.user.id;
+    }
+
     const { count, rows } = await Complaint.findAndCountAll({
       where,
       include: [

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const complaintController = require('../controllers/complaintController');
+const complaintCommentController = require('../controllers/complaintCommentController');
 const { authenticateToken, authorizeRoles } = require('../middlewares/auth');
 const { ROLES } = require('../config/constants');
 
@@ -42,5 +43,16 @@ router.delete('/:id',
   authorizeRoles(ROLES.ADMINISTRADOR, ROLES.SUPER_ADMIN),
   complaintController.deleteComplaint
 );
+
+// ===== RUTAS DE COMENTARIOS =====
+
+// Obtener comentarios de una queja
+router.get('/:complaintId/comments', complaintCommentController.getCommentsByComplaint);
+
+// Crear comentario en una queja
+router.post('/:complaintId/comments', complaintCommentController.createComment);
+
+// Eliminar comentario
+router.delete('/comments/:commentId', complaintCommentController.deleteComment);
 
 module.exports = router;

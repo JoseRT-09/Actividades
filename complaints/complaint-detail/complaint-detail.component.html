@@ -54,17 +54,8 @@
         </button>
 
         <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="printComplaint()">
-            <mat-icon>print</mat-icon>
-            <span>Imprimir</span>
-          </button>
-          <button mat-menu-item (click)="notifyUser()">
-            <mat-icon>email</mat-icon>
-            <span>Notificar al Usuario</span>
-          </button>
-          <mat-divider></mat-divider>
-          <button 
-            mat-menu-item 
+          <button
+            mat-menu-item
             (click)="onDelete()"
             [disabled]="!canDelete()"
             class="delete-option"
@@ -217,7 +208,7 @@
 
           <div class="tab-content">
             <!-- Add Comment Form -->
-            <div class="add-comment-section">
+            <div class="add-comment-section" *ngIf="canComment()">
               <h4>
                 <mat-icon>add_comment</mat-icon>
                 Agregar Comentario
@@ -227,17 +218,16 @@
                   <mat-label>Escribe tu comentario</mat-label>
                   <textarea
                     matInput
-                    formControlName="contenido"
+                    formControlName="comment"
                     rows="3"
                     placeholder="Agrega información adicional o actualizaciones sobre la queja..."
                   ></textarea>
-                  <mat-hint>Mínimo 10 caracteres</mat-hint>
                 </mat-form-field>
-                <button 
-                  mat-raised-button 
-                  color="primary" 
+                <button
+                  mat-raised-button
+                  color="primary"
                   type="submit"
-                  [disabled]="commentForm.invalid || isSavingComment"
+                  [disabled]="isSavingComment"
                 >
                   <mat-spinner *ngIf="isSavingComment" diameter="20"></mat-spinner>
                   <mat-icon *ngIf="!isSavingComment">send</mat-icon>
@@ -250,21 +240,21 @@
 
             <!-- Comments List -->
             <div class="comments-list">
-              <div class="comment-item" *ngFor="let comment of comments" 
-                   [class.admin-comment]="comment.esAdministrador">
+              <div class="comment-item" *ngFor="let comment of comments"
+                   [class.admin-comment]="comment.usuario?.rol === 'Administrador' || comment.usuario?.rol === 'SuperAdmin'">
                 <div class="comment-avatar">
-                  <mat-icon *ngIf="comment.esAdministrador">admin_panel_settings</mat-icon>
-                  <mat-icon *ngIf="!comment.esAdministrador">person</mat-icon>
+                  <mat-icon *ngIf="comment.usuario?.rol === 'Administrador' || comment.usuario?.rol === 'SuperAdmin'">admin_panel_settings</mat-icon>
+                  <mat-icon *ngIf="comment.usuario?.rol !== 'Administrador' && comment.usuario?.rol !== 'SuperAdmin'">person</mat-icon>
                 </div>
                 <div class="comment-content">
                   <div class="comment-header">
-                    <span class="comment-author">{{ comment.usuario }}</span>
-                    <mat-chip class="admin-badge" *ngIf="comment.esAdministrador">
+                    <span class="comment-author">{{ comment.usuario?.nombre }} {{ comment.usuario?.apellido }}</span>
+                    <mat-chip class="admin-badge" *ngIf="comment.usuario?.rol === 'Administrador' || comment.usuario?.rol === 'SuperAdmin'">
                       Administrador
                     </mat-chip>
-                    <span class="comment-date">{{ comment.fecha | timeAgo }}</span>
+                    <span class="comment-date">{{ comment.created_at | timeAgo }}</span>
                   </div>
-                  <p class="comment-text">{{ comment.comentario }}</p>
+                  <p class="comment-text">{{ comment.comment }}</p>
                 </div>
               </div>
 
@@ -275,55 +265,7 @@
             </div>
           </div>
         </mat-tab>
-
-        <!-- Activity Log Tab -->
-        <mat-tab>
-          <ng-template mat-tab-label>
-            <mat-icon>history</mat-icon>
-            Historial de Actividad
-          </ng-template>
-
-          <div class="tab-content">
-            <div class="activity-timeline">
-              <div class="timeline-item" *ngFor="let activity of activityLog">
-                <div class="timeline-marker"></div>
-                <div class="timeline-content">
-                  <div class="activity-header">
-                    <span class="activity-action">{{ activity.accion }}</span>
-                    <span class="activity-date">{{ activity.fecha | timeAgo }}</span>
-                  </div>
-                  <p class="activity-user">Por: {{ activity.usuario }}</p>
-                  <p class="activity-details" *ngIf="activity.detalles">{{ activity.detalles }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </mat-tab>
       </mat-tab-group>
-    </mat-card>
-
-    <!-- Metadata Card -->
-    <mat-card class="metadata-card no-print">
-      <h3>
-        <mat-icon>info</mat-icon>
-        Información del Sistema
-      </h3>
-      <mat-divider></mat-divider>
-
-      <div class="metadata-grid">
-        <div class="metadata-item">
-          <span class="metadata-label">ID de la Queja:</span>
-          <span class="metadata-value">#{{ complaint.id }}</span>
-        </div>
-        <div class="metadata-item">
-          <span class="metadata-label">Creada:</span>
-          <span class="metadata-value">{{ complaint.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
-        </div>
-        <div class="metadata-item">
-          <span class="metadata-label">Última Actualización:</span>
-          <span class="metadata-value">{{ complaint.updated_at | date:'dd/MM/yyyy HH:mm' }}</span>
-        </div>
-      </div>
     </mat-card>
   </div>
 </div>

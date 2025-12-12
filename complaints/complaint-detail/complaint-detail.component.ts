@@ -17,23 +17,6 @@ import { NotificationService } from '../../../core/services/notification.service
 import { AuthService } from '../../../core/services/auth.service';
 import { TimeAgoPipe } from '../../../shared/pipes/time-ago.pipe';
 
-interface Comment {
-  id: number;
-  usuario: string;
-  contenido: string;
-  comentario?: string; // Alias para contenido
-  fecha: Date;
-  isAdmin: boolean;
-  esAdministrador?: boolean; // Alias para isAdmin
-}
-
-interface ActivityLog {
-  id: number;
-  accion: string;
-  usuario: string;
-  fecha: Date;
-  detalles?: string;
-}
 
 @Component({
   selector: 'app-complaint-detail',
@@ -70,8 +53,7 @@ export class ComplaintDetailComponent implements OnInit {
   isSavingComment = false;
   complaintId!: number;
   commentForm!: FormGroup;
-  comments: Comment[] = [];
-  activityLog: ActivityLog[] = [];
+  comments: any[] = [];
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -79,7 +61,6 @@ export class ComplaintDetailComponent implements OnInit {
       this.complaintId = +id;
       this.initCommentForm();
       this.loadComplaint();
-      this.loadMockData();
     } else {
       this.router.navigate(['/complaints']);
     }
@@ -87,7 +68,7 @@ export class ComplaintDetailComponent implements OnInit {
 
   initCommentForm(): void {
     this.commentForm = this.fb.group({
-      contenido: ['', [Validators.required, Validators.minLength(10)]]
+      comment: ['']
     });
   }
 
@@ -95,8 +76,9 @@ export class ComplaintDetailComponent implements OnInit {
     this.isLoading = true;
     this.complaintService.getComplaintById(this.complaintId).subscribe({
       next: (response) => {
-        this.complaint = response;
+        this.complaint = response.complaint;
         this.isLoading = false;
+        this.loadComments();
       },
       error: (error) => {
         this.notificationService.error('Error al cargar queja');
@@ -106,43 +88,23 @@ export class ComplaintDetailComponent implements OnInit {
     });
   }
 
-  loadMockData(): void {
-    // Mock data para comentarios y actividad
-    this.comments = [
-      {
-        id: 1,
-        usuario: 'Admin Sistema',
-        contenido: 'Hemos recibido su queja y la estamos revisando.',
-        comentario: 'Hemos recibido su queja y la estamos revisando.',
-        fecha: new Date(Date.now() - 86400000),
-        isAdmin: true,
-        esAdministrador: true
-      }
-    ];
-
-    this.activityLog = [
-      {
-        id: 1,
-        accion: 'Queja creada',
-        usuario: 'Sistema',
-        fecha: new Date(Date.now() - 172800000),
-        detalles: 'Queja registrada en el sistema'
+  loadComments(): void {
+    this.complaintService.getCommentsByComplaint(this.complaintId).subscribe({
+      next: (response) => {
+        this.comments = response.comments;
       },
-      {
-        id: 2,
-        accion: 'Estado actualizado',
-        usuario: 'Admin',
-        fecha: new Date(Date.now() - 86400000),
-        detalles: 'Cambio de estado: Nuevo → Revisado'
+      error: (error) => {
+        console.error('Error al cargar comentarios:', error);
       }
-    ];
+    });
   }
+
 
   onEdit(): void {
     this.router.navigate(['/complaints', this.complaintId, 'edit']);
   }
 
-  changeStatus(newStatus: "Nueva" | "En Revisión" | "En Proceso" | "Resuelta" | "Cerrada" | "Rechazada"): void {
+  changeStatus(newStatus: "Nueva" | "En Revisión" | "En Proceso" | "Resuelta" | "Rechazada"): void {
     if (!this.complaint) return;
 
     this.complaintService.updateComplaint(this.complaintId, { estado: newStatus }).subscribe({
@@ -172,35 +134,23 @@ export class ComplaintDetailComponent implements OnInit {
   }
 
   onSubmitComment(): void {
-    if (this.commentForm.valid) {
-      this.isSavingComment = true;
-      const currentUser = this.authService.getCurrentUser();
-      const newComment: Comment = {
-        id: this.comments.length + 1,
-        usuario: currentUser ? `${currentUser.nombre} ${currentUser.apellido}` : 'Usuario',
-        contenido: this.commentForm.value.contenido,
-        comentario: this.commentForm.value.contenido,
-        fecha: new Date(),
-        isAdmin: this.authService.isAdmin(),
-        esAdministrador: this.authService.isAdmin()
-      };
+    const comment = this.commentForm.get('comment')?.value;
+    if (!comment || !comment.trim()) return;
 
-      // Simular delay de red
-      setTimeout(() => {
-        this.comments.push(newComment);
-        this.commentForm.reset();
-        this.isSavingComment = false;
+    this.isSavingComment = true;
+
+    this.complaintService.createComment(this.complaintId, comment).subscribe({
+      next: (response) => {
         this.notificationService.success('Comentario agregado');
-      }, 500);
-    }
-  }
-
-  printComplaint(): void {
-    window.print();
-  }
-
-  notifyUser(): void {
-    this.notificationService.info('Notificación enviada al usuario');
+        this.commentForm.reset();
+        this.loadComments();
+        this.isSavingComment = false;
+      },
+      error: (error) => {
+        this.notificationService.error('Error al agregar comentario');
+        this.isSavingComment = false;
+      }
+    });
   }
 
   getStatusClass(status: string): string {
@@ -209,7 +159,6 @@ export class ComplaintDetailComponent implements OnInit {
       'En Revisión': 'status-reviewed',
       'En Proceso': 'status-in-progress',
       'Resuelta': 'status-resolved',
-      'Cerrada': 'status-closed',
       'Rechazada': 'status-rejected'
     };
     return statusMap[status] || 'status-default';
@@ -221,7 +170,6 @@ export class ComplaintDetailComponent implements OnInit {
       'En Revisión': 'rate_review',
       'En Proceso': 'sync',
       'Resuelta': 'check_circle',
-      'Cerrada': 'archive',
       'Rechazada': 'block'
     };
     return iconMap[status] || 'help_outline';
@@ -320,5 +268,16 @@ export class ComplaintDetailComponent implements OnInit {
 
   canChangeStatus(): boolean {
     return this.authService.isAdmin();
+  }
+
+  canComment(): boolean {
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser || !this.complaint) return false;
+
+    // Admin y SuperAdmin pueden comentar
+    if (this.authService.isAdmin()) return true;
+
+    // El creador de la queja también puede comentar
+    return this.complaint.usuario_id === currentUser.id;
   }
 }
