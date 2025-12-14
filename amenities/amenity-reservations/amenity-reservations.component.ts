@@ -15,11 +15,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { AmenityApiRepository } from '../../../data/repositories/amenity-api.repository';
-import { NotificationService } from '../../../core/services/notification.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { AmenityReservation, ReservationStatus } from '../../../domain/models/amenity.model';
-import { ApproveRejectDialogComponent } from './approve-reject-dialog/approve-reject-dialog.component';
+import { AmenityRepository } from '../../domain/repositories/amenity.repository';
+import { AmenityApiRepository } from '../../data/repositories/amenity-api.repository';
+import { NotificationService } from '../../core/services/notification.service';
+import { AuthService } from '../../core/services/auth.service';
+import { AmenityReservation, ReservationStatus } from '../../domain/models/amenity.model';
+import { ApproveRejectDialogComponent } from './approve-reject-dialog';
 
 @Component({
   selector: 'app-amenity-reservations',
@@ -41,12 +42,15 @@ import { ApproveRejectDialogComponent } from './approve-reject-dialog/approve-re
     MatDialogModule,
     MatTooltipModule
   ],
+  providers: [
+    { provide: AmenityRepository, useClass: AmenityApiRepository }
+  ],
   templateUrl: './amenity-reservations.component.html',
   styleUrls: ['./amenity-reservations.component.scss']
 })
 export class AmenityReservationsComponent implements OnInit {
   private fb = inject(FormBuilder);
-  private amenityRepository = inject(AmenityApiRepository);
+  private amenityRepository = inject(AmenityRepository);
   private notificationService = inject(NotificationService);
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
