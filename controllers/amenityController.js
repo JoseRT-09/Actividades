@@ -208,6 +208,7 @@ exports.getAllReservations = async (req, res) => {
       include: [
         {
           model: Amenity,
+          as: 'amenidad',
           attributes: ['id', 'nombre', 'ubicacion', 'tipo', 'capacidad_maxima']
         },
         {
