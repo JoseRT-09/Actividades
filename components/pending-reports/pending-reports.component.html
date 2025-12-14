@@ -1,0 +1,75 @@
+<mat-card class="pending-reports-card">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>report_problem</mat-icon>
+      Reportes Pendientes
+    </mat-card-title>
+    <button mat-icon-button routerLink="/reports">
+      <mat-icon>arrow_forward</mat-icon>
+    </button>
+  </mat-card-header>
+
+  <mat-card-content>
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="isLoading">
+      <mat-icon>hourglass_empty</mat-icon>
+      <p>Cargando reportes...</p>
+    </div>
+
+    <!-- Reports List -->
+    <div class="reports-list" *ngIf="!isLoading">
+      <div 
+        class="report-item" 
+        *ngFor="let report of pendingReports"
+        [routerLink]="['/reports', report.id]"
+      >
+        <div class="report-icon" [style.background]="getReportColor(report.tipo) + '20'">
+          <mat-icon [style.color]="getReportColor(report.tipo)">
+            {{ getReportIcon(report.tipo) }}
+          </mat-icon>
+        </div>
+
+        <div class="report-content">
+          <div class="report-header">
+            <h4 class="report-title">{{ report.titulo }}</h4>
+            <span class="report-time">{{ getTimeAgo(report.created_at) }}</span>
+          </div>
+          
+          <p class="report-description">{{ report.descripcion }}</p>
+          
+          <div class="report-meta">
+            <mat-chip [class]="getPriorityClass(report.prioridad)" class="priority-chip">
+              <mat-icon>{{ getPriorityIcon(report.prioridad) }}</mat-icon>
+              {{ report.prioridad }}
+            </mat-chip>
+            
+            <span class="report-status">{{ report.estado }}</span>
+          </div>
+        </div>
+
+        <button 
+          mat-icon-button 
+          class="report-action"
+          [matTooltip]="'Ver detalles'"
+          (click)="$event.stopPropagation()"
+        >
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="pendingReports.length === 0">
+        <mat-icon>check_circle</mat-icon>
+        <p>¡No hay reportes pendientes!</p>
+        <span>Todos los reportes están resueltos</span>
+      </div>
+    </div>
+  </mat-card-content>
+
+  <mat-card-actions *ngIf="!isLoading && pendingReports.length > 0">
+    <button mat-button color="primary" routerLink="/reports">
+      Ver todos los reportes
+      <mat-icon>arrow_forward</mat-icon>
+    </button>
+  </mat-card-actions>
+</mat-card>
