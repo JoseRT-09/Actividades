@@ -304,6 +304,8 @@ exports.createReservation = async (req, res) => {
     }
 
     // Verificar disponibilidad (no debe haber otra reserva en el mismo horario)
+    console.log(`🔍 Buscando conflictos para: amenidad_id=${amenidad_id}, fecha=${fecha_reserva}, horario=${hora_inicio}-${hora_fin}`);
+
     const conflictingReservation = await AmenityReservation.findOne({
       where: {
         amenidad_id,
@@ -337,7 +339,14 @@ exports.createReservation = async (req, res) => {
     });
 
     if (conflictingReservation) {
-      console.log('❌ Conflicto de horario encontrado');
+      console.log('❌ Conflicto de horario encontrado con reserva:', {
+        id: conflictingReservation.id,
+        fecha_reserva: conflictingReservation.fecha_reserva,
+        hora_inicio: conflictingReservation.hora_inicio,
+        hora_fin: conflictingReservation.hora_fin,
+        estado: conflictingReservation.estado,
+        residente_id: conflictingReservation.residente_id
+      });
       return res.status(400).json({
         message: 'Ya existe una reserva en este horario. Por favor selecciona otro horario.',
         conflictingReservation: {
@@ -346,6 +355,8 @@ exports.createReservation = async (req, res) => {
         }
       });
     }
+
+    console.log('✅ No se encontraron conflictos de horario');
 
     console.log('✅ Todas las validaciones pasadas. Creando reserva...');
 
