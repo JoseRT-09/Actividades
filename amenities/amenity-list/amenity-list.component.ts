@@ -226,7 +226,6 @@ export class AmenityListComponent implements OnInit {
     const statusMap: Record<AmenityStatus, string> = {
       [AmenityStatus.DISPONIBLE]: 'status-available',
       [AmenityStatus.OCUPADA]: 'status-occupied',
-      [AmenityStatus.MANTENIMIENTO]: 'status-maintenance',
       [AmenityStatus.FUERA_SERVICIO]: 'status-out-of-service'
     };
     return statusMap[status];
@@ -236,7 +235,6 @@ export class AmenityListComponent implements OnInit {
     const iconMap: Record<AmenityStatus, string> = {
       [AmenityStatus.DISPONIBLE]: 'check_circle',
       [AmenityStatus.OCUPADA]: 'schedule',
-      [AmenityStatus.MANTENIMIENTO]: 'build',
       [AmenityStatus.FUERA_SERVICIO]: 'cancel'
     };
     return iconMap[status];
