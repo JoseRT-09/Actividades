@@ -68,7 +68,6 @@ export class AmenityFormComponent implements OnInit {
   estados = [
     { value: AmenityStatus.DISPONIBLE, label: 'Disponible', icon: 'check_circle', color: '#4caf50' },
     { value: AmenityStatus.OCUPADA, label: 'Ocupada', icon: 'schedule', color: '#ff9800' },
-    { value: AmenityStatus.MANTENIMIENTO, label: 'Mantenimiento', icon: 'build', color: '#2196f3' },
     { value: AmenityStatus.FUERA_SERVICIO, label: 'Fuera de Servicio', icon: 'cancel', color: '#f44336' }
   ];
 

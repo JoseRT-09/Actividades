@@ -42,6 +42,11 @@ const AmenityReservation = sequelize.define('AmenityReservation', {
   },
   motivo: {
     type: DataTypes.TEXT
+  },
+  num_personas: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue: null
   }
 }, {
   tableName: 'amenity_reservations',

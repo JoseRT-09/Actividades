@@ -85,7 +85,6 @@
         <div class="status-section">
           <mat-chip class="status-chip" [class.available]="amenity.estado === AmenityStatus.DISPONIBLE"
             [class.occupied]="amenity.estado === AmenityStatus.OCUPADA"
-            [class.maintenance]="amenity.estado === AmenityStatus.MANTENIMIENTO"
             [class.out]="amenity.estado === AmenityStatus.FUERA_SERVICIO">
             {{ amenity.estado }}
           </mat-chip>

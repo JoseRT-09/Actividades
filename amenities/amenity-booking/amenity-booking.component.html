@@ -120,6 +120,23 @@
           </div>
         </div>
 
+        <!-- Number of People Section -->
+        <div class="form-section">
+          <h4>Número de Personas</h4>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Cantidad de personas</mat-label>
+            <input matInput type="number" formControlName="num_personas" min="1" [max]="getMaxCapacity()">
+            <mat-icon matPrefix>people</mat-icon>
+            <mat-hint *ngIf="amenity?.capacidad_maxima || amenity?.capacidad">
+              Capacidad máxima: {{ getMaxCapacity() }} personas
+            </mat-hint>
+            <mat-error *ngIf="bookingForm.get('num_personas')?.invalid">
+              {{ getErrorMessage('num_personas') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
         <!-- Purpose Section -->
         <div class="form-section">
           <h4>Motivo de la Reserva</h4>

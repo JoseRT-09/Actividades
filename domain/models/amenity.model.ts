@@ -15,7 +15,6 @@ export enum AmenityType {
 export enum AmenityStatus {
   DISPONIBLE = 'Disponible',
   OCUPADA = 'Ocupada',
-  MANTENIMIENTO = 'Mantenimiento',
   FUERA_SERVICIO = 'Fuera de Servicio'
 }
 
@@ -101,11 +100,12 @@ export interface AmenityReservation {
   hora_fin: string;
   estado: ReservationStatus;
   motivo?: string;
+  num_personas?: number;
   created_at?: Date | string;
-  
+
   // Relaciones
   Amenity?: Amenity;
-  amenidad?: Amenity; 
+  amenidad?: Amenity;
   residente?: User;
   Residence?: Residence;
 }
@@ -116,4 +116,5 @@ export interface CreateReservationDto {
   hora_inicio: string;
   hora_fin: string;
   motivo?: string;
+  num_personas?: number;
 }

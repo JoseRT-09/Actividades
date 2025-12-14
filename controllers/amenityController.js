@@ -147,7 +147,7 @@ exports.updateAmenityAvailability = async (req, res) => {
     const { id } = req.params;
     const { estado } = req.body;
 
-    if (!['Disponible', 'Ocupada', 'Mantenimiento', 'Fuera de Servicio'].includes(estado)) {
+    if (!['Disponible', 'Ocupada', 'Fuera de Servicio'].includes(estado)) {
       return res.status(400).json({ message: 'Estado de amenidad inválido' });
     }
     
@@ -241,7 +241,8 @@ exports.createReservation = async (req, res) => {
       fecha_reserva,
       hora_inicio,
       hora_fin,
-      motivo
+      motivo,
+      num_personas
     } = req.body;
 
     // Verificar que la amenidad existe
@@ -250,9 +251,33 @@ exports.createReservation = async (req, res) => {
       return res.status(404).json({ message: 'Amenidad no encontrada' });
     }
 
+    // VALIDACIÓN: No se puede reservar si está fuera de servicio
+    if (amenity.estado === 'Fuera de Servicio') {
+      return res.status(400).json({ message: 'Esta amenidad está fuera de servicio y no puede ser reservada' });
+    }
+
     // Verificar si requiere reserva
     if (!amenity.disponible_reserva) {
       return res.status(400).json({ message: 'Esta amenidad no está disponible para reserva' });
+    }
+
+    // VALIDACIÓN: Validar capacidad máxima
+    if (num_personas && (amenity.capacidad_maxima || amenity.capacidad)) {
+      const maxCapacity = amenity.capacidad_maxima || amenity.capacidad;
+      if (num_personas > maxCapacity) {
+        return res.status(400).json({
+          message: `La capacidad máxima de esta amenidad es de ${maxCapacity} personas`
+        });
+      }
+    }
+
+    // VALIDACIÓN: Validar horarios de operación
+    if (amenity.horario_inicio && amenity.horario_fin) {
+      if (hora_inicio < amenity.horario_inicio || hora_fin > amenity.horario_fin) {
+        return res.status(400).json({
+          message: `El horario de reserva debe estar dentro del horario de operación (${amenity.horario_inicio} - ${amenity.horario_fin})`
+        });
+      }
     }
 
     // VALIDACIÓN: No se puede reservar en fecha/hora pasada
@@ -316,6 +341,7 @@ exports.createReservation = async (req, res) => {
       hora_inicio,
       hora_fin,
       motivo,
+      num_personas: num_personas || null,
       estado: 'Pendiente' // Siempre comienza como Pendiente
     });
 

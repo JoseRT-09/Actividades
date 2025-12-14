@@ -18,7 +18,7 @@ export interface Amenity {
   requiere_aprobacion?: boolean;
   costo?: number;
   costo_por_hora?: number;
-  estado: 'Disponible' | 'Ocupada' | 'En Mantenimiento' | 'Fuera de Servicio';
+  estado: 'Disponible' | 'Ocupada' | 'Fuera de Servicio';
   imagen_url?: string;
   reservaciones_activas?: number;
   ultima_reserva?: string;
@@ -40,15 +40,17 @@ export interface CreateAmenityData {
   ubicacion?: string;
   capacidad?: number;
   horario_disponible?: string;
-  estado?: 'Disponible' | 'Ocupada' | 'En Mantenimiento' | 'Fuera de Servicio';
+  estado?: 'Disponible' | 'Ocupada' | 'Fuera de Servicio';
   imagen_url?: string;
 }
 
 export interface ReserveAmenityData {
+  amenidad_id: number;
   fecha_reserva: string;
   hora_inicio: string;
   hora_fin: string;
-  notas?: string;
+  motivo: string;
+  num_personas?: number;
 }
 
 @Injectable({
@@ -93,10 +95,10 @@ export class AmenityService {
   }
 
   // Métodos de reserva
-  reserveAmenity(id: number, data: ReserveAmenityData): Observable<{ message: string; amenity: Amenity; reservationInfo: any }> {
-    return this.http.post<{ message: string; amenity: Amenity; reservationInfo: any }>(
-      `${this.apiUrl}/${id}/reserve`,
-      data
+  reserveAmenity(id: number, data: Omit<ReserveAmenityData, 'amenidad_id'>): Observable<{ message: string; reservation: any }> {
+    return this.http.post<{ message: string; reservation: any }>(
+      `${this.apiUrl}/reservations`,
+      { ...data, amenidad_id: id }
     );
   }
 
