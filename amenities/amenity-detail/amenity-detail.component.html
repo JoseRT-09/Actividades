@@ -15,8 +15,8 @@
       </div>
 
       <div class="header-actions" *ngIf="amenity">
-        <button 
-          mat-raised-button 
+        <button
+          mat-raised-button
           color="primary"
           (click)="onBooking()"
           [disabled]="!(amenity.disponible_reserva ?? amenity.requiere_reserva)"
@@ -25,31 +25,22 @@
           Reservar
         </button>
 
-        <button 
-          mat-raised-button 
+        <button
+          *ngIf="canEdit()"
+          mat-raised-button
           color="accent"
           (click)="onEdit()"
-          [disabled]="!canEdit()"
         >
           <mat-icon>edit</mat-icon>
           Editar
         </button>
 
-        <button mat-button [matMenuTriggerFor]="menu">
+        <button *ngIf="canDelete()" mat-button [matMenuTriggerFor]="menu">
           <mat-icon>more_vert</mat-icon>
         </button>
 
         <mat-menu #menu="matMenu">
-          <button mat-menu-item>
-            <mat-icon>calendar_month</mat-icon>
-            <span>Ver Reservas</span>
-          </button>
-          <button mat-menu-item>
-            <mat-icon>print</mat-icon>
-            <span>Imprimir</span>
-          </button>
-          <mat-divider></mat-divider>
-          <button mat-menu-item (click)="onDelete()" [disabled]="!canDelete()" class="delete-option">
+          <button mat-menu-item (click)="onDelete()" class="delete-option">
             <mat-icon>delete</mat-icon>
             <span>Eliminar Amenidad</span>
           </button>
@@ -169,50 +160,5 @@
       </div>
     </mat-card>
 
-    <!-- Quick Actions Card -->
-    <mat-card class="actions-card no-print">
-      <h3>
-        <mat-icon>bolt</mat-icon>
-        Acciones Rápidas
-      </h3>
-      <div class="quick-actions">
-        <button mat-raised-button color="primary" (click)="onBooking()" [disabled]="!(amenity.disponible_reserva ?? amenity.requiere_reserva)">
-          <mat-icon>event_available</mat-icon>
-          Hacer Reserva
-        </button>
-        <button mat-stroked-button>
-          <mat-icon>calendar_month</mat-icon>
-          Ver Calendario
-        </button>
-        <button mat-stroked-button>
-          <mat-icon>list</mat-icon>
-          Historial de Reservas
-        </button>
-      </div>
-    </mat-card>
-
-    <!-- Metadata Card -->
-    <mat-card class="metadata-card no-print">
-      <h3>
-        <mat-icon>info</mat-icon>
-        Información del Sistema
-      </h3>
-      <mat-divider></mat-divider>
-
-      <div class="metadata-grid">
-        <div class="metadata-item">
-          <span class="metadata-label">ID de la Amenidad:</span>
-          <span class="metadata-value">#{{ amenity.id }}</span>
-        </div>
-        <div class="metadata-item">
-          <span class="metadata-label">Creada:</span>
-          <span class="metadata-value">{{ amenity.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
-        </div>
-        <div class="metadata-item" *ngIf="amenity.updated_at">
-          <span class="metadata-label">Última Actualización:</span>
-          <span class="metadata-value">{{ amenity.updated_at | date:'dd/MM/yyyy HH:mm' }}</span>
-        </div>
-      </div>
-    </mat-card>
   </div>
 </div>

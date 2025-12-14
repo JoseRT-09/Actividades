@@ -374,7 +374,8 @@ exports.createReservation = async (req, res) => {
 
     console.log('✅ Reserva creada con ID:', reservation.id);
 
-    const reservationWithDetails = await AmenityReservation.findByPk(reservation.id, {
+    // Recargar la reserva con las relaciones
+    await reservation.reload({
       include: [
         {
           model: Amenity,
@@ -389,9 +390,11 @@ exports.createReservation = async (req, res) => {
       ]
     });
 
+    console.log('✅ Reserva con detalles cargada correctamente');
+
     res.status(201).json({
       message: 'Solicitud de reserva creada exitosamente. Pendiente de aprobación del administrador.',
-      reservation: reservationWithDetails
+      reservation: reservation
     });
   } catch (error) {
     console.error('Error al crear reserva:', error);
