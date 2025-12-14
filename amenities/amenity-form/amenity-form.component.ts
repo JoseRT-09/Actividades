@@ -86,8 +86,6 @@ export class AmenityFormComponent implements OnInit {
       capacidad_maxima: [null],
       horario_inicio: [''],
       horario_fin: [''],
-      costo_reserva: [0, [Validators.required, Validators.min(0)]],
-      requiere_aprobacion: [false],
       disponible_reserva: [true],
       estado: [AmenityStatus.DISPONIBLE, [Validators.required]],
       reglas: ['']
@@ -118,8 +116,6 @@ export class AmenityFormComponent implements OnInit {
           capacidad_maxima: amenity.capacidad_maxima || amenity.capacidad,
           horario_inicio: amenity.horario_inicio || amenity.horario_apertura,
           horario_fin: amenity.horario_fin || amenity.horario_cierre,
-          costo_reserva: amenity.costo_reserva ?? amenity.costo_uso,
-          requiere_aprobacion: amenity.requiere_aprobacion,
           disponible_reserva: amenity.disponible_reserva ?? amenity.requiere_reserva,
           estado: amenity.estado,
           reglas: amenity.reglas

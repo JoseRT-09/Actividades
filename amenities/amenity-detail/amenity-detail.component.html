@@ -138,24 +138,11 @@
           </div>
         </div>
 
-        <!-- Cost -->
-        <div class="detail-card">
-          <h4>
-            <mat-icon>attach_money</mat-icon>
-            Costo de Reserva
-          </h4>
-          <div class="detail-value">
-            <span class="value-large" *ngIf="(amenity.costo_reserva ?? amenity.costo_uso) > 0">${{ amenity.costo_reserva ?? amenity.costo_uso | number:'1.2-2' }}</span>
-            <span class="value-large free" *ngIf="(amenity.costo_reserva ?? amenity.costo_uso) === 0">Gratis</span>
-            <span class="value-label">{{ (amenity.costo_reserva ?? amenity.costo_uso) > 0 ? 'MXN por reserva' : 'Sin costo' }}</span>
-          </div>
-        </div>
-
         <!-- Booking Settings -->
         <div class="detail-card">
           <h4>
             <mat-icon>settings</mat-icon>
-            Configuración
+            Configuración de Reservas
           </h4>
           <div class="settings-list">
             <div class="setting-item">
@@ -165,10 +152,8 @@
               <span>{{ (amenity.disponible_reserva ?? amenity.requiere_reserva) ? 'Reservas habilitadas' : 'Reservas deshabilitadas' }}</span>
             </div>
             <div class="setting-item">
-              <mat-icon [class.active]="amenity.requiere_aprobacion">
-                {{ amenity.requiere_aprobacion ? 'approval' : 'check' }}
-              </mat-icon>
-              <span>{{ amenity.requiere_aprobacion ? 'Requiere aprobación' : 'Aprobación automática' }}</span>
+              <mat-icon class="active">approval</mat-icon>
+              <span>Requiere aprobación del administrador</span>
             </div>
           </div>
         </div>

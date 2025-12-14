@@ -170,18 +170,6 @@
           </td>
         </ng-container>
 
-        <!-- Costo Reserva Column -->
-        <ng-container matColumnDef="costo_reserva">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Costo</th>
-          <td mat-cell *matCellDef="let amenity">
-            <div class="cost-cell">
-              <mat-icon>attach_money</mat-icon>
-              <span *ngIf="amenity.costo_reserva > 0">${{ amenity.costo_reserva | number:'1.2-2' }}</span>
-              <span class="free" *ngIf="amenity.costo_reserva === 0">Gratis</span>
-            </div>
-          </td>
-        </ng-container>
-
         <!-- Estado Column -->
         <ng-container matColumnDef="estado">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>

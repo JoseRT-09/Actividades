@@ -131,18 +131,6 @@
           <mat-divider></mat-divider>
 
           <div class="form-grid">
-            <mat-form-field appearance="outline">
-              <mat-label>Costo de Reserva</mat-label>
-              <input matInput type="number" formControlName="costo_reserva" placeholder="0.00">
-              <span matTextPrefix>$&nbsp;</span>
-              <span matTextSuffix>MXN</span>
-              <mat-icon matPrefix>attach_money</mat-icon>
-              <mat-hint>Ingresa 0 si es gratis</mat-hint>
-              <mat-error *ngIf="amenityForm.get('costo_reserva')?.invalid">
-                {{ getErrorMessage('costo_reserva') }}
-              </mat-error>
-            </mat-form-field>
-
             <div class="toggle-options">
               <mat-slide-toggle formControlName="disponible_reserva" color="primary">
                 <div class="toggle-content">
@@ -154,15 +142,13 @@
                 </div>
               </mat-slide-toggle>
 
-              <mat-slide-toggle formControlName="requiere_aprobacion" color="accent">
-                <div class="toggle-content">
-                  <mat-icon>approval</mat-icon>
-                  <div>
-                    <span class="toggle-label">Requiere Aprobación</span>
-                    <span class="toggle-description">Las reservas deben ser aprobadas por administración</span>
-                  </div>
+              <div class="info-box">
+                <mat-icon>info</mat-icon>
+                <div>
+                  <span class="info-label">Aprobación Requerida</span>
+                  <span class="info-description">Todas las reservas requieren aprobación del administrador</span>
                 </div>
-              </mat-slide-toggle>
+              </div>
             </div>
           </div>
         </div>
@@ -201,11 +187,9 @@
               <span class="preview-value">{{ amenityForm.get('ubicacion')?.value }}</span>
             </div>
             <div class="preview-item">
-              <span class="preview-label">Costo:</span>
+              <span class="preview-label">Reservable:</span>
               <span class="preview-value">
-                {{ amenityForm.get('costo_reserva')?.value > 0 
-                   ? '$' + amenityForm.get('costo_reserva')?.value 
-                   : 'Gratis' }}
+                {{ amenityForm.get('disponible_reserva')?.value ? 'Sí' : 'No' }}
               </span>
             </div>
           </div>

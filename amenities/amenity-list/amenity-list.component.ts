@@ -64,7 +64,7 @@ export class AmenityListComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  displayedColumns: string[] = ['nombre', 'tipo', 'capacidad', 'horario', 'costo_reserva', 'estado', 'disponible', 'acciones'];
+  displayedColumns: string[] = ['nombre', 'tipo', 'capacidad', 'horario', 'estado', 'disponible', 'acciones'];
   dataSource = new MatTableDataSource<Amenity>();
   
   filterForm!: FormGroup;

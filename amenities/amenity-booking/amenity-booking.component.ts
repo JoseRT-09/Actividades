@@ -54,15 +54,11 @@ export class AmenityBookingComponent implements OnInit {
   }
 
   initForm(): void {
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
     this.bookingForm = this.fb.group({
-      fecha_reserva: [today, [Validators.required]],
+      fecha_reserva: [new Date(), [Validators.required]],
       hora_inicio: ['', [Validators.required, Validators.pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)]],
       hora_fin: ['', [Validators.required, Validators.pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)]],
-      notas: ['', [Validators.maxLength(500)]]
+      motivo: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]]
     });
   }
 
@@ -102,7 +98,7 @@ export class AmenityBookingComponent implements OnInit {
 
       this.amenityService.reserveAmenity(this.amenityId, formData).subscribe({
         next: (response) => {
-          this.notificationService.success('Reserva creada correctamente');
+          this.notificationService.success('Solicitud de reserva enviada. Pendiente de aprobación del administrador.');
           this.router.navigate(['/amenities']);
           this.isSaving = false;
         },
@@ -125,11 +121,6 @@ export class AmenityBookingComponent implements OnInit {
     return this.authService.isAdmin() || this.authService.isSuperAdmin();
   }
 
-  getCosto(): number {
-    if (!this.amenity) return 0;
-    return this.amenity.costo || this.amenity.costo_por_hora || 0;
-  }
-
   private markFormGroupTouched(formGroup: FormGroup): void {
     Object.keys(formGroup.controls).forEach(key => {
       formGroup.get(key)?.markAsTouched();
@@ -148,8 +139,15 @@ export class AmenityBookingComponent implements OnInit {
       return `Mínimo ${minLength} caracteres`;
     }
 
-    if (control?.hasError('min')) {
-      return 'Debe ser al menos 1 persona';
+    if (control?.hasError('maxlength')) {
+      const maxLength = control.errors?.['maxlength'].requiredLength;
+      return `Máximo ${maxLength} caracteres`;
+    }
+
+    if (control?.hasError('pattern')) {
+      if (fieldName === 'hora_inicio' || fieldName === 'hora_fin') {
+        return 'Formato de hora inválido (HH:MM)';
+      }
     }
 
     return '';
