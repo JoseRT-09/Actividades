@@ -132,7 +132,7 @@ export class AmenityReservationsComponent implements OnInit {
         this.totalReservations = response.total;
         this.isLoading = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         this.notificationService.error('Error al cargar reservas');
         this.isLoading = false;
       }
@@ -183,7 +183,7 @@ export class AmenityReservationsComponent implements OnInit {
         this.notificationService.success('Reserva aprobada exitosamente');
         this.loadReservations();
       },
-      error: (error) => {
+      error: (error: any) => {
         this.notificationService.error(error.error?.message || 'Error al aprobar reserva');
       }
     });
@@ -195,7 +195,7 @@ export class AmenityReservationsComponent implements OnInit {
         this.notificationService.success('Reserva rechazada');
         this.loadReservations();
       },
-      error: (error) => {
+      error: (error: any) => {
         this.notificationService.error(error.error?.message || 'Error al rechazar reserva');
       }
     });
