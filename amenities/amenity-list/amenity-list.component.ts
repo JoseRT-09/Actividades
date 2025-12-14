@@ -89,7 +89,6 @@ export class AmenityListComponent implements OnInit {
     { value: '', label: 'Todos los estados' },
     { value: AmenityStatus.DISPONIBLE, label: 'Disponible' },
     { value: AmenityStatus.OCUPADA, label: 'Ocupada' },
-    { value: AmenityStatus.MANTENIMIENTO, label: 'Mantenimiento' },
     { value: AmenityStatus.FUERA_SERVICIO, label: 'Fuera de Servicio' }
   ];
 
