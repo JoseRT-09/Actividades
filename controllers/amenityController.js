@@ -236,6 +236,8 @@ exports.getAllReservations = async (req, res) => {
 // Crear reserva
 exports.createReservation = async (req, res) => {
   try {
+    console.log('📝 Datos recibidos para crear reserva:', req.body);
+
     const {
       amenidad_id,
       fecha_reserva,
@@ -248,16 +250,21 @@ exports.createReservation = async (req, res) => {
     // Verificar que la amenidad existe
     const amenity = await Amenity.findByPk(amenidad_id);
     if (!amenity) {
+      console.log('❌ Amenidad no encontrada:', amenidad_id);
       return res.status(404).json({ message: 'Amenidad no encontrada' });
     }
 
+    console.log('✅ Amenidad encontrada:', amenity.nombre);
+
     // VALIDACIÓN: No se puede reservar si está fuera de servicio
     if (amenity.estado === 'Fuera de Servicio') {
+      console.log('❌ Amenidad fuera de servicio');
       return res.status(400).json({ message: 'Esta amenidad está fuera de servicio y no puede ser reservada' });
     }
 
     // Verificar si requiere reserva
     if (!amenity.disponible_reserva) {
+      console.log('❌ Amenidad no disponible para reserva');
       return res.status(400).json({ message: 'Esta amenidad no está disponible para reserva' });
     }
 
@@ -265,6 +272,7 @@ exports.createReservation = async (req, res) => {
     if (num_personas && (amenity.capacidad_maxima || amenity.capacidad)) {
       const maxCapacity = amenity.capacidad_maxima || amenity.capacidad;
       if (num_personas > maxCapacity) {
+        console.log(`❌ Capacidad excedida: ${num_personas} > ${maxCapacity}`);
         return res.status(400).json({
           message: `La capacidad máxima de esta amenidad es de ${maxCapacity} personas`
         });
@@ -273,7 +281,9 @@ exports.createReservation = async (req, res) => {
 
     // VALIDACIÓN: Validar horarios de operación
     if (amenity.horario_inicio && amenity.horario_fin) {
+      console.log(`🕒 Validando horarios: ${hora_inicio} - ${hora_fin} vs ${amenity.horario_inicio} - ${amenity.horario_fin}`);
       if (hora_inicio < amenity.horario_inicio || hora_fin > amenity.horario_fin) {
+        console.log('❌ Horario fuera del rango permitido');
         return res.status(400).json({
           message: `El horario de reserva debe estar dentro del horario de operación (${amenity.horario_inicio} - ${amenity.horario_fin})`
         });
@@ -284,7 +294,10 @@ exports.createReservation = async (req, res) => {
     const fechaHoraReserva = new Date(`${fecha_reserva}T${hora_inicio}`);
     const ahora = new Date();
 
+    console.log(`📅 Validando fecha/hora: ${fechaHoraReserva} vs ${ahora}`);
+
     if (fechaHoraReserva < ahora) {
+      console.log('❌ Fecha/hora en el pasado');
       return res.status(400).json({
         message: 'No se puede reservar en una fecha u hora pasada'
       });
@@ -324,6 +337,7 @@ exports.createReservation = async (req, res) => {
     });
 
     if (conflictingReservation) {
+      console.log('❌ Conflicto de horario encontrado');
       return res.status(400).json({
         message: 'Ya existe una reserva en este horario. Por favor selecciona otro horario.',
         conflictingReservation: {
@@ -332,6 +346,8 @@ exports.createReservation = async (req, res) => {
         }
       });
     }
+
+    console.log('✅ Todas las validaciones pasadas. Creando reserva...');
 
     // Todas las reservas requieren aprobación del administrador
     const reservation = await AmenityReservation.create({
@@ -344,6 +360,8 @@ exports.createReservation = async (req, res) => {
       num_personas: num_personas || null,
       estado: 'Pendiente' // Siempre comienza como Pendiente
     });
+
+    console.log('✅ Reserva creada con ID:', reservation.id);
 
     const reservationWithDetails = await AmenityReservation.findByPk(reservation.id, {
       include: [
