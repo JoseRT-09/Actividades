@@ -107,7 +107,24 @@ export class AmenityApiRepository extends AmenityRepository {
     const params = new HttpParams()
       .set('amenidad_id', amenityId.toString())
       .set('fecha_reserva', dateStr);
-    
+
     return this.http.get<any>(`${this.apiUrl}/reservations/available-slots`, { params });
+  }
+
+  approveReservation(id: number): Observable<AmenityReservation> {
+    return this.http.post<any>(`${this.apiUrl}/reservations/${id}/approve-reject`, {
+      accion: 'aprobar'
+    }).pipe(
+      map(response => response.reservation)
+    );
+  }
+
+  rejectReservation(id: number, motivo?: string): Observable<AmenityReservation> {
+    return this.http.post<any>(`${this.apiUrl}/reservations/${id}/approve-reject`, {
+      accion: 'rechazar',
+      motivo_rechazo: motivo
+    }).pipe(
+      map(response => response.reservation)
+    );
   }
 }

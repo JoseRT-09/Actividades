@@ -1,0 +1,96 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>
+    <mat-icon [color]="isApprove ? 'primary' : 'warn'">
+      {{ isApprove ? 'check_circle' : 'cancel' }}
+    </mat-icon>
+    {{ getTitle() }}
+  </h2>
+
+  <mat-dialog-content>
+    <div class="reservation-summary">
+      <div class="summary-item">
+        <mat-icon>event</mat-icon>
+        <div class="summary-details">
+          <strong>Amenidad:</strong>
+          <span>{{ data.reservation.amenidad?.nombre || 'N/A' }}</span>
+        </div>
+      </div>
+
+      <div class="summary-item">
+        <mat-icon>person</mat-icon>
+        <div class="summary-details">
+          <strong>Residente:</strong>
+          <span>
+            {{ data.reservation.residente?.nombre }} {{ data.reservation.residente?.apellido }}
+          </span>
+        </div>
+      </div>
+
+      <div class="summary-item">
+        <mat-icon>calendar_today</mat-icon>
+        <div class="summary-details">
+          <strong>Fecha:</strong>
+          <span>{{ data.reservation.fecha_reserva | date:'dd/MM/yyyy' }}</span>
+        </div>
+      </div>
+
+      <div class="summary-item">
+        <mat-icon>schedule</mat-icon>
+        <div class="summary-details">
+          <strong>Horario:</strong>
+          <span>{{ data.reservation.hora_inicio }} - {{ data.reservation.hora_fin }}</span>
+        </div>
+      </div>
+
+      <div class="summary-item" *ngIf="data.reservation.num_personas">
+        <mat-icon>people</mat-icon>
+        <div class="summary-details">
+          <strong>Personas:</strong>
+          <span>{{ data.reservation.num_personas }}</span>
+        </div>
+      </div>
+
+      <div class="summary-item" *ngIf="data.reservation.motivo">
+        <mat-icon>description</mat-icon>
+        <div class="summary-details">
+          <strong>Motivo:</strong>
+          <span>{{ data.reservation.motivo }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="message-container" [ngClass]="isApprove ? 'approve-message' : 'reject-message'">
+      <p>{{ getMessage() }}</p>
+    </div>
+
+    <form [formGroup]="form" *ngIf="!isApprove">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Motivo del Rechazo *</mat-label>
+        <textarea
+          matInput
+          formControlName="motivo"
+          rows="4"
+          placeholder="Explique el motivo del rechazo (mínimo 10 caracteres)..."></textarea>
+        <mat-error *ngIf="form.get('motivo')?.hasError('required')">
+          El motivo es requerido
+        </mat-error>
+        <mat-error *ngIf="form.get('motivo')?.hasError('minlength')">
+          El motivo debe tener al menos 10 caracteres
+        </mat-error>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">
+      Cancelar
+    </button>
+    <button
+      mat-raised-button
+      [color]="isApprove ? 'primary' : 'warn'"
+      (click)="onConfirm()"
+      [disabled]="!isApprove && form.invalid">
+      {{ isApprove ? 'Aprobar' : 'Rechazar' }}
+    </button>
+  </mat-dialog-actions>
+</div>

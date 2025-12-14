@@ -21,4 +21,6 @@ export abstract class AmenityRepository {
   abstract updateReservationStatus(id: number, status: string): Observable<AmenityReservation>;
   abstract cancelReservation(id: number): Observable<AmenityReservation>;
   abstract getAvailableSlots(amenityId: number, date: Date): Observable<any>;
+  abstract approveReservation(id: number): Observable<AmenityReservation>;
+  abstract rejectReservation(id: number, motivo?: string): Observable<AmenityReservation>;
 }
