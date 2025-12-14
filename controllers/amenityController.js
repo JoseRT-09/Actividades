@@ -191,20 +191,24 @@ exports.deleteAmenity = async (req, res) => {
 // Obtener todas las reservas
 exports.getAllReservations = async (req, res) => {
   try {
-    const { amenidad_id, residente_id, estado, page = 1, limit = 10 } = req.query;
+    const { amenidad_id, estado, page = 1, limit = 10 } = req.query;
     const offset = (page - 1) * limit;
 
     const where = {};
     if (amenidad_id) where.amenidad_id = amenidad_id;
-    if (residente_id) where.residente_id = residente_id;
     if (estado) where.estado = estado;
+
+    // Si es residente, solo puede ver sus propias reservas
+    if (req.user.rol === 'Residente') {
+      where.residente_id = req.user.id;
+    }
 
     const { count, rows } = await AmenityReservation.findAndCountAll({
       where,
       include: [
         {
           model: Amenity,
-          attributes: ['id', 'nombre', 'ubicacion', 'costo_reserva'] // Campo corregido
+          attributes: ['id', 'nombre', 'ubicacion', 'tipo', 'capacidad_maxima']
         },
         {
           model: User,
@@ -246,12 +250,22 @@ exports.createReservation = async (req, res) => {
       return res.status(404).json({ message: 'Amenidad no encontrada' });
     }
 
-    // Verificar si requiere reserva (Usando el campo correcto del modelo Amenity.js)
-    if (!amenity.disponible_reserva) { 
+    // Verificar si requiere reserva
+    if (!amenity.disponible_reserva) {
       return res.status(400).json({ message: 'Esta amenidad no está disponible para reserva' });
     }
 
-    // Verificar disponibilidad (no debe haber otra reserva confirmada en el mismo horario)
+    // VALIDACIÓN: No se puede reservar en fecha/hora pasada
+    const fechaHoraReserva = new Date(`${fecha_reserva}T${hora_inicio}`);
+    const ahora = new Date();
+
+    if (fechaHoraReserva < ahora) {
+      return res.status(400).json({
+        message: 'No se puede reservar en una fecha u hora pasada'
+      });
+    }
+
+    // Verificar disponibilidad (no debe haber otra reserva en el mismo horario)
     const conflictingReservation = await AmenityReservation.findOne({
       where: {
         amenidad_id,
@@ -259,15 +273,25 @@ exports.createReservation = async (req, res) => {
         estado: ['Pendiente', 'Confirmada'],
         [Op.or]: [
           {
+            // La nueva reserva empieza durante una reserva existente
             hora_inicio: { [Op.between]: [hora_inicio, hora_fin] }
           },
           {
+            // La nueva reserva termina durante una reserva existente
             hora_fin: { [Op.between]: [hora_inicio, hora_fin] }
           },
           {
+            // La nueva reserva envuelve completamente una reserva existente
             [Op.and]: [
               { hora_inicio: { [Op.lte]: hora_inicio } },
               { hora_fin: { [Op.gte]: hora_fin } }
+            ]
+          },
+          {
+            // Una reserva existente está dentro del rango de la nueva
+            [Op.and]: [
+              { hora_inicio: { [Op.gte]: hora_inicio } },
+              { hora_fin: { [Op.lte]: hora_fin } }
             ]
           }
         ]
@@ -275,12 +299,16 @@ exports.createReservation = async (req, res) => {
     });
 
     if (conflictingReservation) {
-      return res.status(400).json({ 
-        message: 'Ya existe una reserva en este horario',
-        conflictingReservation
+      return res.status(400).json({
+        message: 'Ya existe una reserva en este horario. Por favor selecciona otro horario.',
+        conflictingReservation: {
+          hora_inicio: conflictingReservation.hora_inicio,
+          hora_fin: conflictingReservation.hora_fin
+        }
       });
     }
 
+    // Todas las reservas requieren aprobación del administrador
     const reservation = await AmenityReservation.create({
       amenidad_id,
       residente_id: req.user.id,
@@ -288,31 +316,113 @@ exports.createReservation = async (req, res) => {
       hora_inicio,
       hora_fin,
       motivo,
-      // Lógica de estado inicial: Pendiente si requiere aprobación, Confirmada si no.
-      estado: amenity.requiere_aprobacion ? 'Pendiente' : 'Confirmada' 
+      estado: 'Pendiente' // Siempre comienza como Pendiente
     });
 
     const reservationWithDetails = await AmenityReservation.findByPk(reservation.id, {
       include: [
         {
           model: Amenity,
-          attributes: ['id', 'nombre', 'ubicacion', 'costo_reserva'] // Campo corregido
+          attributes: ['id', 'nombre', 'ubicacion', 'tipo']
         },
         {
           model: User,
           as: 'residente',
-          attributes: ['id', 'nombre', 'apellido']
+          attributes: ['id', 'nombre', 'apellido', 'email']
         }
       ]
     });
 
     res.status(201).json({
-      message: 'Reserva creada exitosamente',
+      message: 'Solicitud de reserva creada exitosamente. Pendiente de aprobación del administrador.',
       reservation: reservationWithDetails
     });
   } catch (error) {
     console.error('Error al crear reserva:', error);
     res.status(500).json({ message: 'Error al crear reserva', error: error.message });
+  }
+};
+
+// Aprobar o rechazar reserva (Solo admin)
+exports.approveOrRejectReservation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { accion, motivo_rechazo } = req.body; // accion: 'aprobar' o 'rechazar'
+
+    // Verificar que es admin
+    if (req.user.rol !== 'Administrador' && req.user.rol !== 'SuperAdmin') {
+      return res.status(403).json({ message: 'Solo los administradores pueden aprobar/rechazar reservas' });
+    }
+
+    const reservation = await AmenityReservation.findByPk(id, {
+      include: [
+        {
+          model: Amenity,
+          attributes: ['id', 'nombre']
+        },
+        {
+          model: User,
+          as: 'residente',
+          attributes: ['id', 'nombre', 'apellido', 'email']
+        }
+      ]
+    });
+
+    if (!reservation) {
+      return res.status(404).json({ message: 'Reserva no encontrada' });
+    }
+
+    if (reservation.estado !== 'Pendiente') {
+      return res.status(400).json({ message: 'Solo se pueden aprobar/rechazar reservas pendientes' });
+    }
+
+    let nuevoEstado;
+    let mensaje;
+
+    if (accion === 'aprobar') {
+      nuevoEstado = 'Confirmada';
+      mensaje = 'Reserva aprobada exitosamente';
+    } else if (accion === 'rechazar') {
+      nuevoEstado = 'Cancelada';
+      mensaje = 'Reserva rechazada';
+
+      if (motivo_rechazo) {
+        await reservation.update({
+          estado: nuevoEstado,
+          motivo: motivo_rechazo
+        });
+      } else {
+        await reservation.update({ estado: nuevoEstado });
+      }
+    } else {
+      return res.status(400).json({ message: 'Acción inválida. Use "aprobar" o "rechazar"' });
+    }
+
+    if (accion === 'aprobar') {
+      await reservation.update({ estado: nuevoEstado });
+    }
+
+    const updatedReservation = await AmenityReservation.findByPk(id, {
+      include: [
+        {
+          model: Amenity,
+          attributes: ['id', 'nombre', 'ubicacion', 'tipo']
+        },
+        {
+          model: User,
+          as: 'residente',
+          attributes: ['id', 'nombre', 'apellido', 'email']
+        }
+      ]
+    });
+
+    res.json({
+      message: mensaje,
+      reservation: updatedReservation
+    });
+  } catch (error) {
+    console.error('Error al aprobar/rechazar reserva:', error);
+    res.status(500).json({ message: 'Error al procesar reserva', error: error.message });
   }
 };
 

@@ -47,8 +47,14 @@ router.get('/reservations/all', amenityController.getAllReservations);
 // Crear reserva
 router.post('/reservations', amenityController.createReservation);
 
+// Aprobar o rechazar reserva (Solo Admin y SuperAdmin)
+router.post('/reservations/:id/approve-reject',
+  authorizeRoles(ROLES.ADMINISTRADOR, ROLES.SUPER_ADMIN),
+  amenityController.approveOrRejectReservation
+);
+
 // Actualizar estado de reserva (Solo Admin y SuperAdmin)
-router.put('/reservations/:id/status', 
+router.put('/reservations/:id/status',
   authorizeRoles(ROLES.ADMINISTRADOR, ROLES.SUPER_ADMIN),
   amenityController.updateReservationStatus
 );
