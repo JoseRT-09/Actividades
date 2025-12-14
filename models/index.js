@@ -136,12 +136,12 @@ AmenityReservation.belongsTo(Amenity, {
 });
 
 User.hasMany(AmenityReservation, {
-  foreignKey: 'usuario_id',
+  foreignKey: 'residente_id',
   as: 'reservasAmenidades'
 });
 AmenityReservation.belongsTo(User, {
-  foreignKey: 'usuario_id',
-  as: 'usuario'
+  foreignKey: 'residente_id',
+  as: 'residente'
 });
 
 // ===== RELACIONES DE REPORT =====

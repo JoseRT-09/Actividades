@@ -349,6 +349,7 @@ exports.createReservation = async (req, res) => {
       include: [
         {
           model: Amenity,
+          as: 'amenidad',
           attributes: ['id', 'nombre', 'ubicacion', 'tipo']
         },
         {
@@ -432,6 +433,7 @@ exports.approveOrRejectReservation = async (req, res) => {
       include: [
         {
           model: Amenity,
+          as: 'amenidad',
           attributes: ['id', 'nombre', 'ubicacion', 'tipo']
         },
         {
@@ -469,6 +471,7 @@ exports.updateReservationStatus = async (req, res) => {
       include: [
         {
           model: Amenity,
+          as: 'amenidad',
           attributes: ['id', 'nombre', 'ubicacion']
         },
         {
