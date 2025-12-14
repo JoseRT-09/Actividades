@@ -1,0 +1,229 @@
+<div class="amenity-form-container">
+  <div class="page-header">
+    <div class="header-content">
+      <button mat-icon-button class="back-button" routerLink="/amenities">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>{{ isEditMode ? 'edit' : 'add' }}</mat-icon>
+          {{ isEditMode ? 'Editar Amenidad' : 'Nueva Amenidad' }}
+        </h1>
+        <p class="page-subtitle">
+          {{ isEditMode ? 'Modifica los datos de la amenidad' : 'Completa el formulario para crear una amenidad' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando datos...</p>
+  </div>
+
+  <div class="form-wrapper" *ngIf="!isLoading">
+    <mat-card class="form-card">
+      <form [formGroup]="amenityForm" (ngSubmit)="onSubmit()">
+        
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>info</mat-icon>
+            <h2>Información General</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="form-grid">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Nombre de la Amenidad</mat-label>
+              <input matInput formControlName="nombre" placeholder="Ej: Salón de Eventos Principal">
+              <mat-icon matPrefix>title</mat-icon>
+              <mat-error *ngIf="amenityForm.get('nombre')?.invalid">
+                {{ getErrorMessage('nombre') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Descripción</mat-label>
+              <textarea matInput formControlName="descripcion" rows="4" 
+                placeholder="Describe las características y servicios de la amenidad..."></textarea>
+              <mat-icon matPrefix>description</mat-icon>
+              <mat-error *ngIf="amenityForm.get('descripcion')?.invalid">
+                {{ getErrorMessage('descripcion') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo de Amenidad</mat-label>
+              <mat-select formControlName="tipo">
+                <mat-option *ngFor="let tipo of tipos" [value]="tipo.value">
+                  <div class="select-option">
+                    <mat-icon>{{ tipo.icon }}</mat-icon>
+                    <div class="option-content">
+                      <span class="option-label">{{ tipo.label }}</span>
+                      <span class="option-description">{{ tipo.description }}</span>
+                    </div>
+                  </div>
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>category</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Ubicación</mat-label>
+              <input matInput formControlName="ubicacion" placeholder="Ej: Edificio A, Planta Baja">
+              <mat-icon matPrefix>location_on</mat-icon>
+              <mat-error *ngIf="amenityForm.get('ubicacion')?.invalid">
+                {{ getErrorMessage('ubicacion') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Capacidad Máxima (Opcional)</mat-label>
+              <input matInput type="number" formControlName="capacidad_maxima" placeholder="Número de personas">
+              <mat-icon matPrefix>people</mat-icon>
+              <mat-hint>Deja vacío si no hay límite</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Estado</mat-label>
+              <mat-select formControlName="estado">
+                <mat-option *ngFor="let estado of estados" [value]="estado.value">
+                  <div class="select-option">
+                    <mat-icon [style.color]="estado.color">{{ estado.icon }}</mat-icon>
+                    <span>{{ estado.label }}</span>
+                  </div>
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>sync</mat-icon>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>schedule</mat-icon>
+            <h2>Horario de Operación</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Hora de Inicio (Opcional)</mat-label>
+              <input matInput type="time" formControlName="horario_inicio">
+              <mat-icon matPrefix>schedule</mat-icon>
+              <mat-hint>Deja vacío si está disponible 24/7</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Hora de Cierre (Opcional)</mat-label>
+              <input matInput type="time" formControlName="horario_fin">
+              <mat-icon matPrefix>schedule</mat-icon>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>event_available</mat-icon>
+            <h2>Configuración de Reservas</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Costo de Reserva</mat-label>
+              <input matInput type="number" formControlName="costo_reserva" placeholder="0.00">
+              <span matTextPrefix>$&nbsp;</span>
+              <span matTextSuffix>MXN</span>
+              <mat-icon matPrefix>attach_money</mat-icon>
+              <mat-hint>Ingresa 0 si es gratis</mat-hint>
+              <mat-error *ngIf="amenityForm.get('costo_reserva')?.invalid">
+                {{ getErrorMessage('costo_reserva') }}
+              </mat-error>
+            </mat-form-field>
+
+            <div class="toggle-options">
+              <mat-slide-toggle formControlName="disponible_reserva" color="primary">
+                <div class="toggle-content">
+                  <mat-icon>event_available</mat-icon>
+                  <div>
+                    <span class="toggle-label">Disponible para Reservas</span>
+                    <span class="toggle-description">Los residentes pueden reservar esta amenidad</span>
+                  </div>
+                </div>
+              </mat-slide-toggle>
+
+              <mat-slide-toggle formControlName="requiere_aprobacion" color="accent">
+                <div class="toggle-content">
+                  <mat-icon>approval</mat-icon>
+                  <div>
+                    <span class="toggle-label">Requiere Aprobación</span>
+                    <span class="toggle-description">Las reservas deben ser aprobadas por administración</span>
+                  </div>
+                </div>
+              </mat-slide-toggle>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>rule</mat-icon>
+            <h2>Reglas y Normativas</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Reglas de Uso (Opcional)</mat-label>
+            <textarea matInput formControlName="reglas" rows="4" 
+              placeholder="Especifica las reglas y normas para el uso de esta amenidad..."></textarea>
+            <mat-icon matPrefix>gavel</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <div class="preview-card" *ngIf="amenityForm.get('nombre')?.value">
+          <h3>
+            <mat-icon>visibility</mat-icon>
+            Vista Previa
+          </h3>
+          <div class="preview-content">
+            <div class="preview-item">
+              <span class="preview-label">Nombre:</span>
+              <span class="preview-value">{{ amenityForm.get('nombre')?.value }}</span>
+            </div>
+            <div class="preview-item">
+              <span class="preview-label">Tipo:</span>
+              <span class="preview-value">{{ amenityForm.get('tipo')?.value }}</span>
+            </div>
+            <div class="preview-item">
+              <span class="preview-label">Ubicación:</span>
+              <span class="preview-value">{{ amenityForm.get('ubicacion')?.value }}</span>
+            </div>
+            <div class="preview-item">
+              <span class="preview-label">Costo:</span>
+              <span class="preview-value">
+                {{ amenityForm.get('costo_reserva')?.value > 0 
+                   ? '$' + amenityForm.get('costo_reserva')?.value 
+                   : 'Gratis' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button mat-stroked-button type="button" (click)="onCancel()" [disabled]="isSaving">
+            <mat-icon>close</mat-icon>
+            Cancelar
+          </button>
+
+          <button mat-raised-button color="primary" type="submit" [disabled]="amenityForm.invalid || isSaving">
+            <mat-spinner *ngIf="isSaving" diameter="20"></mat-spinner>
+            <mat-icon *ngIf="!isSaving">{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+            <span *ngIf="!isSaving">{{ isEditMode ? 'Guardar Cambios' : 'Crear Amenidad' }}</span>
+          </button>
+        </div>
+      </form>
+    </mat-card>
+  </div>
+</div>

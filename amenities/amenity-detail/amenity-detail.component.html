@@ -1,0 +1,234 @@
+<div class="amenity-detail-container">
+  <!-- Header -->
+  <div class="page-header no-print">
+    <div class="header-content">
+      <button mat-icon-button class="back-button" routerLink="/amenities">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>home_work</mat-icon>
+          Detalle de la Amenidad
+        </h1>
+        <p class="page-subtitle">Información completa de la amenidad</p>
+      </div>
+
+      <div class="header-actions" *ngIf="amenity">
+        <button 
+          mat-raised-button 
+          color="primary"
+          (click)="onBooking()"
+          [disabled]="!(amenity.disponible_reserva ?? amenity.requiere_reserva)"
+        >
+          <mat-icon>event_available</mat-icon>
+          Reservar
+        </button>
+
+        <button 
+          mat-raised-button 
+          color="accent"
+          (click)="onEdit()"
+          [disabled]="!canEdit()"
+        >
+          <mat-icon>edit</mat-icon>
+          Editar
+        </button>
+
+        <button mat-button [matMenuTriggerFor]="menu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item>
+            <mat-icon>calendar_month</mat-icon>
+            <span>Ver Reservas</span>
+          </button>
+          <button mat-menu-item>
+            <mat-icon>print</mat-icon>
+            <span>Imprimir</span>
+          </button>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="onDelete()" [disabled]="!canDelete()" class="delete-option">
+            <mat-icon>delete</mat-icon>
+            <span>Eliminar Amenidad</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando información de la amenidad...</p>
+  </div>
+
+  <!-- Amenity Detail Content -->
+  <div class="detail-wrapper" *ngIf="!isLoading && amenity">
+    <!-- Main Info Card -->
+    <mat-card class="main-info-card">
+      <div class="info-header">
+        <div class="amenity-title-section">
+          <div class="type-icon">
+            <mat-icon>{{ getTypeIcon(amenity.tipo) }}</mat-icon>
+          </div>
+          <div class="title-content">
+            <h2>{{ amenity.nombre }}</h2>
+            <p class="amenity-location">
+              <mat-icon>location_on</mat-icon>
+              {{ amenity.ubicacion }}
+            </p>
+          </div>
+        </div>
+
+        <div class="status-section">
+          <mat-chip class="status-chip" [class.available]="amenity.estado === AmenityStatus.DISPONIBLE"
+            [class.occupied]="amenity.estado === AmenityStatus.OCUPADA"
+            [class.maintenance]="amenity.estado === AmenityStatus.MANTENIMIENTO"
+            [class.out]="amenity.estado === AmenityStatus.FUERA_SERVICIO">
+            {{ amenity.estado }}
+          </mat-chip>
+          <mat-chip class="type-chip">
+            {{ amenity.tipo }}
+          </mat-chip>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Description Section -->
+      <div class="description-section">
+        <h3>
+          <mat-icon>description</mat-icon>
+          Descripción
+        </h3>
+        <p>{{ amenity.descripcion }}</p>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Details Grid -->
+      <div class="details-grid">
+        <!-- Capacity -->
+        <div class="detail-card">
+          <h4>
+            <mat-icon>people</mat-icon>
+            Capacidad
+          </h4>
+          <div class="detail-value">
+            <span class="value-large">{{ amenity.capacidad_maxima || amenity.capacidad || '∞' }}</span>
+            <span class="value-label">{{ (amenity.capacidad_maxima || amenity.capacidad) ? 'Personas' : 'Sin límite' }}</span>
+          </div>
+        </div>
+
+        <!-- Schedule -->
+        <div class="detail-card">
+          <h4>
+            <mat-icon>schedule</mat-icon>
+            Horario
+          </h4>
+          <div class="detail-value" *ngIf="(amenity.horario_inicio || amenity.horario_apertura) && (amenity.horario_fin || amenity.horario_cierre)">
+            <span class="value-large">{{ amenity.horario_inicio || amenity.horario_apertura }} - {{ amenity.horario_fin || amenity.horario_cierre }}</span>
+            <span class="value-label">Horario de operación</span>
+          </div>
+          <div class="detail-value" *ngIf="!(amenity.horario_inicio || amenity.horario_apertura)">
+            <span class="value-large">24/7</span>
+            <span class="value-label">Disponible todo el día</span>
+          </div>
+        </div>
+
+        <!-- Cost -->
+        <div class="detail-card">
+          <h4>
+            <mat-icon>attach_money</mat-icon>
+            Costo de Reserva
+          </h4>
+          <div class="detail-value">
+            <span class="value-large" *ngIf="(amenity.costo_reserva ?? amenity.costo_uso) > 0">${{ amenity.costo_reserva ?? amenity.costo_uso | number:'1.2-2' }}</span>
+            <span class="value-large free" *ngIf="(amenity.costo_reserva ?? amenity.costo_uso) === 0">Gratis</span>
+            <span class="value-label">{{ (amenity.costo_reserva ?? amenity.costo_uso) > 0 ? 'MXN por reserva' : 'Sin costo' }}</span>
+          </div>
+        </div>
+
+        <!-- Booking Settings -->
+        <div class="detail-card">
+          <h4>
+            <mat-icon>settings</mat-icon>
+            Configuración
+          </h4>
+          <div class="settings-list">
+            <div class="setting-item">
+              <mat-icon [class.active]="amenity.disponible_reserva ?? amenity.requiere_reserva">
+                {{ (amenity.disponible_reserva ?? amenity.requiere_reserva) ? 'check_circle' : 'cancel' }}
+              </mat-icon>
+              <span>{{ (amenity.disponible_reserva ?? amenity.requiere_reserva) ? 'Reservas habilitadas' : 'Reservas deshabilitadas' }}</span>
+            </div>
+            <div class="setting-item">
+              <mat-icon [class.active]="amenity.requiere_aprobacion">
+                {{ amenity.requiere_aprobacion ? 'approval' : 'check' }}
+              </mat-icon>
+              <span>{{ amenity.requiere_aprobacion ? 'Requiere aprobación' : 'Aprobación automática' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rules Section -->
+      <div class="rules-section" *ngIf="amenity.reglas">
+        <mat-divider></mat-divider>
+        <h3>
+          <mat-icon>gavel</mat-icon>
+          Reglas de Uso
+        </h3>
+        <p>{{ amenity.reglas }}</p>
+      </div>
+    </mat-card>
+
+    <!-- Quick Actions Card -->
+    <mat-card class="actions-card no-print">
+      <h3>
+        <mat-icon>bolt</mat-icon>
+        Acciones Rápidas
+      </h3>
+      <div class="quick-actions">
+        <button mat-raised-button color="primary" (click)="onBooking()" [disabled]="!(amenity.disponible_reserva ?? amenity.requiere_reserva)">
+          <mat-icon>event_available</mat-icon>
+          Hacer Reserva
+        </button>
+        <button mat-stroked-button>
+          <mat-icon>calendar_month</mat-icon>
+          Ver Calendario
+        </button>
+        <button mat-stroked-button>
+          <mat-icon>list</mat-icon>
+          Historial de Reservas
+        </button>
+      </div>
+    </mat-card>
+
+    <!-- Metadata Card -->
+    <mat-card class="metadata-card no-print">
+      <h3>
+        <mat-icon>info</mat-icon>
+        Información del Sistema
+      </h3>
+      <mat-divider></mat-divider>
+
+      <div class="metadata-grid">
+        <div class="metadata-item">
+          <span class="metadata-label">ID de la Amenidad:</span>
+          <span class="metadata-value">#{{ amenity.id }}</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Creada:</span>
+          <span class="metadata-value">{{ amenity.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="metadata-item" *ngIf="amenity.updated_at">
+          <span class="metadata-label">Última Actualización:</span>
+          <span class="metadata-value">{{ amenity.updated_at | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+</div>

@@ -1,0 +1,50 @@
+<mat-card class="recent-activities-card">
+
+  <mat-card-content>
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="isLoading">
+      <mat-icon>hourglass_empty</mat-icon>
+      <p>Cargando actividades...</p>
+    </div>
+
+    <!-- Activities List -->
+    <div class="activities-list" *ngIf="!isLoading">
+      <div 
+        class="activity-item" 
+        *ngFor="let activity of activities; let last = last"
+        (click)="navigateToActivity(activity)"
+        [class.last-item]="last"
+      >
+        <div class="activity-timeline">
+          <div class="timeline-dot" [style.background]="activity.color"></div>
+          <div class="timeline-line" *ngIf="!last"></div>
+        </div>
+
+        <div class="activity-icon" [style.background]="activity.color + '20'">
+          <mat-icon [style.color]="activity.color">{{ activity.icon }}</mat-icon>
+        </div>
+
+        <div class="activity-content">
+          <div class="activity-header">
+            <h4 class="activity-title">{{ activity.title }}</h4>
+            <span class="activity-time">{{ getTimeAgo(activity.timestamp) }}</span>
+          </div>
+          <p class="activity-description">{{ activity.description }}</p>
+          <mat-chip 
+            *ngIf="activity.status" 
+            [class]="getStatusClass(activity.status)"
+            class="status-chip"
+          >
+            {{ activity.status }}
+          </mat-chip>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="activities.length === 0">
+        <mat-icon>inbox</mat-icon>
+        <p>No hay actividades recientes</p>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

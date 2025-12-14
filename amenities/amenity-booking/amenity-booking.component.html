@@ -1,0 +1,219 @@
+<div class="booking-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <button mat-icon-button class="back-button" [routerLink]="['/amenities', amenityId]">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>event_available</mat-icon>
+          Reservar Amenidad
+        </h1>
+        <p class="page-subtitle">Completa el formulario para realizar tu reserva</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando información...</p>
+  </div>
+
+  <!-- Booking Form -->
+  <div class="booking-wrapper" *ngIf="!isLoading && amenity">
+    <!-- Amenity Info Card -->
+    <mat-card class="amenity-info-card">
+      <div class="amenity-header">
+        <div class="amenity-icon">
+          <mat-icon>home_work</mat-icon>
+        </div>
+        <div class="amenity-details">
+          <h2>{{ amenity.nombre }}</h2>
+          <p class="amenity-location" *ngIf="amenity.ubicacion">
+            <mat-icon>location_on</mat-icon>
+            {{ amenity.ubicacion }}
+          </p>
+          <p class="amenity-type">{{ amenity.tipo }}</p>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="amenity-specs">
+        <div class="spec-item">
+          <mat-icon>people</mat-icon>
+          <div>
+            <span class="spec-label">Capacidad Máxima</span>
+            <span class="spec-value">{{ amenity.capacidad_maxima || amenity.capacidad || 'Sin límite' }}</span>
+          </div>
+        </div>
+
+        <div class="spec-item" *ngIf="(amenity.horario_inicio || amenity.horario_apertura) && (amenity.horario_fin || amenity.horario_cierre)">
+          <mat-icon>schedule</mat-icon>
+          <div>
+            <span class="spec-label">Horario</span>
+            <span class="spec-value">{{ amenity.horario_inicio || amenity.horario_apertura }} - {{ amenity.horario_fin || amenity.horario_cierre }}</span>
+          </div>
+        </div>
+
+        <div class="spec-item">
+          <mat-icon>attach_money</mat-icon>
+          <div>
+            <span class="spec-label">Costo</span>
+            <span class="spec-value" *ngIf="getCosto() > 0">${{ getCosto() | number:'1.2-2' }} MXN</span>
+            <span class="spec-value free" *ngIf="getCosto() === 0">Gratis</span>
+          </div>
+        </div>
+
+        <div class="spec-item" *ngIf="amenity.requiere_aprobacion">
+          <mat-icon>approval</mat-icon>
+          <div>
+            <span class="spec-label">Requiere Aprobación</span>
+            <span class="spec-value">Tu reserva será revisada por administración</span>
+          </div>
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Booking Form Card -->
+    <mat-card class="form-card">
+      <h3>
+        <mat-icon>event</mat-icon>
+        Datos de la Reserva
+      </h3>
+      <mat-divider></mat-divider>
+
+      <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()">
+        
+        <!-- Date & Time Section -->
+        <div class="form-section">
+          <h4>Fecha y Hora</h4>
+          
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha y Hora de Inicio</mat-label>
+              <input matInput [matDatepicker]="pickerInicio" formControlName="fecha_inicio">
+              <mat-datepicker-toggle matIconSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+              <mat-datepicker #pickerInicio></mat-datepicker>
+              <mat-icon matPrefix>event</mat-icon>
+              <mat-error *ngIf="bookingForm.get('fecha_inicio')?.invalid">
+                {{ getErrorMessage('fecha_inicio') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha y Hora de Fin</mat-label>
+              <input matInput [matDatepicker]="pickerFin" formControlName="fecha_fin">
+              <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
+              <mat-datepicker #pickerFin></mat-datepicker>
+              <mat-icon matPrefix>event_busy</mat-icon>
+              <mat-error *ngIf="bookingForm.get('fecha_fin')?.invalid">
+                {{ getErrorMessage('fecha_fin') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Attendees Section -->
+        <div class="form-section">
+          <h4>Información de Asistentes</h4>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Número de Personas</mat-label>
+            <input matInput type="number" formControlName="num_personas" min="1" 
+              [max]="amenity.capacidad_maxima || amenity.capacidad || 999">
+            <mat-icon matPrefix>people</mat-icon>
+            <mat-hint>Máximo: {{ amenity.capacidad_maxima || amenity.capacidad || 'Sin límite' }}</mat-hint>
+            <mat-error *ngIf="bookingForm.get('num_personas')?.invalid">
+              {{ getErrorMessage('num_personas') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Purpose Section -->
+        <div class="form-section">
+          <h4>Propósito de la Reserva</h4>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Describe el propósito</mat-label>
+            <textarea matInput formControlName="proposito" rows="4" 
+              placeholder="Ej: Reunión familiar, celebración de cumpleaños, evento deportivo..."></textarea>
+            <mat-icon matPrefix>description</mat-icon>
+            <mat-hint>Mínimo 10 caracteres</mat-hint>
+            <mat-error *ngIf="bookingForm.get('proposito')?.invalid">
+              {{ getErrorMessage('proposito') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="form-section">
+          <h4>Notas Adicionales (Opcional)</h4>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Comentarios o solicitudes especiales</mat-label>
+            <textarea matInput formControlName="notas" rows="3" 
+              placeholder="Cualquier información adicional que desees compartir..."></textarea>
+            <mat-icon matPrefix>note</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="summary-section" *ngIf="bookingForm.get('fecha_inicio')?.value && bookingForm.get('fecha_fin')?.value">
+          <h4>
+            <mat-icon>summarize</mat-icon>
+            Resumen de la Reserva
+          </h4>
+          <div class="summary-content">
+            <div class="summary-item">
+              <span class="summary-label">Amenidad:</span>
+              <span class="summary-value">{{ amenity.nombre }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Fecha de Inicio:</span>
+              <span class="summary-value">{{ bookingForm.get('fecha_inicio')?.value | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Fecha de Fin:</span>
+              <span class="summary-value">{{ bookingForm.get('fecha_fin')?.value | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Personas:</span>
+              <span class="summary-value">{{ bookingForm.get('num_personas')?.value }}</span>
+            </div>
+            <div class="summary-item total" *ngIf="getCosto() > 0">
+              <span class="summary-label">Total a Pagar:</span>
+              <span class="summary-value price">${{ getCosto() | number:'1.2-2' }} MXN</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Warning if requires approval -->
+        <div class="warning-box" *ngIf="amenity.requiere_aprobacion">
+          <mat-icon>info</mat-icon>
+          <div>
+            <strong>Nota importante:</strong>
+            <p>Esta reserva requiere aprobación de administración. Recibirás una notificación una vez que sea revisada.</p>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button mat-stroked-button type="button" (click)="onCancel()" [disabled]="isSaving">
+            <mat-icon>close</mat-icon>
+            Cancelar
+          </button>
+
+          <button mat-raised-button color="primary" type="submit" [disabled]="bookingForm.invalid || isSaving">
+            <mat-spinner *ngIf="isSaving" diameter="20"></mat-spinner>
+            <mat-icon *ngIf="!isSaving">event_available</mat-icon>
+            <span *ngIf="!isSaving">Confirmar Reserva</span>
+          </button>
+        </div>
+      </form>
+    </mat-card>
+  </div>
+</div>
