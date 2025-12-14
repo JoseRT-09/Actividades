@@ -418,6 +418,7 @@ exports.approveOrRejectReservation = async (req, res) => {
       include: [
         {
           model: Amenity,
+          as: 'amenidad',
           attributes: ['id', 'nombre']
         },
         {
