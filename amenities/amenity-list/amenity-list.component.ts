@@ -240,6 +240,10 @@ export class AmenityListComponent implements OnInit {
     return iconMap[status];
   }
 
+  isAdmin(): boolean {
+    return this.authService.isAdmin() || this.authService.isSuperAdmin();
+  }
+
   canEdit(): boolean {
     return this.authService.isAdmin();
   }
@@ -258,5 +262,9 @@ export class AmenityListComponent implements OnInit {
 
   getBookableCount(): number {
     return this.dataSource.data.filter(a => a.disponible_reserva ?? a.requiere_reserva).length;
+  }
+
+  getOutOfServiceCount(): number {
+    return this.dataSource.data.filter(a => a.estado === AmenityStatus.FUERA_SERVICIO).length;
   }
 }

@@ -11,7 +11,25 @@
       </div>
 
       <div class="header-actions">
-        <button mat-raised-button color="primary" routerLink="/amenities/new">
+        <button
+          *ngIf="isAdmin()"
+          mat-raised-button
+          color="accent"
+          routerLink="/amenities/reservations"
+          matTooltip="Gestionar solicitudes de reserva">
+          <mat-icon>event_note</mat-icon>
+          Ver Reservas
+        </button>
+        <button
+          *ngIf="!isAdmin()"
+          mat-raised-button
+          color="accent"
+          routerLink="/amenities/my-reservations"
+          matTooltip="Ver mis reservas">
+          <mat-icon>calendar_today</mat-icon>
+          Mis Reservas
+        </button>
+        <button mat-raised-button color="primary" routerLink="/amenities/new" *ngIf="canEdit()">
           <mat-icon>add</mat-icon>
           Nueva Amenidad
         </button>
@@ -98,11 +116,11 @@
         <span class="stat-label">Reservables</span>
       </div>
     </div>
-    <div class="stat-item maintenance">
-      <mat-icon>build</mat-icon>
+    <div class="stat-item out-of-service">
+      <mat-icon>cancel</mat-icon>
       <div class="stat-content">
-        <span class="stat-value">{{ (dataSource.data | filter: 'estado' : 'Mantenimiento').length }}</span>
-        <span class="stat-label">En Mantenimiento</span>
+        <span class="stat-value">{{ getOutOfServiceCount() }}</span>
+        <span class="stat-label">Fuera de Servicio</span>
       </div>
     </div>
   </div>
@@ -232,20 +250,13 @@
                   <mat-icon>edit</mat-icon>
                   <span>Editar</span>
                 </button>
-                <button mat-menu-item>
-                  <mat-icon>calendar_month</mat-icon>
-                  <span>Ver Reservas</span>
-                </button>
-                <button mat-menu-item>
-                  <mat-icon>print</mat-icon>
-                  <span>Imprimir</span>
-                </button>
-                <mat-divider></mat-divider>
-                <button 
-                  mat-menu-item 
+                <mat-divider *ngIf="canDelete()"></mat-divider>
+                <button
+                  mat-menu-item
                   (click)="onDelete(amenity)"
                   [disabled]="!canDelete()"
                   class="delete-option"
+                  *ngIf="canDelete()"
                 >
                   <mat-icon>delete</mat-icon>
                   <span>Eliminar</span>
