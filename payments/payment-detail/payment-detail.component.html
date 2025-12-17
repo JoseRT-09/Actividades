@@ -1,0 +1,294 @@
+<div class="payment-detail-container">
+  <!-- Header -->
+  <div class="page-header no-print">
+    <div class="header-content">
+      <button mat-icon-button class="back-button" routerLink="/payments">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>receipt</mat-icon>
+          Detalle del Pago
+        </h1>
+        <p class="page-subtitle">Información completa del recibo de pago</p>
+      </div>
+
+      <div class="header-actions" *ngIf="payment">
+        <button 
+          mat-raised-button 
+          color="primary"
+          (click)="onEdit()"
+          [disabled]="!canEdit()"
+        >
+          <mat-icon>edit</mat-icon>
+          Editar
+        </button>
+
+        <button 
+          mat-button 
+          [matMenuTriggerFor]="menu"
+        >
+          <mat-icon>more_vert</mat-icon>
+        </button>
+
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="printReceipt()">
+            <mat-icon>print</mat-icon>
+            <span>Imprimir Recibo</span>
+          </button>
+          <button mat-menu-item (click)="downloadPDF()">
+            <mat-icon>download</mat-icon>
+            <span>Descargar PDF</span>
+          </button>
+          <button mat-menu-item (click)="sendEmail()">
+            <mat-icon>email</mat-icon>
+            <span>Enviar por Email</span>
+          </button>
+          <mat-divider></mat-divider>
+          <button 
+            mat-menu-item 
+            (click)="onDelete()"
+            [disabled]="!canDelete()"
+            class="delete-option"
+          >
+            <mat-icon>delete</mat-icon>
+            <span>Eliminar Pago</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando información del pago...</p>
+  </div>
+
+  <!-- Payment Detail Content -->
+  <div class="detail-wrapper" *ngIf="!isLoading && payment">
+    <!-- Receipt Card -->
+    <mat-card class="receipt-card">
+      <!-- Receipt Header -->
+      <div class="receipt-header">
+        <div class="company-info">
+          <div class="logo">
+            <mat-icon>home</mat-icon>
+          </div>
+          <div class="company-details">
+            <h2>ResidenceHub</h2>
+            <p>Sistema de Administración de Residencias</p>
+          </div>
+        </div>
+        <div class="receipt-number">
+          <span class="label">Recibo N°</span>
+          <span class="number">#{{ payment.id.toString().padStart(6, '0') }}</span>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Status Banner -->
+      <div class="status-banner" [class]="getStatusClass(payment.estado)">
+        <mat-icon>{{ getStatusIcon(payment.estado) }}</mat-icon>
+        <span>{{ payment.estado }}</span>
+      </div>
+
+      <!-- Payment Info -->
+      <div class="payment-info-section">
+        <h3>Información del Pago</h3>
+        
+        <div class="info-grid">
+          <div class="info-item">
+            <mat-icon>event</mat-icon>
+            <div class="info-content">
+              <span class="info-label">Fecha de Pago</span>
+              <span class="info-value">{{ payment.fecha_pago | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <mat-icon>{{ getMethodIcon(payment.metodo_pago) }}</mat-icon>
+            <div class="info-content">
+              <span class="info-label">Método de Pago</span>
+              <span class="info-value">{{ payment.metodo_pago }}</span>
+            </div>
+          </div>
+
+          <div class="info-item" *ngIf="payment.referencia">
+            <mat-icon>tag</mat-icon>
+            <div class="info-content">
+              <span class="info-label">Referencia</span>
+              <span class="info-value">{{ payment.referencia }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- User Info -->
+      <div class="user-info-section">
+        <h3>Información del Usuario</h3>
+        
+        <div class="user-card" *ngIf="payment.usuario">
+          <div class="user-avatar">
+            {{ getUserInitials() }}
+          </div>
+          <div class="user-details">
+            <h4>{{ getUserName() }}</h4>
+            <p class="user-email">
+              <mat-icon>email</mat-icon>
+              {{ payment.usuario.email }}
+            </p>
+            <p class="user-phone" *ngIf="payment.usuario.telefono">
+              <mat-icon>phone</mat-icon>
+              {{ payment.usuario.telefono }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Service Cost Info -->
+      <div class="cost-info-section" *ngIf="payment.costoServicio">
+        <h3>Concepto Pagado</h3>
+        
+        <div class="cost-card">
+          <div class="cost-header">
+            <mat-icon>description</mat-icon>
+            <h4>{{ payment.costoServicio.concepto }}</h4>
+          </div>
+          
+          <p class="cost-description" *ngIf="payment.costoServicio.descripcion">
+            {{ payment.costoServicio.descripcion }}
+          </p>
+
+          <div class="cost-details">
+            <div class="cost-detail-item" *ngIf="payment.costoServicio.residencia">
+              <mat-icon>home</mat-icon>
+              <span>Unidad {{ payment.costoServicio.residencia.numero_unidad }}</span>
+              <span *ngIf="payment.costoServicio.residencia.bloque"> - Bloque {{ payment.costoServicio.residencia.bloque }}</span>
+            </div>
+            <div class="cost-detail-item">
+              <mat-icon>calendar_today</mat-icon>
+              <span>Periodo: {{ payment.costoServicio.periodo }}</span>
+            </div>
+            <div class="cost-detail-item">
+              <mat-icon>event_busy</mat-icon>
+              <span>Vencimiento: {{ payment.costoServicio.fecha_vencimiento | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Amount Display -->
+      <div class="amount-section">
+        <div class="amount-row">
+          <span class="amount-label">Monto Pagado:</span>
+          <span class="amount-value">${{ payment.monto | number:'1.2-2' }}</span>
+        </div>
+        <div class="amount-row total">
+          <span class="amount-label">Total:</span>
+          <span class="amount-value">${{ payment.monto | number:'1.2-2' }} MXN</span>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="notes-section" *ngIf="payment.notas">
+        <mat-divider></mat-divider>
+        <h3>Notas</h3>
+        <p>{{ payment.notas }}</p>
+      </div>
+
+      <!-- Receipt Footer -->
+      <div class="receipt-footer">
+        <mat-divider></mat-divider>
+        <div class="footer-content">
+          <p class="thank-you">¡Gracias por su pago!</p>
+          <p class="footer-info">Este es un comprobante de pago generado electrónicamente.</p>
+          <div class="timestamps">
+            <span>Generado: {{ payment.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+            <span *ngIf="payment.updated_at !== payment.created_at"> | Actualizado: {{ payment.updated_at | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Metadata Card (No print) -->
+    <mat-card class="metadata-card no-print">
+      <h3>
+        <mat-icon>info</mat-icon>
+        Información del Sistema
+      </h3>
+      <mat-divider></mat-divider>
+
+      <div class="metadata-grid">
+        <div class="metadata-item">
+          <span class="metadata-label">ID del Pago:</span>
+          <span class="metadata-value">#{{ payment.id }}</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Creado:</span>
+          <span class="metadata-value">{{ payment.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Última Actualización:</span>
+          <span class="metadata-value">{{ payment.updated_at | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Quick Actions (No print) -->
+    <mat-card class="actions-card no-print" *ngIf="payment.estado === 'Completado'">
+      <h3>
+        <mat-icon>touch_app</mat-icon>
+        Acciones Rápidas
+      </h3>
+      <mat-divider></mat-divider>
+
+      <div class="actions-grid">
+        <button 
+          mat-raised-button 
+          color="primary"
+          (click)="printReceipt()"
+          class="action-button"
+        >
+          <mat-icon>print</mat-icon>
+          <div class="button-content">
+            <span class="button-title">Imprimir Recibo</span>
+            <span class="button-description">Genera una copia física</span>
+          </div>
+        </button>
+
+        <button 
+          mat-stroked-button
+          (click)="downloadPDF()"
+          class="action-button"
+        >
+          <mat-icon>download</mat-icon>
+          <div class="button-content">
+            <span class="button-title">Descargar PDF</span>
+            <span class="button-description">Guarda el comprobante</span>
+          </div>
+        </button>
+
+        <button 
+          mat-stroked-button
+          (click)="sendEmail()"
+          class="action-button"
+        >
+          <mat-icon>email</mat-icon>
+          <div class="button-content">
+            <span class="button-title">Enviar por Email</span>
+            <span class="button-description">Envía al usuario</span>
+          </div>
+        </button>
+      </div>
+    </mat-card>
+  </div>
+</div>

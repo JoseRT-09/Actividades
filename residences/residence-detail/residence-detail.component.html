@@ -1,0 +1,399 @@
+<div class="residence-detail-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <button mat-icon-button class="back-button" routerLink="/residences">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>home</mat-icon>
+          Detalle de Residencia
+        </h1>
+        <p class="page-subtitle">Información completa de la unidad</p>
+      </div>
+
+      <div class="header-actions" *ngIf="residence">
+        <button 
+          mat-raised-button 
+          color="primary"
+          (click)="onEdit()"
+          [disabled]="!canEdit()"
+        >
+          <mat-icon>edit</mat-icon>
+          Editar
+        </button>
+
+        <button 
+          mat-raised-button 
+          color="accent"
+          (click)="onAssign()"
+          [disabled]="!canEdit()"
+        >
+          <mat-icon>person_add</mat-icon>
+          Asignar
+        </button>
+
+        <button 
+          mat-button 
+          [matMenuTriggerFor]="menu"
+        >
+          <mat-icon>more_vert</mat-icon>
+        </button>
+
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item [routerLink]="['/service-costs']" [queryParams]="{residencia_id: residence.id}">
+            <mat-icon>receipt</mat-icon>
+            <span>Ver Costos</span>
+          </button>
+          <button mat-menu-item [routerLink]="['/payments']" [queryParams]="{residencia_id: residence.id}">
+            <mat-icon>payment</mat-icon>
+            <span>Ver Pagos</span>
+          </button>
+          <button mat-menu-item (click)="printDetails()">
+            <mat-icon>print</mat-icon>
+            <span>Imprimir</span>
+          </button>
+          <button mat-menu-item (click)="exportDetails()">
+            <mat-icon>download</mat-icon>
+            <span>Exportar</span>
+          </button>
+          <mat-divider></mat-divider>
+          <button 
+            mat-menu-item 
+            (click)="onDelete()"
+            [disabled]="!canDelete()"
+            class="delete-option"
+          >
+            <mat-icon>delete</mat-icon>
+            <span>Eliminar Residencia</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando información de la residencia...</p>
+  </div>
+
+  <!-- Residence Detail Content -->
+  <div class="detail-wrapper" *ngIf="!isLoading && residence">
+    <!-- Main Info Card -->
+    <mat-card class="main-info-card">
+      <div class="info-header">
+        <div class="unit-badge">
+          <mat-icon>home</mat-icon>
+          <div class="unit-info">
+            <h2>Unidad {{ residence.numero_unidad }}</h2>
+            <p *ngIf="residence.bloque">Bloque {{ residence.bloque }}</p>
+          </div>
+        </div>
+
+        <mat-chip [class]="getStatusClass(residence.estado)" class="status-chip-large">
+          <mat-icon>{{ getStatusIcon(residence.estado) }}</mat-icon>
+          {{ residence.estado }}
+        </mat-chip>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-item" *ngIf="residence.piso">
+          <mat-icon>layers</mat-icon>
+          <div class="info-details">
+            <span class="info-label">Piso</span>
+            <span class="info-value">{{ residence.piso }}</span>
+          </div>
+        </div>
+
+        <div class="info-item" *ngIf="residence.area_m2">
+          <mat-icon>square_foot</mat-icon>
+          <div class="info-details">
+            <span class="info-label">Área Construida</span>
+            <span class="info-value">{{ residence.area_m2 }} m²</span>
+          </div>
+        </div>
+
+        <div class="info-item" *ngIf="residence.habitaciones">
+          <mat-icon>bed</mat-icon>
+          <div class="info-details">
+            <span class="info-label">Habitaciones</span>
+            <span class="info-value">{{ residence.habitaciones }}</span>
+          </div>
+        </div>
+
+        <div class="info-item" *ngIf="residence.banos">
+          <mat-icon>bathtub</mat-icon>
+          <div class="info-details">
+            <span class="info-label">Baños</span>
+            <span class="info-value">{{ residence.banos }}</span>
+          </div>
+        </div>
+
+        <div class="info-item" *ngIf="residence.estacionamientos">
+          <mat-icon>local_parking</mat-icon>
+          <div class="info-details">
+            <span class="info-label">Estacionamientos</span>
+            <span class="info-value">{{ residence.estacionamientos }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <mat-icon>calendar_today</mat-icon>
+          <div class="info-details">
+            <span class="info-label">Fecha de Registro</span>
+            <span class="info-value">{{ residence.created_at | date: 'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <mat-card 
+        *ngFor="let stat of stats" 
+        class="stat-card"
+        [style.border-top]="'4px solid ' + stat.color"
+      >
+        <div class="stat-icon" [style.background]="stat.color + '20'">
+          <mat-icon [style.color]="stat.color">{{ stat.icon }}</mat-icon>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-value">{{ stat.value }}</h3>
+          <p class="stat-label">{{ stat.label }}</p>
+        </div>
+      </mat-card>
+    </div>
+
+    <!-- Tabs Content -->
+    <mat-card class="tabs-card">
+      <mat-tab-group animationDuration="300ms" class="residence-tabs">
+        
+        <!-- Residentes -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>people</mat-icon>
+            Residentes
+          </ng-template>
+          
+          <div class="tab-content">
+            <!-- Propietario -->
+            <div class="resident-section">
+              <h3>
+                <mat-icon>account_circle</mat-icon>
+                Propietario
+              </h3>
+              <div class="resident-card" *ngIf="residence.dueno">
+                <div class="resident-avatar">
+                  {{ getUserInitials(residence.dueno.nombre, residence.dueno.apellido) }}
+                </div>
+                <div class="resident-info">
+                  <h4>{{ getOwnerName(residence) }}</h4>
+                  <p class="resident-email">
+                    <mat-icon>email</mat-icon>
+                    {{ residence.dueno.email }}
+                  </p>
+                  <p class="resident-phone" *ngIf="residence.dueno.telefono">
+                    <mat-icon>phone</mat-icon>
+                    {{ residence.dueno.telefono }}
+                  </p>
+                </div>
+                <button 
+                  mat-icon-button 
+                  [routerLink]="['/users', residence.dueno.id]"
+                  matTooltip="Ver perfil"
+                >
+                  <mat-icon>arrow_forward</mat-icon>
+                </button>
+              </div>
+              <div class="empty-state" *ngIf="!residence.dueno">
+                <mat-icon>person_off</mat-icon>
+                <p>Sin propietario asignado</p>
+              </div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <!-- Residente Actual -->
+            <div class="resident-section">
+              <h3>
+                <mat-icon>person</mat-icon>
+                Residente Actual
+              </h3>
+              <div class="resident-card" *ngIf="residence.residenteActual">
+                <div class="resident-avatar">
+                  {{ getUserInitials(residence.residenteActual.nombre, residence.residenteActual.apellido) }}
+                </div>
+                <div class="resident-info">
+                  <h4>{{ getResidentName(residence) }}</h4>
+                  <p class="resident-email">
+                    <mat-icon>email</mat-icon>
+                    {{ residence.residenteActual.email }}
+                  </p>
+                  <p class="resident-phone" *ngIf="residence.residenteActual.telefono">
+                    <mat-icon>phone</mat-icon>
+                    {{ residence.residenteActual.telefono }}
+                  </p>
+                </div>
+                <button 
+                  mat-icon-button 
+                  [routerLink]="['/users', residence.residenteActual.id]"
+                  matTooltip="Ver perfil"
+                >
+                  <mat-icon>arrow_forward</mat-icon>
+                </button>
+              </div>
+              <div class="empty-state" *ngIf="!residence.residenteActual">
+                <mat-icon>home_work</mat-icon>
+                <p>Sin residente asignado</p>
+                <button 
+                  mat-raised-button 
+                  color="primary" 
+                  (click)="onAssign()"
+                  [disabled]="!canEdit()"
+                >
+                  <mat-icon>person_add</mat-icon>
+                  Asignar Residente
+                </button>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Historial de Asignaciones -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>history</mat-icon>
+            Historial de Asignaciones
+          </ng-template>
+          
+          <div class="tab-content">
+            <div class="loading-state" *ngIf="isLoadingHistory">
+              <mat-spinner diameter="40"></mat-spinner>
+              <p>Cargando historial...</p>
+            </div>
+
+            <div *ngIf="!isLoadingHistory && reassignmentHistory.length > 0">
+              <div class="table-container">
+                <table mat-table [dataSource]="reassignmentHistory" class="history-table">
+                  
+                  <!-- Fecha Column -->
+                  <ng-container matColumnDef="fecha">
+                    <th mat-header-cell *matHeaderCellDef>Fecha</th>
+                    <td mat-cell *matCellDef="let item">
+                      {{ item.fecha_cambio | date: 'dd/MM/yyyy HH:mm' }}
+                    </td>
+                  </ng-container>
+
+                  <!-- Tipo Column -->
+                  <ng-container matColumnDef="tipo">
+                    <th mat-header-cell *matHeaderCellDef>Tipo</th>
+                    <td mat-cell *matCellDef="let item">
+                      <mat-chip class="type-chip">
+                        {{ getReassignmentTypeName(item.tipo_cambio) }}
+                      </mat-chip>
+                    </td>
+                  </ng-container>
+
+                  <!-- Residente Anterior Column -->
+                  <ng-container matColumnDef="residente_anterior">
+                    <th mat-header-cell *matHeaderCellDef>Residente Anterior</th>
+                    <td mat-cell *matCellDef="let item">
+                      <span *ngIf="item.residenteAnterior">
+                        {{ item.residenteAnterior.nombre }} {{ item.residenteAnterior.apellido }}
+                      </span>
+                      <span class="no-data" *ngIf="!item.residenteAnterior">-</span>
+                    </td>
+                  </ng-container>
+
+                  <!-- Residente Nuevo Column -->
+                  <ng-container matColumnDef="residente_nuevo">
+                    <th mat-header-cell *matHeaderCellDef>Residente Nuevo</th>
+                    <td mat-cell *matCellDef="let item">
+                      <span *ngIf="item.residenteNuevo">
+                        {{ item.residenteNuevo.nombre }} {{ item.residenteNuevo.apellido }}
+                      </span>
+                      <span class="no-data" *ngIf="!item.residenteNuevo">-</span>
+                    </td>
+                  </ng-container>
+
+                  <!-- Motivo Column -->
+                  <ng-container matColumnDef="motivo">
+                    <th mat-header-cell *matHeaderCellDef>Motivo</th>
+                    <td mat-cell *matCellDef="let item">
+                      {{ item.motivo || 'Sin especificar' }}
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                </table>
+              </div>
+            </div>
+
+            <div class="empty-state" *ngIf="!isLoadingHistory && reassignmentHistory.length === 0">
+              <mat-icon>inbox</mat-icon>
+              <p>No hay historial de asignaciones</p>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Información Adicional -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>description</mat-icon>
+            Información Adicional
+          </ng-template>
+          
+          <div class="tab-content">
+            <div class="additional-info">
+              <div class="info-block" *ngIf="residence.descripcion">
+                <h3>
+                  <mat-icon>article</mat-icon>
+                  Descripción
+                </h3>
+                <p>{{ residence.descripcion }}</p>
+              </div>
+
+              <div class="info-block" *ngIf="residence.notas_adicionales">
+                <h3>
+                  <mat-icon>notes</mat-icon>
+                  Notas Adicionales
+                </h3>
+                <p>{{ residence.notas_adicionales }}</p>
+              </div>
+
+              <div class="info-block">
+                <h3>
+                  <mat-icon>info</mat-icon>
+                  Metadatos del Sistema
+                </h3>
+                <div class="metadata-grid">
+                  <div class="metadata-item">
+                    <span class="metadata-label">ID de Residencia:</span>
+                    <span class="metadata-value">#{{ residence.id }}</span>
+                  </div>
+                  <div class="metadata-item">
+                    <span class="metadata-label">Creada:</span>
+                    <span class="metadata-value">{{ residence.created_at | date: 'dd/MM/yyyy HH:mm' }}</span>
+                  </div>
+                  <div class="metadata-item">
+                    <span class="metadata-label">Última Actualización:</span>
+                    <span class="metadata-value">{{ residence.updated_at | date: 'dd/MM/yyyy HH:mm' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="empty-state" *ngIf="!residence.descripcion && !residence.notas_adicionales">
+                <mat-icon>description</mat-icon>
+                <p>No hay información adicional registrada</p>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card>
+  </div>
+</div>

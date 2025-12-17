@@ -1,0 +1,382 @@
+<div class="residence-form-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <button mat-icon-button class="back-button" routerLink="/residences">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>{{ isEditMode ? 'edit' : 'add_home' }}</mat-icon>
+          {{ isEditMode ? 'Editar Residencia' : 'Nueva Residencia' }}
+        </h1>
+        <p class="page-subtitle">
+          {{ isEditMode ? 'Modifica los datos de la residencia' : 'Completa el formulario para registrar una nueva unidad' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando datos...</p>
+  </div>
+
+  <!-- Form -->
+  <div class="form-wrapper" *ngIf="!isLoading">
+    <mat-card class="form-card">
+      <form [formGroup]="residenceForm" (ngSubmit)="onSubmit()">
+        
+        <!-- Información Básica -->
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>info</mat-icon>
+            <h2>Información Básica</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="form-grid">
+            <!-- Número de Unidad -->
+            <mat-form-field appearance="outline">
+              <mat-label>Número de Unidad</mat-label>
+              <input 
+                matInput 
+                formControlName="numero_unidad"
+                placeholder="101, A-202, etc."
+              >
+              <mat-icon matPrefix>home</mat-icon>
+              <mat-error *ngIf="residenceForm.get('numero_unidad')?.invalid">
+                {{ getErrorMessage('numero_unidad') }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Bloque -->
+            <mat-form-field appearance="outline">
+              <mat-label>Bloque (Opcional)</mat-label>
+              <input 
+                matInput 
+                formControlName="bloque"
+                placeholder="A, B, Torre Norte..."
+              >
+              <mat-icon matPrefix>apartment</mat-icon>
+            </mat-form-field>
+
+            <!-- Piso -->
+            <mat-form-field appearance="outline">
+              <mat-label>Piso (Opcional)</mat-label>
+              <input 
+                matInput 
+                type="number"
+                formControlName="piso"
+                placeholder="1, 2, 3..."
+              >
+              <mat-icon matPrefix>layers</mat-icon>
+              <mat-hint>Solo números enteros</mat-hint>
+              <mat-error *ngIf="residenceForm.get('piso')?.invalid">
+                {{ getErrorMessage('piso') }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Estado -->
+            <mat-form-field appearance="outline">
+              <mat-label>Estado</mat-label>
+              <mat-select formControlName="estado">
+                <mat-option *ngFor="let estado of estados" [value]="estado.value">
+                  <div class="select-option">
+                    <mat-icon [style.color]="estado.color">{{ estado.icon }}</mat-icon>
+                    <div class="option-content">
+                      <span class="option-label">{{ estado.label }}</span>
+                      <span class="option-description">{{ estado.description }}</span>
+                    </div>
+                  </div>
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>check_circle</mat-icon>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Características -->
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>straighten</mat-icon>
+            <h2>Características</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="form-grid">
+            <!-- Área -->
+            <mat-form-field appearance="outline">
+              <mat-label>Área (m²)</mat-label>
+              <input 
+                matInput 
+                type="number"
+                step="0.01"
+                formControlName="area_m2"
+                placeholder="85.5"
+              >
+              <mat-icon matPrefix>square_foot</mat-icon>
+              <span matSuffix>m²</span>
+              <mat-hint>Área construida en metros cuadrados</mat-hint>
+              <mat-error *ngIf="residenceForm.get('area_m2')?.invalid">
+                {{ getErrorMessage('area_m2') }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Habitaciones -->
+            <mat-form-field appearance="outline">
+              <mat-label>Habitaciones</mat-label>
+              <input 
+                matInput 
+                type="number"
+                formControlName="habitaciones"
+                placeholder="2, 3, 4..."
+              >
+              <mat-icon matPrefix>bed</mat-icon>
+              <mat-hint>Número de recámaras</mat-hint>
+              <mat-error *ngIf="residenceForm.get('habitaciones')?.invalid">
+                {{ getErrorMessage('habitaciones') }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Baños -->
+            <mat-form-field appearance="outline">
+              <mat-label>Baños</mat-label>
+              <input 
+                matInput 
+                type="number"
+                step="0.5"
+                formControlName="banos"
+                placeholder="1, 1.5, 2..."
+              >
+              <mat-icon matPrefix>bathtub</mat-icon>
+              <mat-hint>Puede incluir medios baños (ej: 1.5)</mat-hint>
+              <mat-error *ngIf="residenceForm.get('banos')?.invalid">
+                {{ getErrorMessage('banos') }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Estacionamientos -->
+            <mat-form-field appearance="outline">
+              <mat-label>Estacionamientos</mat-label>
+              <input 
+                matInput 
+                type="number"
+                formControlName="estacionamientos"
+                placeholder="1, 2, 3..."
+              >
+              <mat-icon matPrefix>local_parking</mat-icon>
+              <mat-hint>Número de cajones asignados</mat-hint>
+              <mat-error *ngIf="residenceForm.get('estacionamientos')?.invalid">
+                {{ getErrorMessage('estacionamientos') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Información Comercial -->
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>attach_money</mat-icon>
+            <h2>Información Comercial</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="form-grid">
+            <!-- Tipo de Propiedad -->
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo de Propiedad (Opcional)</mat-label>
+              <mat-select formControlName="tipo_propiedad">
+                <mat-option [value]="null">Sin especificar</mat-option>
+                <mat-option *ngFor="let tipo of tiposPropiedad" [value]="tipo.value">
+                  <div class="select-option">
+                    <mat-icon>{{ tipo.icon }}</mat-icon>
+                    <div class="option-content">
+                      <span class="option-label">{{ tipo.label }}</span>
+                      <span class="option-description">{{ tipo.description }}</span>
+                    </div>
+                  </div>
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>business</mat-icon>
+              <mat-hint>Indica si es para renta o compra</mat-hint>
+            </mat-form-field>
+
+            <!-- Precio -->
+            <mat-form-field appearance="outline">
+              <mat-label>{{ getPrecioLabel() }} (Opcional)</mat-label>
+              <input
+                matInput
+                type="number"
+                step="0.01"
+                formControlName="precio"
+                placeholder="15000.00"
+              >
+              <mat-icon matPrefix>payments</mat-icon>
+              <span matSuffix>$</span>
+              <mat-hint>
+                {{ residenceForm.get('tipo_propiedad')?.value === 'Renta' ? 'Monto mensual de renta' :
+                   residenceForm.get('tipo_propiedad')?.value === 'Compra' ? 'Precio de venta' :
+                   'Precio según tipo de propiedad' }}
+              </mat-hint>
+              <mat-error *ngIf="residenceForm.get('precio')?.invalid">
+                {{ getErrorMessage('precio') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Asignaciones -->
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>people</mat-icon>
+            <h2>Asignaciones de Residentes</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="form-grid">
+            <!-- Dueño -->
+            <mat-form-field appearance="outline">
+              <mat-label>Propietario (Opcional)</mat-label>
+              <mat-select formControlName="dueno_id">
+                <mat-option [value]="null">Sin asignar</mat-option>
+                <mat-option *ngFor="let user of users" [value]="user.id">
+                  {{ user.nombre }} {{ user.apellido }} - {{ user.email }}
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>account_circle</mat-icon>
+              <mat-hint>Dueño legal de la propiedad</mat-hint>
+            </mat-form-field>
+
+            <!-- Residente Actual -->
+            <mat-form-field appearance="outline">
+              <mat-label>Residente Actual (Opcional)</mat-label>
+              <mat-select formControlName="residente_actual_id">
+                <mat-option [value]="null">Sin asignar</mat-option>
+                <mat-option *ngFor="let user of users" [value]="user.id">
+                  {{ user.nombre }} {{ user.apellido }} - {{ user.email }}
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>person</mat-icon>
+              <mat-hint>Persona que actualmente habita la unidad</mat-hint>
+            </mat-form-field>
+
+            <!-- Administrador -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Administrador Asignado (Opcional)</mat-label>
+              <mat-select formControlName="administrador_id">
+                <mat-option [value]="null">Sin asignar</mat-option>
+                <mat-option *ngFor="let user of users" [value]="user.id">
+                  {{ user.nombre }} {{ user.apellido }} - {{ user.email }}
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>admin_panel_settings</mat-icon>
+              <mat-hint>Administrador responsable de esta unidad</mat-hint>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Información Adicional -->
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>description</mat-icon>
+            <h2>Información Adicional</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="form-grid">
+            <!-- Descripción -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Descripción (Opcional)</mat-label>
+              <textarea 
+                matInput 
+                formControlName="descripcion"
+                rows="3"
+                placeholder="Características especiales, ubicación, vista..."
+              ></textarea>
+              <mat-icon matPrefix>article</mat-icon>
+              <mat-hint>Descripción general de la unidad</mat-hint>
+            </mat-form-field>
+
+            <!-- Notas Adicionales -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Notas Adicionales (Opcional)</mat-label>
+              <textarea 
+                matInput 
+                formControlName="notas_adicionales"
+                rows="3"
+                placeholder="Observaciones internas, restricciones, pendientes..."
+              ></textarea>
+              <mat-icon matPrefix>notes</mat-icon>
+              <mat-hint>Notas internas para el equipo administrativo</mat-hint>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Preview Card -->
+        <div class="preview-card" *ngIf="residenceForm.get('numero_unidad')?.value">
+          <h3>
+            <mat-icon>visibility</mat-icon>
+            Vista Previa
+          </h3>
+          <div class="preview-content">
+            <div class="preview-item">
+              <mat-icon>home</mat-icon>
+              <span>Unidad {{ residenceForm.get('numero_unidad')?.value }}</span>
+            </div>
+            <div class="preview-item" *ngIf="residenceForm.get('bloque')?.value">
+              <mat-icon>apartment</mat-icon>
+              <span>Bloque {{ residenceForm.get('bloque')?.value }}</span>
+            </div>
+            <div class="preview-item" *ngIf="residenceForm.get('area_m2')?.value">
+              <mat-icon>square_foot</mat-icon>
+              <span>{{ residenceForm.get('area_m2')?.value }} m²</span>
+            </div>
+            <div class="preview-item" *ngIf="residenceForm.get('habitaciones')?.value">
+              <mat-icon>bed</mat-icon>
+              <span>{{ residenceForm.get('habitaciones')?.value }} hab.</span>
+            </div>
+            <div class="preview-item" *ngIf="residenceForm.get('banos')?.value">
+              <mat-icon>bathtub</mat-icon>
+              <span>{{ residenceForm.get('banos')?.value }} baños</span>
+            </div>
+            <div class="preview-status">
+              <mat-chip 
+                [style.background]="getStatusColor(residenceForm.get('estado')?.value) + '20'"
+                [style.color]="getStatusColor(residenceForm.get('estado')?.value)"
+              >
+                {{ residenceForm.get('estado')?.value }}
+              </mat-chip>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button 
+            mat-stroked-button 
+            type="button"
+            (click)="onCancel()"
+            [disabled]="isSaving"
+          >
+            <mat-icon>close</mat-icon>
+            Cancelar
+          </button>
+
+          <button 
+            mat-raised-button 
+            color="primary"
+            type="submit"
+            [disabled]="residenceForm.invalid || isSaving"
+          >
+            <mat-spinner *ngIf="isSaving" diameter="20"></mat-spinner>
+            <mat-icon *ngIf="!isSaving">{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+            <span *ngIf="!isSaving">{{ isEditMode ? 'Guardar Cambios' : 'Crear Residencia' }}</span>
+          </button>
+        </div>
+      </form>
+    </mat-card>
+  </div>
+</div>

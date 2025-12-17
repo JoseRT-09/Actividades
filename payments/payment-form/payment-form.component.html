@@ -1,0 +1,275 @@
+<div class="payment-form-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <button mat-icon-button class="back-button" routerLink="/payments">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>{{ isEditMode ? 'edit' : 'add' }}</mat-icon>
+          {{ isEditMode ? 'Editar Pago' : 'Registrar Pago' }}
+        </h1>
+        <p class="page-subtitle">
+          {{ isEditMode ? 'Modifica los datos del pago' : 'Completa el formulario para registrar un nuevo pago' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando datos...</p>
+  </div>
+
+  <!-- Form -->
+  <div class="form-wrapper" *ngIf="!isLoading">
+    <mat-card class="form-card">
+      <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()">
+        
+        <!-- Información del Pago -->
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>info</mat-icon>
+            <h2>Información del Pago</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="form-grid">
+            <!-- Usuario -->
+            <mat-form-field appearance="outline">
+              <mat-label>Usuario que Paga</mat-label>
+              <mat-select formControlName="usuario_id">
+                <mat-option *ngFor="let user of users" [value]="user.id">
+                  <div class="user-option">
+                    <div class="user-avatar-small">
+                      {{ user.nombre.charAt(0) }}{{ user.apellido.charAt(0) }}
+                    </div>
+                    <span>{{ user.nombre }} {{ user.apellido }}</span>
+                  </div>
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>person</mat-icon>
+              <mat-error *ngIf="paymentForm.get('usuario_id')?.invalid">
+                {{ getErrorMessage('usuario_id') }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Costo de Servicio -->
+            <mat-form-field appearance="outline">
+              <mat-label>Costo de Servicio</mat-label>
+              <mat-select formControlName="costo_servicio_id">
+                <mat-option *ngFor="let cost of serviceCosts" [value]="cost.id">
+                  <div class="cost-option">
+                    <div class="cost-details">
+                      <span class="cost-name">{{ cost.concepto }}</span>
+                      <span class="cost-amount">${{ cost.monto | number:'1.2-2' }}</span>
+                    </div>
+                    <span class="cost-residence" *ngIf="cost.residencia">
+                      Unidad {{ cost.residencia.numero_unidad }}
+                    </span>
+                  </div>
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>receipt</mat-icon>
+              <mat-hint>Selecciona el concepto a pagar</mat-hint>
+              <mat-error *ngIf="paymentForm.get('costo_servicio_id')?.invalid">
+                {{ getErrorMessage('costo_servicio_id') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Detalles del Costo Seleccionado -->
+        <div class="cost-info-card" *ngIf="selectedCost">
+          <h3>
+            <mat-icon>info</mat-icon>
+            Información del Costo Seleccionado
+          </h3>
+          <mat-divider></mat-divider>
+          <div class="cost-info-grid">
+            <div class="info-item">
+              <span class="info-label">Concepto:</span>
+              <span class="info-value">{{ selectedCost.concepto }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Monto Original:</span>
+              <span class="info-value amount">${{ selectedCost.monto | number:'1.2-2' }}</span>
+            </div>
+            <div class="info-item" *ngIf="selectedCost.descripcion">
+              <span class="info-label">Descripción:</span>
+              <span class="info-value">{{ selectedCost.descripcion }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Vencimiento:</span>
+              <span class="info-value">{{ selectedCost.fecha_vencimiento | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detalles del Pago -->
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>payments</mat-icon>
+            <h2>Detalles del Pago</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="form-grid">
+            <!-- Monto -->
+            <mat-form-field appearance="outline">
+              <mat-label>Monto a Pagar</mat-label>
+              <input 
+                matInput 
+                type="number"
+                step="0.01"
+                formControlName="monto"
+                placeholder="0.00"
+              >
+              <mat-icon matPrefix>attach_money</mat-icon>
+              <span matSuffix>MXN</span>
+              <mat-hint>Monto en pesos mexicanos</mat-hint>
+              <mat-error *ngIf="paymentForm.get('monto')?.invalid">
+                {{ getErrorMessage('monto') }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Método de Pago -->
+            <mat-form-field appearance="outline">
+              <mat-label>Método de Pago</mat-label>
+              <mat-select formControlName="metodo_pago">
+                <mat-option *ngFor="let metodo of metodosPago" [value]="metodo.value">
+                  <div class="select-option">
+                    <mat-icon>{{ metodo.icon }}</mat-icon>
+                    <div class="option-content">
+                      <span class="option-label">{{ metodo.label }}</span>
+                      <span class="option-description">{{ metodo.description }}</span>
+                    </div>
+                  </div>
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>credit_card</mat-icon>
+            </mat-form-field>
+
+            <!-- Fecha de Pago -->
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha de Pago</mat-label>
+              <input 
+                matInput 
+                [matDatepicker]="pickerPago" 
+                formControlName="fecha_pago"
+              >
+              <mat-datepicker-toggle matIconSuffix [for]="pickerPago"></mat-datepicker-toggle>
+              <mat-datepicker #pickerPago></mat-datepicker>
+              <mat-icon matPrefix>event</mat-icon>
+              <mat-error *ngIf="paymentForm.get('fecha_pago')?.invalid">
+                {{ getErrorMessage('fecha_pago') }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Estado -->
+            <mat-form-field appearance="outline">
+              <mat-label>Estado del Pago</mat-label>
+              <mat-select formControlName="estado">
+                <mat-option *ngFor="let estado of estados" [value]="estado.value">
+                  <div class="select-option">
+                    <mat-icon [style.color]="estado.color">{{ estado.icon }}</mat-icon>
+                    <span>{{ estado.label }}</span>
+                  </div>
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>check_circle</mat-icon>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Información Adicional -->
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>description</mat-icon>
+            <h2>Información Adicional</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="form-grid">
+            <!-- Referencia -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Referencia/Comprobante (Opcional)</mat-label>
+              <input 
+                matInput 
+                formControlName="referencia"
+                placeholder="Número de referencia, folio, etc."
+              >
+              <mat-icon matPrefix>tag</mat-icon>
+              <mat-hint>Número de comprobante, folio o referencia bancaria</mat-hint>
+            </mat-form-field>
+
+            <!-- Notas -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Notas (Opcional)</mat-label>
+              <textarea 
+                matInput 
+                formControlName="notas"
+                rows="3"
+                placeholder="Observaciones o comentarios adicionales..."
+              ></textarea>
+              <mat-icon matPrefix>notes</mat-icon>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Preview Card -->
+        <div class="preview-card" *ngIf="paymentForm.get('monto')?.value">
+          <h3>
+            <mat-icon>visibility</mat-icon>
+            Resumen del Pago
+          </h3>
+          <div class="preview-content">
+            <div class="preview-item">
+              <span class="preview-label">Monto Total:</span>
+              <span class="preview-value amount">${{ paymentForm.get('monto')?.value | number:'1.2-2' }}</span>
+            </div>
+            <div class="preview-item">
+              <span class="preview-label">Método:</span>
+              <span class="preview-value">{{ paymentForm.get('metodo_pago')?.value }}</span>
+            </div>
+            <div class="preview-item">
+              <span class="preview-label">Fecha:</span>
+              <span class="preview-value">{{ paymentForm.get('fecha_pago')?.value | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="preview-item">
+              <span class="preview-label">Estado:</span>
+              <span class="preview-value">{{ paymentForm.get('estado')?.value }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button 
+            mat-stroked-button 
+            type="button"
+            (click)="onCancel()"
+            [disabled]="isSaving"
+          >
+            <mat-icon>close</mat-icon>
+            Cancelar
+          </button>
+
+          <button 
+            mat-raised-button 
+            color="primary"
+            type="submit"
+            [disabled]="paymentForm.invalid || isSaving"
+          >
+            <mat-spinner *ngIf="isSaving" diameter="20"></mat-spinner>
+            <mat-icon *ngIf="!isSaving">{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+            <span *ngIf="!isSaving">{{ isEditMode ? 'Guardar Cambios' : 'Registrar Pago' }}</span>
+          </button>
+        </div>
+      </form>
+    </mat-card>
+  </div>
+</div>

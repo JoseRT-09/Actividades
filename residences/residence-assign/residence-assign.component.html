@@ -1,0 +1,212 @@
+<div class="assign-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <button mat-icon-button class="back-button" [routerLink]="['/residences', residenceId]">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>person_add</mat-icon>
+          Asignar Residente
+        </h1>
+        <p class="page-subtitle">Gestiona la asignación de residentes a la unidad</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando datos...</p>
+  </div>
+
+  <!-- Form -->
+  <div class="form-wrapper" *ngIf="!isLoading && residence">
+    <!-- Residence Info Card -->
+    <mat-card class="residence-info-card">
+      <div class="info-content">
+        <div class="unit-badge">
+          <mat-icon>home</mat-icon>
+          <div class="unit-details">
+            <h3>Unidad {{ residence.numero_unidad }}</h3>
+            <p *ngIf="residence.bloque">Bloque {{ residence.bloque }}</p>
+          </div>
+        </div>
+
+        <div class="current-resident">
+          <div class="resident-label">
+            <mat-icon>person</mat-icon>
+            <span>Residente Actual:</span>
+          </div>
+          <div class="resident-name" *ngIf="residence.residenteActual">
+            {{ getCurrentResidentName() }}
+          </div>
+          <div class="no-resident" *ngIf="!residence.residenteActual">
+            <mat-icon>home_work</mat-icon>
+            Sin residente asignado
+          </div>
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Assignment Form -->
+    <mat-card class="form-card">
+      <form [formGroup]="assignForm" (ngSubmit)="onSubmit()">
+        
+        <!-- Tipo de Cambio -->
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>category</mat-icon>
+            <h2>Tipo de Operación</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <mat-radio-group formControlName="tipo_cambio" class="radio-group">
+            <mat-radio-button 
+              *ngFor="let type of reassignmentTypes" 
+              [value]="type.value"
+              class="radio-option"
+            >
+              <div class="radio-content">
+                <mat-icon>{{ type.icon }}</mat-icon>
+                <div class="radio-details">
+                  <span class="radio-label">{{ type.label }}</span>
+                  <span class="radio-description">{{ type.description }}</span>
+                </div>
+              </div>
+            </mat-radio-button>
+          </mat-radio-group>
+        </div>
+
+        <!-- Selección de Residente -->
+        <div class="form-section" *ngIf="!isLiberation()">
+          <div class="section-header">
+            <mat-icon>person_search</mat-icon>
+            <h2>Seleccionar Residente</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nuevo Residente</mat-label>
+            <mat-select formControlName="residente_id">
+              <mat-option [value]="null">Selecciona un residente</mat-option>
+              <mat-option *ngFor="let resident of residents" [value]="resident.id">
+                <div class="resident-option">
+                  <div class="resident-avatar-small">
+                    {{ resident.nombre.charAt(0) }}{{ resident.apellido.charAt(0) }}
+                  </div>
+                  <div class="resident-details">
+                    <span class="resident-name">{{ resident.nombre }} {{ resident.apellido }}</span>
+                    <span class="resident-email">{{ resident.email }}</span>
+                  </div>
+                </div>
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>person</mat-icon>
+            <mat-hint>Selecciona el residente que ocupará la unidad</mat-hint>
+            <mat-error *ngIf="assignForm.get('residente_id')?.invalid">
+              {{ getErrorMessage('residente_id') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Información del Cambio -->
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>description</mat-icon>
+            <h2>Información del Cambio</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="form-grid">
+            <!-- Motivo -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Motivo del Cambio</mat-label>
+              <textarea 
+                matInput 
+                formControlName="motivo"
+                rows="3"
+                placeholder="Describe el motivo de este cambio..."
+              ></textarea>
+              <mat-icon matPrefix>article</mat-icon>
+              <mat-hint>Mínimo 10 caracteres</mat-hint>
+              <mat-error *ngIf="assignForm.get('motivo')?.invalid">
+                {{ getErrorMessage('motivo') }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Notas Adicionales -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Notas Adicionales (Opcional)</mat-label>
+              <textarea 
+                matInput 
+                formControlName="notas"
+                rows="3"
+                placeholder="Información adicional sobre el cambio..."
+              ></textarea>
+              <mat-icon matPrefix>notes</mat-icon>
+              <mat-hint>Cualquier información relevante</mat-hint>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Resumen -->
+        <div class="summary-card">
+          <h3>
+            <mat-icon>summarize</mat-icon>
+            Resumen de la Operación
+          </h3>
+          <div class="summary-content">
+            <div class="summary-item">
+              <span class="summary-label">Unidad:</span>
+              <span class="summary-value">{{ residence.numero_unidad }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Tipo de Operación:</span>
+              <span class="summary-value">
+                {{ (reassignmentTypes | filter: 'value' : assignForm.get('tipo_cambio')?.value)[0]?.label }}
+              </span>
+            </div>
+            <div class="summary-item" *ngIf="residence.residenteActual">
+              <span class="summary-label">Residente Anterior:</span>
+              <span class="summary-value">{{ getCurrentResidentName() }}</span>
+            </div>
+            <div class="summary-item" *ngIf="assignForm.get('residente_id')?.value && !isLiberation()">
+              <span class="summary-label">Nuevo Residente:</span>
+              <span class="summary-value">
+                {{ (residents | filter: 'id' : assignForm.get('residente_id')?.value)[0]?.nombre }}
+                {{ (residents | filter: 'id' : assignForm.get('residente_id')?.value)[0]?.apellido }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button 
+            mat-stroked-button 
+            type="button"
+            (click)="onCancel()"
+            [disabled]="isSaving"
+          >
+            <mat-icon>close</mat-icon>
+            Cancelar
+          </button>
+
+          <button 
+            mat-raised-button 
+            color="primary"
+            type="submit"
+            [disabled]="assignForm.invalid || isSaving"
+          >
+            <mat-spinner *ngIf="isSaving" diameter="20"></mat-spinner>
+            <mat-icon *ngIf="!isSaving">check</mat-icon>
+            <span *ngIf="!isSaving">Confirmar Asignación</span>
+          </button>
+        </div>
+      </form>
+    </mat-card>
+  </div>
+</div>
