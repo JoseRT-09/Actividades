@@ -1,0 +1,178 @@
+<div class="my-residence-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>
+      <mat-icon>home</mat-icon>
+      Mi Residencia
+    </h1>
+    <p class="subtitle">Información de tu unidad habitacional</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando información...</p>
+  </div>
+
+  <!-- No Residence Found -->
+  <mat-card *ngIf="!isLoading && !residence" class="no-residence-card">
+    <mat-card-content>
+      <div class="no-residence-content">
+        <mat-icon>home_work</mat-icon>
+        <h2>No tienes una residencia asignada</h2>
+        <p>Por favor, contacta al administrador para más información.</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Residence Information -->
+  <div *ngIf="!isLoading && residence" class="residence-content">
+    <!-- Main Info Card -->
+    <mat-card class="main-info-card">
+      <mat-card-header>
+        <div class="header-content">
+          <div class="unit-info">
+            <h2>{{ residence.numero_unidad }}</h2>
+            <p *ngIf="residence.bloque">Bloque {{ residence.bloque }}</p>
+          </div>
+          <mat-chip [ngClass]="getStatusClass(residence.estado)">
+            <mat-icon>{{ getStatusIcon(residence.estado) }}</mat-icon>
+            {{ residence.estado }}
+          </mat-chip>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="details-grid">
+          <div class="detail-item">
+            <mat-icon>layers</mat-icon>
+            <div class="detail-content">
+              <span class="label">Piso</span>
+              <span class="value">{{ residence.piso || 'N/A' }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>square_foot</mat-icon>
+            <div class="detail-content">
+              <span class="label">Área</span>
+              <span class="value">{{ formatArea(residence.area_m2) }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item" *ngIf="residence.habitaciones">
+            <mat-icon>bed</mat-icon>
+            <div class="detail-content">
+              <span class="label">Habitaciones</span>
+              <span class="value">{{ residence.habitaciones }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item" *ngIf="residence.banos">
+            <mat-icon>bathroom</mat-icon>
+            <div class="detail-content">
+              <span class="label">Baños</span>
+              <span class="value">{{ residence.banos }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item" *ngIf="residence.estacionamientos">
+            <mat-icon>local_parking</mat-icon>
+            <div class="detail-content">
+              <span class="label">Estacionamientos</span>
+              <span class="value">{{ residence.estacionamientos }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>category</mat-icon>
+            <div class="detail-content">
+              <span class="label">Tipo de Propiedad</span>
+              <span class="value">{{ residence.tipo_propiedad }}</span>
+            </div>
+          </div>
+        </div>
+
+        <mat-divider class="section-divider"></mat-divider>
+
+        <!-- COMPRA - Información de Adquisición -->
+        <div *ngIf="isPurchase()" class="purchase-section">
+          <h3>
+            <mat-icon>shopping_cart</mat-icon>
+            Información de Compra
+          </h3>
+          <div class="purchase-info">
+            <div class="price-card">
+              <span class="price-label">Precio de Compra</span>
+              <span class="price-value">{{ formatCurrency(residence.precio) }}</span>
+            </div>
+            <p class="info-text">
+              <mat-icon>info</mat-icon>
+              Esta residencia fue adquirida mediante compra directa.
+            </p>
+          </div>
+        </div>
+
+        <!-- RENTA - Información de Pagos Mensuales -->
+        <div *ngIf="isRent()" class="rent-section">
+          <h3>
+            <mat-icon>payments</mat-icon>
+            Información de Renta
+          </h3>
+          <div class="rent-info">
+            <div class="rent-amount-card">
+              <span class="rent-label">Renta Mensual</span>
+              <span class="rent-value">{{ formatCurrency(residence.precio) }}</span>
+            </div>
+            <button
+              mat-raised-button
+              color="primary"
+              routerLink="/payments/my-payments"
+              class="view-payments-btn">
+              <mat-icon>receipt_long</mat-icon>
+              Ver Historial de Pagos
+            </button>
+            <p class="info-text">
+              <mat-icon>info</mat-icon>
+              Consulta tus pagos mensuales, estados y fechas de vencimiento.
+            </p>
+          </div>
+        </div>
+
+        <!-- Descripción -->
+        <div *ngIf="residence.descripcion" class="description-section">
+          <mat-divider class="section-divider"></mat-divider>
+          <h3>
+            <mat-icon>description</mat-icon>
+            Descripción
+          </h3>
+          <p>{{ residence.descripcion }}</p>
+        </div>
+
+        <!-- Notas Adicionales -->
+        <div *ngIf="residence.notas_adicionales" class="notes-section">
+          <mat-divider class="section-divider"></mat-divider>
+          <h3>
+            <mat-icon>note</mat-icon>
+            Notas Adicionales
+          </h3>
+          <p>{{ residence.notas_adicionales }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Contact Card -->
+    <mat-card class="contact-card">
+      <mat-card-header>
+        <h3>¿Necesitas Ayuda?</h3>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Si tienes dudas sobre tu residencia o pagos, contacta al administrador.</p>
+        <button mat-raised-button color="accent">
+          <mat-icon>support_agent</mat-icon>
+          Contactar Soporte
+        </button>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

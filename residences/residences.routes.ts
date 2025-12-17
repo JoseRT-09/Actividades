@@ -13,6 +13,11 @@ export const RESIDENCES_ROUTES: Routes = [
         title: 'Gestión de Residencias - ResidenceHub'
       },
       {
+        path: 'my-residence',
+        loadComponent: () => import('./my-residence/my-residence.component').then(m => m.MyResidenceComponent),
+        title: 'Mi Residencia - ResidenceHub'
+      },
+      {
         path: 'new',
         canActivate: [adminGuard],
         loadComponent: () => import('./residence-form/residence-form.component').then(m => m.ResidenceFormComponent),

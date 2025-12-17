@@ -13,6 +13,11 @@ export const PAYMENTS_ROUTES: Routes = [
         title: 'Gestión de Pagos - ResidenceHub'
       },
       {
+        path: 'my-payments',
+        loadComponent: () => import('./my-payments/my-payments.component').then(m => m.MyPaymentsComponent),
+        title: 'Mis Pagos - ResidenceHub'
+      },
+      {
         path: 'new',
         loadComponent: () => import('./payment-form/payment-form.component').then(m => m.PaymentFormComponent),
         title: 'Registrar Pago - ResidenceHub'
