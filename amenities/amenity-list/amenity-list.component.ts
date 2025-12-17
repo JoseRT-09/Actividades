@@ -23,7 +23,6 @@ import { UpdateAmenityUseCase } from '../../../domain/use-cases/amenity/update-a
 import { Amenity, AmenityType, AmenityStatus } from '../../../domain/models/amenity.model';
 import { NotificationService } from '../../../core/services/notification.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { FilterPipe } from '../../../shared/pipes/filter.pipe';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
@@ -47,8 +46,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
     MatTooltipModule,
     MatProgressSpinnerModule,
     MatSlideToggleModule,
-    MatDividerModule,
-    FilterPipe
+    MatDividerModule
   ],
   templateUrl: './amenity-list.component.html',
   styleUrls: ['./amenity-list.component.scss']
