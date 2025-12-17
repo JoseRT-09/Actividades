@@ -193,8 +193,4 @@ export class ResidenceListComponent implements OnInit {
   canDelete(): boolean {
     return this.authService.isSuperAdmin();
   }
-
-  exportToCSV(): void {
-    this.notificationService.info('Exportando a CSV...');
-  }
 }

@@ -252,10 +252,6 @@ export class AmenityListComponent implements OnInit {
     return this.authService.isSuperAdmin();
   }
 
-  exportToCSV(): void {
-    this.notificationService.info('Exportando a CSV...');
-  }
-
   getAvailableCount(): number {
     return this.dataSource.data.filter(a => a.estado === AmenityStatus.DISPONIBLE).length;
   }

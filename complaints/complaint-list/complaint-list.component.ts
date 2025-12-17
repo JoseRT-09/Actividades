@@ -311,10 +311,6 @@ export class ComplaintListComponent implements OnInit {
     return this.authService.isAdmin();
   }
 
-  exportToCSV(): void {
-    this.notificationService.info('Exportando a CSV...');
-  }
-
   getNewCount(): number {
     return this.dataSource.data.filter(c => c.estado === 'Nueva').length;
   }

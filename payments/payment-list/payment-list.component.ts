@@ -244,10 +244,6 @@ export class PaymentListComponent implements OnInit {
     return this.authService.isSuperAdmin();
   }
 
-  exportToCSV(): void {
-    this.notificationService.info('Exportando a CSV...');
-  }
-
   printReceipt(payment: any): void {
     this.router.navigate(['/payments', payment.id], {
       queryParams: { print: true }

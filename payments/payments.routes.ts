@@ -9,6 +9,7 @@ export const PAYMENTS_ROUTES: Routes = [
     children: [
       {
         path: '',
+        canActivate: [adminGuard],
         loadComponent: () => import('./payment-list/payment-list.component').then(m => m.PaymentListComponent),
         title: 'Gestión de Pagos - ResidenceHub'
       },

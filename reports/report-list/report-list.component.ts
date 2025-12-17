@@ -296,10 +296,6 @@ export class ReportListComponent implements OnInit {
     return this.authService.isAdmin();
   }
 
-  exportToCSV(): void {
-    this.notificationService.info('Exportando a CSV...');
-  }
-
   getOpenCount(): number {
     return this.dataSource.data.filter(r => r.estado === 'Abierto').length;
   }
