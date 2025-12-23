@@ -45,7 +45,7 @@ exports.getAllReports = async (req, res) => {
     });
 
     res.json({
-      data: rows,
+      reports: rows,
       total: count,
       pages: Math.ceil(count / limit),
       currentPage: parseInt(page)

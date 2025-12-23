@@ -115,7 +115,7 @@ export class ResidenceListComponent implements OnInit {
 
     this.residenceService.getAllResidences(params).subscribe({
       next: (response) => {
-        this.dataSource.data = response.data;
+        this.dataSource.data = response.residences;
         this.totalResidences = response.total;
         this.isLoading = false;
       },

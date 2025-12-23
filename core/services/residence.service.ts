@@ -29,7 +29,7 @@ export interface Residence {
 }
 
 export interface ResidenceListResponse {
-  data: Residence[]; // ✅ CORRECCIÓN: El backend devuelve la lista en 'data'
+  residences: Residence[]; // Backend devuelve la lista en 'residences'
   total: number;
   pages: number;
   currentPage: number;

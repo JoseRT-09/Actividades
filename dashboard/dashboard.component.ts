@@ -144,32 +144,60 @@ export class DashboardComponent implements OnInit {
   loadDashboardData(): void {
     this.isLoading = true;
 
-    forkJoin({
-      reportStats: this.getReportStatistics.execute(),
-      residences: this.getAllResidences.execute({ page: 1, limit: 1 }),
-      payments: this.getAllPayments.execute({ page: 1, limit: 100 }),
-      activities: this.getUpcomingActivities.execute()
-    }).subscribe({
-      next: (results) => {
-        // Actualizar estadísticas
-        this.dashboardStats.totalResidences = results.residences.total;
-        this.dashboardStats.pendingReports = results.reportStats.byStatus.abierto + results.reportStats.byStatus.enProgreso;
-        this.dashboardStats.totalPayments = results.payments.total;
-        this.dashboardStats.upcomingActivities = results.activities.length;
+    // Diferentes llamadas según el rol del usuario
+    const isAdmin = this.authService.isAdmin() || this.authService.isSuperAdmin();
 
-        // Actualizar cards
-        this.statsCards[0].value = this.dashboardStats.totalResidences;
-        this.statsCards[1].value = this.dashboardStats.totalResidents;
-        this.statsCards[2].value = this.dashboardStats.pendingReports;
-        this.statsCards[3].value = this.dashboardStats.totalPayments;
+    if (isAdmin) {
+      // Para administradores: cargar todas las estadísticas
+      forkJoin({
+        reportStats: this.getReportStatistics.execute(),
+        residences: this.getAllResidences.execute({ page: 1, limit: 1 }),
+        payments: this.getAllPayments.execute({ page: 1, limit: 100 }),
+        activities: this.getUpcomingActivities.execute()
+      }).subscribe({
+        next: (results) => {
+          // Actualizar estadísticas
+          this.dashboardStats.totalResidences = results.residences.total;
+          this.dashboardStats.pendingReports = results.reportStats.byStatus.abierto + results.reportStats.byStatus.enProgreso;
+          this.dashboardStats.totalPayments = results.payments.total;
+          this.dashboardStats.upcomingActivities = results.activities.length;
 
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading dashboard data:', error);
-        this.isLoading = false;
-      }
-    });
+          // Actualizar cards
+          this.statsCards[0].value = this.dashboardStats.totalResidences;
+          this.statsCards[1].value = this.dashboardStats.totalResidents;
+          this.statsCards[2].value = this.dashboardStats.pendingReports;
+          this.statsCards[3].value = this.dashboardStats.totalPayments;
+
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading dashboard data:', error);
+          this.isLoading = false;
+        }
+      });
+    } else {
+      // Para residentes: solo cargar actividades y residencias
+      forkJoin({
+        residences: this.getAllResidences.execute({ page: 1, limit: 1 }),
+        activities: this.getUpcomingActivities.execute()
+      }).subscribe({
+        next: (results) => {
+          // Actualizar estadísticas limitadas
+          this.dashboardStats.totalResidences = results.residences.total;
+          this.dashboardStats.upcomingActivities = results.activities.length;
+
+          // Actualizar cards (solo las que son relevantes)
+          this.statsCards[0].value = this.dashboardStats.totalResidences;
+          this.statsCards[3].value = 0; // Pagos se manejan en my-payments
+
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading dashboard data:', error);
+          this.isLoading = false;
+        }
+      });
+    }
   }
 
   getGreeting(): string {
