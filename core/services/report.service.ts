@@ -28,7 +28,7 @@ export interface Report {
 }
 
 export interface ReportListResponse {
-  data: Report[]; // Se mantiene 'data' (correcto)
+  reports: Report[]; // Backend devuelve la lista en 'reports'
   total: number;
   pages: number;
   currentPage: number;

@@ -15,6 +15,7 @@ import { ResidenceService } from '../../../core/services/residence.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { MatChipsModule } from '@angular/material/chips';
+import { GetActiveResidentsUseCase } from '../../../domain/use-cases/user/get-active-residents.usecase';
 
 @Component({
   selector: 'app-residence-form',
@@ -44,13 +45,14 @@ export class ResidenceFormComponent implements OnInit {
   private residenceService = inject(ResidenceService);
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
+  private getActiveResidents = inject(GetActiveResidentsUseCase);
 
   residenceForm!: FormGroup;
   isEditMode = false;
   residenceId?: number;
   isLoading = false;
   isSaving = false;
-  users: any[] = [];
+  residents: any[] = [];
 
   estados = [
     {
@@ -100,7 +102,6 @@ export class ResidenceFormComponent implements OnInit {
       precio: ['', [Validators.pattern(/^[0-9]+(\.[0-9]{1,2})?$/)]],
       dueno_id: [null],
       residente_actual_id: [null],
-      administrador_id: [null],
       estado: ['Disponible', [Validators.required]],
       descripcion: [''],
       notas_adicionales: ['']
@@ -108,8 +109,14 @@ export class ResidenceFormComponent implements OnInit {
   }
 
   loadUsers(): void {
-    // Por ahora dejamos el array vacío, se puede conectar con un servicio de usuarios
-    this.users = [];
+    this.getActiveResidents.execute().subscribe({
+      next: (residents) => {
+        this.residents = residents;
+      },
+      error: (error) => {
+        console.error('Error loading residents:', error);
+      }
+    });
   }
 
   checkEditMode(): void {
@@ -143,7 +150,6 @@ export class ResidenceFormComponent implements OnInit {
           precio: residence.precio,
           dueno_id: residence.dueno_id,
           residente_actual_id: residence.residente_actual_id,
-          administrador_id: residence.administrador_id,
           estado: residence.estado,
           descripcion: residence.descripcion,
           notas_adicionales: residence.notas_adicionales

@@ -6,13 +6,14 @@ const { Op } = require('sequelize');
 // Obtener todas las residencias
 exports.getAllResidences = async (req, res) => {
   try {
-    const { estado, bloque, search, page = 1, limit = 10 } = req.query;
+    const { estado, bloque, search, residente_actual_id, page = 1, limit = 10 } = req.query;
     const offset = (page - 1) * limit;
 
     const where = {};
     if (estado) where.estado = estado;
     if (bloque) where.bloque = bloque;
-    
+    if (residente_actual_id) where.residente_actual_id = residente_actual_id;
+
     // Búsqueda por texto
     if (search) {
       where[Op.or] = [
