@@ -1,0 +1,109 @@
+<mat-sidenav-container class="sidenav-container">
+  <!-- Sidebar -->
+  <mat-sidenav
+    #drawer
+    class="sidenav"
+    fixedInViewport
+    [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
+    [mode]="(isHandset$ | async) ? 'over' : 'side'"
+    [opened]="(isHandset$ | async) === false">
+
+    <!-- Logo/Header Section -->
+    <div class="sidebar-header">
+      <mat-icon class="app-icon">home_work</mat-icon>
+      <h2>ResidenceHub</h2>
+    </div>
+
+    <!-- Navigation Menu -->
+    <mat-nav-list>
+      <ng-container *ngFor="let item of getVisibleMenuItems()">
+        <a
+          mat-list-item
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{exact: item.route === '/dashboard'}"
+          (click)="(isHandset$ | async) && drawer.close()">
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span matListItemTitle>{{ item.label }}</span>
+        </a>
+      </ng-container>
+    </mat-nav-list>
+
+    <!-- User Section at Bottom -->
+    <div class="sidebar-footer" *ngIf="currentUser$ | async as user">
+      <mat-divider></mat-divider>
+      <div class="user-info">
+        <div class="user-details">
+          <mat-icon>account_circle</mat-icon>
+          <div class="user-text">
+            <span class="user-name">{{ user.nombre }}</span>
+            <span class="user-role">{{ getUserRoleName() }}</span>
+          </div>
+        </div>
+        <button mat-icon-button [matMenuTriggerFor]="userMenu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <mat-menu #userMenu="matMenu">
+      <button mat-menu-item>
+        <mat-icon>person</mat-icon>
+        <span>Mi Perfil</span>
+      </button>
+      <button mat-menu-item>
+        <mat-icon>settings</mat-icon>
+        <span>Configuración</span>
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Cerrar Sesión</span>
+      </button>
+    </mat-menu>
+  </mat-sidenav>
+
+  <!-- Main Content -->
+  <mat-sidenav-content>
+    <!-- Toolbar -->
+    <mat-toolbar color="primary" class="toolbar">
+      <button
+        type="button"
+        mat-icon-button
+        (click)="drawer.toggle()"
+        *ngIf="isHandset$ | async">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span class="toolbar-spacer"></span>
+
+      <!-- User info for desktop -->
+      <div class="toolbar-user" *ngIf="(isHandset$ | async) === false && (currentUser$ | async) as user">
+        <span class="user-name-toolbar">{{ user.nombre }}</span>
+        <button mat-icon-button [matMenuTriggerFor]="userMenuToolbar">
+          <mat-icon>account_circle</mat-icon>
+        </button>
+      </div>
+    </mat-toolbar>
+
+    <mat-menu #userMenuToolbar="matMenu">
+      <button mat-menu-item>
+        <mat-icon>person</mat-icon>
+        <span>Mi Perfil</span>
+      </button>
+      <button mat-menu-item>
+        <mat-icon>settings</mat-icon>
+        <span>Configuración</span>
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Cerrar Sesión</span>
+      </button>
+    </mat-menu>
+
+    <!-- Router Outlet for Content -->
+    <div class="content-container">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
