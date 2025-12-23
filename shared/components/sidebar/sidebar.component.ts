@@ -63,8 +63,15 @@ export class SidebarComponent implements OnInit {
     },
     {
       icon: 'payment',
+      label: 'Mis Pagos',
+      route: '/payments/my-payments',
+      roles: [UserRole.RESIDENTE]
+    },
+    {
+      icon: 'payments',
       label: 'Pagos',
-      route: '/payments'
+      route: '/payments',
+      roles: [UserRole.ADMINISTRADOR, UserRole.SUPER_ADMIN]
     },
     {
       icon: 'report_problem',
