@@ -1,0 +1,127 @@
+<mat-toolbar class="navbar" color="primary">
+  <div class="navbar-container">
+    <!-- Logo y Título -->
+    <div class="navbar-brand">
+      <mat-icon class="brand-icon">apartment</mat-icon>
+      <span class="brand-title">ResidenceHub</span>
+    </div>
+
+    <!-- Espaciador -->
+    <span class="spacer"></span>
+
+    <!-- Navegación Principal -->
+    <div class="navbar-nav" *ngIf="currentUser$ | async as user">
+      <button mat-button routerLink="/dashboard" routerLinkActive="active">
+        <mat-icon>dashboard</mat-icon>
+        <span>Dashboard</span>
+      </button>
+
+      <button mat-button [matMenuTriggerFor]="residencesMenu">
+        <mat-icon>home</mat-icon>
+        <span>Residencias</span>
+        <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+      </button>
+
+      <button mat-button [matMenuTriggerFor]="financeMenu">
+        <mat-icon>payments</mat-icon>
+        <span>Finanzas</span>
+        <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+      </button>
+
+      <button mat-button routerLink="/reports" routerLinkActive="active">
+        <mat-icon>report_problem</mat-icon>
+        <span>Reportes</span>
+      </button>
+
+      <button mat-button routerLink="/activities" routerLinkActive="active">
+        <mat-icon>event</mat-icon>
+        <span>Actividades</span>
+      </button>
+    </div>
+
+    <!-- Acciones de Usuario -->
+    <div class="navbar-actions" *ngIf="currentUser$ | async as user">
+      <!-- Notificaciones -->
+      <button mat-icon-button class="action-button">
+        <mat-icon [matBadge]="notificationCount" matBadgeColor="warn" matBadgeSize="small" aria-hidden="false">
+          notifications
+        </mat-icon>
+      </button>
+
+      <!-- Perfil de Usuario -->
+      <button mat-button [matMenuTriggerFor]="userMenu" class="user-button">
+        <div class="user-avatar">
+          {{ getUserInitials(user) }}
+        </div>
+        <div class="user-info">
+          <span class="user-name">{{ user.nombre }} {{ user.apellido }}</span>
+          <span class="user-role">{{ user.rol }}</span>
+        </div>
+        <mat-icon>arrow_drop_down</mat-icon>
+      </button>
+    </div>
+  </div>
+</mat-toolbar>
+
+<!-- Menu: Residencias -->
+<mat-menu #residencesMenu="matMenu" class="custom-menu">
+  <button mat-menu-item routerLink="/residences">
+    <mat-icon>list</mat-icon>
+    <span>Ver Residencias</span>
+  </button>
+  <button mat-menu-item routerLink="/residences/new">
+    <mat-icon>add_home</mat-icon>
+    <span>Nueva Residencia</span>
+  </button>
+  <button mat-menu-item routerLink="/amenities">
+    <mat-icon>pool</mat-icon>
+    <span>Amenidades</span>
+  </button>
+</mat-menu>
+
+<!-- Menu: Finanzas -->
+<mat-menu #financeMenu="matMenu" class="custom-menu">
+  <button mat-menu-item routerLink="/service-costs">
+    <mat-icon>receipt</mat-icon>
+    <span>Costos de Servicio</span>
+  </button>
+  <button mat-menu-item routerLink="/payments">
+    <mat-icon>payment</mat-icon>
+    <span>Pagos</span>
+  </button>
+  <button mat-menu-item routerLink="/payments/history">
+    <mat-icon>history</mat-icon>
+    <span>Historial</span>
+  </button>
+</mat-menu>
+
+<!-- Menu: Usuario -->
+<mat-menu #userMenu="matMenu" class="custom-menu user-menu">
+  <div class="user-menu-header">
+    <div class="user-avatar-large">
+      {{ (currentUser$ | async) ? getUserInitials((currentUser$ | async)!) : '' }}
+    </div>
+    <div class="user-details">
+      <p class="user-name-large">{{ (currentUser$ | async)?.nombre }} {{ (currentUser$ | async)?.apellido }}</p>
+      <p class="user-email">{{ (currentUser$ | async)?.email }}</p>
+    </div>
+  </div>
+  
+  <mat-divider></mat-divider>
+  
+  <button mat-menu-item (click)="navigateToProfile()">
+    <mat-icon>person</mat-icon>
+    <span>Mi Perfil</span>
+  </button>
+  <button mat-menu-item (click)="navigateToSettings()">
+    <mat-icon>settings</mat-icon>
+    <span>Configuración</span>
+  </button>
+  
+  <mat-divider></mat-divider>
+  
+  <button mat-menu-item (click)="onLogout()" class="logout-button">
+    <mat-icon>logout</mat-icon>
+    <span>Cerrar Sesión</span>
+  </button>
+</mat-menu>
