@@ -96,8 +96,7 @@ export class ComplaintFormComponent implements OnInit {
   loadResidences(): void {
     this.residenceService.getAllResidences({ page: 1, limit: 1000 }).subscribe({
       next: (response) => {
-        // Ya está corregido en el service, 'response' tiene la propiedad 'data'
-        this.residences = response.data; 
+        this.residences = response.residences;
       },
       error: (error) => {
         console.error('Error loading residences:', error);

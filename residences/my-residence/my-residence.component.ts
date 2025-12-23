@@ -60,8 +60,8 @@ export class MyResidenceComponent implements OnInit {
     // Obtener residencia del usuario actual
     this.residenceRepository.getAll({ residente_actual_id: userId, limit: 1 }).subscribe({
       next: (response) => {
-        if (response.data && response.data.length > 0) {
-          this.residence = response.data[0];
+        if (response.residences && response.residences.length > 0) {
+          this.residence = response.residences[0];
         }
         this.isLoading = false;
       },
