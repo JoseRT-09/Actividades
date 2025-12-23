@@ -50,7 +50,7 @@ exports.getAllResidences = async (req, res) => {
     });
 
     res.json({
-      data: rows,
+      residences: rows,
       total: count,
       pages: Math.ceil(count / limit),
       currentPage: parseInt(page)
@@ -96,7 +96,7 @@ exports.getResidenceById = async (req, res) => {
       return res.status(404).json({ message: 'Residencia no encontrada' });
     }
 
-    res.json(residence);
+    res.json({ residence });
   } catch (error) {
     console.error('Error al obtener residencia:', error);
     res.status(500).json({ 
@@ -353,7 +353,7 @@ exports.getReassignmentHistory = async (req, res) => {
       order: [['fecha_cambio', 'DESC']]
     });
 
-    res.json(history);
+    res.json({ history });
   } catch (error) {
     console.error('Error al obtener historial:', error);
     res.status(500).json({ 
