@@ -30,7 +30,7 @@ const ReassignmentHistory = sequelize.define('ReassignmentHistory', {
     }
   },
   tipo_cambio: {
-    type: DataTypes.ENUM('Venta', 'Renta', 'Cambio Responsable', 'Herencia')
+    type: DataTypes.ENUM('Asignacion', 'Cambio', 'Liberacion', 'Venta', 'Renta', 'Cambio Responsable', 'Herencia')
   },
   motivo: {
     type: DataTypes.TEXT

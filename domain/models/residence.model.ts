@@ -76,9 +76,9 @@ export enum ReassignmentType {
   RENTA = 'Renta',
   CAMBIO_RESPONSABLE = 'Cambio Responsable',
   HERENCIA = 'Herencia',
-  ASIGNACION = 'Asignación',
+  ASIGNACION = 'Asignacion',
   CAMBIO = 'Cambio',
-  LIBERACION = 'Liberación'
+  LIBERACION = 'Liberacion'
 }
 
 export interface AssignResidentDto {
