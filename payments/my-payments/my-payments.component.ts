@@ -78,7 +78,7 @@ export class MyPaymentsComponent implements OnInit {
     const params: any = {
       page: this.pageIndex + 1,
       limit: this.pageSize,
-      usuario_id: userId
+      residente_id: userId
     };
 
     this.paymentRepository.getAll(params).subscribe({

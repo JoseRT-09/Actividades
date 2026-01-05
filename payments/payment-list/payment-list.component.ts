@@ -141,7 +141,7 @@ export class PaymentListComponent implements OnInit {
 
     this.paymentService.getAllPayments(params).subscribe({
       next: (response) => {
-        this.dataSource.data = response.data;
+        this.dataSource.data = response.payments;
         this.totalPayments = response.total;
         this.isLoading = false;
       },

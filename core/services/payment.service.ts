@@ -24,7 +24,7 @@ export interface Payment {
 }
 
 export interface PaymentListResponse {
-  data: Payment[];
+  payments: Payment[];
   total: number;
   pages: number;
   currentPage: number;
