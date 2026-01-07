@@ -75,16 +75,11 @@ export class MyPaymentsComponent implements OnInit {
       return;
     }
 
-    const params: any = {
-      page: this.pageIndex + 1,
-      limit: this.pageSize,
-      residente_id: userId
-    };
-
-    this.paymentRepository.getAll(params).subscribe({
+    this.paymentRepository.getByResident(userId).subscribe({
       next: (response) => {
-        this.payments = response.data;
-        this.totalPayments = response.total;
+        this.payments = response.payments;
+        this.totalPayments = response.payments.length;
+        this.totalPaid = response.totalPaid;
         this.calculateStatistics();
         this.isLoading = false;
       },

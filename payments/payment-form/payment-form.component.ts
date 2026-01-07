@@ -121,7 +121,7 @@ export class PaymentFormComponent implements OnInit {
 
     this.paymentForm = this.fb.group({
       usuario_id: [currentUser?.id, [Validators.required]],
-      costo_servicio_id: [null],
+      costo_servicio_id: [null, [Validators.required]],
       monto: ['', [Validators.required, Validators.min(0.01)]],
       metodo_pago: ['Efectivo', [Validators.required]],
       fecha_pago: [new Date(), [Validators.required]],
@@ -229,6 +229,7 @@ export class PaymentFormComponent implements OnInit {
       // Map to backend expected field names
       const paymentData = {
         residente_id: formData.usuario_id,
+        servicio_costo_id: formData.costo_servicio_id,
         monto_pagado: formData.monto,
         metodo_pago: formData.metodo_pago,
         fecha_pago: formData.fecha_pago,
