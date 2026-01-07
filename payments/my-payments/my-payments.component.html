@@ -29,9 +29,9 @@
     <div class="stat-card pending">
       <mat-icon>schedule</mat-icon>
       <div class="stat-content">
-        <span class="stat-label">Pendiente</span>
-        <span class="stat-value">{{ formatCurrency(totalPending) }}</span>
-        <span class="stat-count">{{ getPendingCount() }} pendientes</span>
+        <span class="stat-label">Pendiente de Pagar</span>
+        <span class="stat-value">{{ formatCurrency(totalPendingCosts) }}</span>
+        <span class="stat-count">{{ pendingCosts.length }} servicios</span>
       </div>
     </div>
 
@@ -45,7 +45,86 @@
     </div>
   </div>
 
-  <!-- Payments Table -->
+  <!-- Pending Costs Table -->
+  <mat-card class="table-card" *ngIf="pendingCosts.length > 0">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>warning</mat-icon>
+        Costos Pendientes de Pago
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div *ngIf="isLoadingCosts" class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Cargando costos pendientes...</p>
+      </div>
+
+      <div class="table-container" *ngIf="!isLoadingCosts">
+        <table mat-table [dataSource]="pendingCosts" class="pending-costs-table">
+          <!-- Nombre Servicio Column -->
+          <ng-container matColumnDef="nombre_servicio">
+            <th mat-header-cell *matHeaderCellDef>Servicio</th>
+            <td mat-cell *matCellDef="let cost">
+              <div class="service-info">
+                <strong>{{ cost.nombre_servicio }}</strong>
+                <small *ngIf="cost.descripcion">{{ cost.descripcion }}</small>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Monto Column -->
+          <ng-container matColumnDef="monto">
+            <th mat-header-cell *matHeaderCellDef>Monto</th>
+            <td mat-cell *matCellDef="let cost">
+              <span class="monto-pendiente">{{ formatCurrency(cost.monto) }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Fecha Vencimiento Column -->
+          <ng-container matColumnDef="fecha_vencimiento">
+            <th mat-header-cell *matHeaderCellDef>Fecha de Vencimiento</th>
+            <td mat-cell *matCellDef="let cost">
+              <div class="vencimiento-info">
+                <mat-icon>event</mat-icon>
+                <span>{{ cost.fecha_vencimiento | date:'dd/MM/yyyy' }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Periodo Column -->
+          <ng-container matColumnDef="periodo">
+            <th mat-header-cell *matHeaderCellDef>Período</th>
+            <td mat-cell *matCellDef="let cost">
+              <mat-chip class="periodo-chip">{{ cost.periodo }}</mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Acciones Column -->
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let cost">
+              <button
+                mat-raised-button
+                color="primary"
+                [routerLink]="['/payments/new']"
+                [queryParams]="{costo_id: cost.id, usuario_id: authService.getCurrentUser()?.id}"
+              >
+                <mat-icon>payment</mat-icon>
+                Pagar
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="pendingCostsColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: pendingCostsColumns;"></tr>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-divider *ngIf="pendingCosts.length > 0"></mat-divider>
+
+  <!-- Payments History Table -->
   <mat-card class="table-card">
     <mat-card-content>
       <div *ngIf="isLoading" class="loading-container">

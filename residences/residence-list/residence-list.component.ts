@@ -187,7 +187,7 @@ export class ResidenceListComponent implements OnInit {
   }
 
   canEdit(): boolean {
-    return this.authService.isAdmin();
+    return this.authService.isAdmin() || this.authService.isSuperAdmin();
   }
 
   canDelete(): boolean {

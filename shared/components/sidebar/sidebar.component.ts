@@ -56,12 +56,6 @@ export class SidebarComponent implements OnInit {
       route: '/residences'
     },
     {
-      icon: 'receipt_long',
-      label: 'Costos de Servicio',
-      route: '/service-costs',
-      roles: [UserRole.ADMINISTRADOR, UserRole.SUPER_ADMIN]
-    },
-    {
       icon: 'payment',
       label: 'Mis Pagos',
       route: '/payments/my-payments',

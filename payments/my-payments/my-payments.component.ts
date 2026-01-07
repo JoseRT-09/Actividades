@@ -8,11 +8,15 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDividerModule } from '@angular/material/divider';
 import { PaymentRepository } from '../../domain/repositories/payment.repository';
 import { PaymentApiRepository } from '../../data/repositories/payment-api.repository';
 import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Payment, PaymentStatus, PaymentMethod } from '../../domain/models/payment.model';
+import { ServiceCost } from '../../domain/models/service-cost.model';
+import { GetPendingCostsByResidenceUseCase } from '../../domain/use-cases/service-cost/get-pending-costs-by-residence.usecase';
+import { GetAllResidencesUseCase } from '../../domain/use-cases/residence/get-all-residences.usecase';
 
 @Component({
   selector: 'app-my-payments',
@@ -26,7 +30,8 @@ import { Payment, PaymentStatus, PaymentMethod } from '../../domain/models/payme
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDividerModule
   ],
   providers: [
     { provide: PaymentRepository, useClass: PaymentApiRepository }
@@ -37,13 +42,18 @@ import { Payment, PaymentStatus, PaymentMethod } from '../../domain/models/payme
 export class MyPaymentsComponent implements OnInit {
   private paymentRepository = inject(PaymentRepository);
   private notificationService = inject(NotificationService);
-  private authService = inject(AuthService);
+  authService = inject(AuthService); // Public for template access
+  private getPendingCosts = inject(GetPendingCostsByResidenceUseCase);
+  private getAllResidences = inject(GetAllResidencesUseCase);
 
   PaymentStatus = PaymentStatus;
   PaymentMethod = PaymentMethod;
 
   payments: Payment[] = [];
+  pendingCosts: ServiceCost[] = [];
+  residenceId: number | null = null;
   isLoading = false;
+  isLoadingCosts = false;
   totalPayments = 0;
   pageSize = 10;
   pageIndex = 0;
@@ -56,13 +66,57 @@ export class MyPaymentsComponent implements OnInit {
     'estado'
   ];
 
+  pendingCostsColumns: string[] = [
+    'nombre_servicio',
+    'monto',
+    'fecha_vencimiento',
+    'periodo',
+    'acciones'
+  ];
+
   // Statistics
   totalPaid = 0;
   totalPending = 0;
   paymentCount = 0;
+  totalPendingCosts = 0;
 
   ngOnInit(): void {
+    this.loadUserResidence();
     this.loadMyPayments();
+  }
+
+  loadUserResidence(): void {
+    const userId = this.authService.getCurrentUser()?.id;
+    if (!userId) return;
+
+    this.getAllResidences.execute({ residente_actual_id: userId, limit: 1 }).subscribe({
+      next: (response) => {
+        if (response.data && response.data.length > 0) {
+          this.residenceId = response.data[0].id;
+          this.loadPendingCosts();
+        }
+      },
+      error: (error) => {
+        console.error('Error al cargar residencia:', error);
+      }
+    });
+  }
+
+  loadPendingCosts(): void {
+    if (!this.residenceId) return;
+
+    this.isLoadingCosts = true;
+    this.getPendingCosts.execute(this.residenceId).subscribe({
+      next: (response) => {
+        this.pendingCosts = response.pendingCosts;
+        this.totalPendingCosts = response.totalPending;
+        this.isLoadingCosts = false;
+      },
+      error: (error) => {
+        console.error('Error al cargar costos pendientes:', error);
+        this.isLoadingCosts = false;
+      }
+    });
   }
 
   loadMyPayments(): void {
