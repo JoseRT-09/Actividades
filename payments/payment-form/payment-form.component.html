@@ -64,7 +64,7 @@
                 <mat-option *ngFor="let cost of serviceCosts" [value]="cost.id">
                   <div class="cost-option">
                     <div class="cost-details">
-                      <span class="cost-name">{{ cost.concepto }}</span>
+                      <span class="cost-name">{{ cost.nombre_servicio }}</span>
                       <span class="cost-amount">${{ cost.monto | number:'1.2-2' }}</span>
                     </div>
                     <span class="cost-residence" *ngIf="cost.residencia">
@@ -92,7 +92,7 @@
           <div class="cost-info-grid">
             <div class="info-item">
               <span class="info-label">Concepto:</span>
-              <span class="info-value">{{ selectedCost.concepto }}</span>
+              <span class="info-value">{{ selectedCost.nombre_servicio }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Monto Original:</span>
