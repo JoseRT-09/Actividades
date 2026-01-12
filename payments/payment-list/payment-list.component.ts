@@ -21,7 +21,6 @@ import { MatDividerModule } from '@angular/material/divider';
 import { PaymentService } from '../../../core/services/payment.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { FilterPipe } from '../../../shared/pipes/filter.pipe';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
@@ -46,8 +45,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
     MatProgressSpinnerModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatDividerModule,
-    FilterPipe
+    MatDividerModule
   ],
   templateUrl: './payment-list.component.html',
   styleUrls: ['./payment-list.component.scss']
