@@ -1,0 +1,147 @@
+<div class="card-payment-dialog">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon>credit_card</mat-icon>
+      Pago con Tarjeta
+    </h2>
+    <button mat-icon-button (click)="onCancel()" [disabled]="isProcessing">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <!-- Payment Summary -->
+    <div class="payment-summary">
+      <div class="summary-item">
+        <span class="label">Concepto:</span>
+        <span class="value">{{ data.serviceName }}</span>
+      </div>
+      <div class="summary-item total">
+        <span class="label">Monto a Pagar:</span>
+        <span class="value amount">${{ data.amount | number:'1.2-2' }} MXN</span>
+      </div>
+    </div>
+
+    <!-- Card Form -->
+    <form [formGroup]="cardForm" (ngSubmit)="onSubmit()" class="card-form">
+      <div class="form-section">
+        <div class="section-title">
+          <mat-icon>lock</mat-icon>
+          <span>Información de Pago Segura</span>
+        </div>
+
+        <!-- Card Number -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Número de Tarjeta</mat-label>
+          <input
+            matInput
+            formControlName="cardNumber"
+            placeholder="1234 5678 9012 3456"
+            maxlength="16"
+            (input)="formatCardNumber($event)"
+            autocomplete="cc-number"
+          >
+          <mat-icon matPrefix>{{ getCardIcon() }}</mat-icon>
+          <mat-hint *ngIf="cardType">{{ cardType }}</mat-hint>
+          <mat-error *ngIf="cardForm.get('cardNumber')?.hasError('required')">
+            El número de tarjeta es requerido
+          </mat-error>
+          <mat-error *ngIf="cardForm.get('cardNumber')?.hasError('pattern')">
+            Debe ser un número de 16 dígitos
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Card Holder -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Titular de la Tarjeta</mat-label>
+          <input
+            matInput
+            formControlName="cardHolder"
+            placeholder="NOMBRE COMO APARECE EN LA TARJETA"
+            style="text-transform: uppercase"
+            autocomplete="cc-name"
+          >
+          <mat-icon matPrefix>person</mat-icon>
+          <mat-error *ngIf="cardForm.get('cardHolder')?.hasError('required')">
+            El nombre del titular es requerido
+          </mat-error>
+          <mat-error *ngIf="cardForm.get('cardHolder')?.hasError('minlength')">
+            El nombre debe tener al menos 3 caracteres
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Expiry Date and CVV -->
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha de Expiración</mat-label>
+            <input
+              matInput
+              formControlName="expiryDate"
+              placeholder="MM/YY"
+              maxlength="5"
+              (input)="formatExpiryDate($event)"
+              autocomplete="cc-exp"
+            >
+            <mat-icon matPrefix>event</mat-icon>
+            <mat-error *ngIf="cardForm.get('expiryDate')?.hasError('required')">
+              Requerido
+            </mat-error>
+            <mat-error *ngIf="cardForm.get('expiryDate')?.hasError('pattern')">
+              Formato MM/YY
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>CVV</mat-label>
+            <input
+              matInput
+              formControlName="cvv"
+              placeholder="123"
+              maxlength="4"
+              type="password"
+              (input)="formatCVV($event)"
+              autocomplete="cc-csc"
+            >
+            <mat-icon matPrefix>lock</mat-icon>
+            <mat-error *ngIf="cardForm.get('cvv')?.hasError('required')">
+              Requerido
+            </mat-error>
+            <mat-error *ngIf="cardForm.get('cvv')?.hasError('pattern')">
+              3-4 dígitos
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Security Notice -->
+      <div class="security-notice">
+        <mat-icon>verified_user</mat-icon>
+        <span>Tu información está segura y encriptada</span>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button
+      mat-stroked-button
+      type="button"
+      (click)="onCancel()"
+      [disabled]="isProcessing"
+    >
+      <mat-icon>close</mat-icon>
+      Cancelar
+    </button>
+
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="onSubmit()"
+      [disabled]="cardForm.invalid || isProcessing"
+    >
+      <mat-spinner *ngIf="isProcessing" diameter="20"></mat-spinner>
+      <mat-icon *ngIf="!isProcessing">payment</mat-icon>
+      <span *ngIf="!isProcessing">Pagar ${{ data.amount | number:'1.2-2' }}</span>
+      <span *ngIf="isProcessing">Procesando...</span>
+    </button>
+  </mat-dialog-actions>
+</div>

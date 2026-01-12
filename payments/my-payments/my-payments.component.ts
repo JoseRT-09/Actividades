@@ -9,6 +9,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { PaymentRepository } from '../../domain/repositories/payment.repository';
 import { PaymentApiRepository } from '../../data/repositories/payment-api.repository';
 import { NotificationService } from '../../core/services/notification.service';
@@ -18,6 +20,7 @@ import { ServiceCost } from '../../domain/models/service-cost.model';
 import { Residence, PropertyType } from '../../domain/models/residence.model';
 import { GetPendingCostsByResidenceUseCase } from '../../domain/use-cases/service-cost/get-pending-costs-by-residence.usecase';
 import { GetAllResidencesUseCase } from '../../domain/use-cases/residence/get-all-residences.usecase';
+import { CardPaymentDialogComponent, CardPaymentDialogData } from '../card-payment-dialog/card-payment-dialog.component';
 
 @Component({
   selector: 'app-my-payments',
@@ -32,7 +35,9 @@ import { GetAllResidencesUseCase } from '../../domain/use-cases/residence/get-al
     MatIconModule,
     MatChipsModule,
     MatProgressSpinnerModule,
-    MatDividerModule
+    MatDividerModule,
+    MatDialogModule,
+    MatTooltipModule
   ],
   providers: [
     { provide: PaymentRepository, useClass: PaymentApiRepository }
@@ -46,6 +51,7 @@ export class MyPaymentsComponent implements OnInit {
   authService = inject(AuthService); // Public for template access
   private getPendingCosts = inject(GetPendingCostsByResidenceUseCase);
   private getAllResidences = inject(GetAllResidencesUseCase);
+  private dialog = inject(MatDialog);
 
   PaymentStatus = PaymentStatus;
   PaymentMethod = PaymentMethod;
@@ -260,5 +266,38 @@ export class MyPaymentsComponent implements OnInit {
 
   getPrecioCompra(): number {
     return this.residence?.precio || 0;
+  }
+
+  openCardPayment(cost: ServiceCost): void {
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) {
+      this.notificationService.error('Usuario no autenticado');
+      return;
+    }
+
+    console.log('[MY-PAYMENTS] Opening card payment dialog for cost:', cost);
+
+    const dialogData: CardPaymentDialogData = {
+      amount: cost.monto,
+      serviceCostId: cost.id,
+      residentId: currentUser.id,
+      serviceName: cost.nombre_servicio
+    };
+
+    const dialogRef = this.dialog.open(CardPaymentDialogComponent, {
+      width: '600px',
+      maxWidth: '95vw',
+      data: dialogData,
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('[MY-PAYMENTS] Card payment dialog closed:', result);
+      if (result?.success) {
+        // Recargar datos después de un pago exitoso
+        this.loadPendingCosts();
+        this.loadMyPayments();
+      }
+    });
   }
 }

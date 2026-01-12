@@ -16,7 +16,7 @@ import { PaymentService } from '../../../core/services/payment.service';
 import { GetAllServiceCostsUseCase } from '../../../domain/use-cases/service-cost/get-all-service-costs.usecase';
 import { GetActiveResidentsUseCase } from '../../../domain/use-cases/user/get-active-residents.usecase';
 import { ServiceCost } from '../../../domain/models/service-cost.model';
-import { User } from '../../../domain/models/user.model';
+import { User, UserRole } from '../../../domain/models/user.model';
 import { NotificationService } from '../../../core/services/notification.service';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -60,32 +60,7 @@ export class PaymentFormComponent implements OnInit {
   users: User[] = [];
   selectedCost: ServiceCost | null = null;
 
-  metodosPago = [
-    {
-      value: 'Efectivo',
-      label: 'Efectivo',
-      icon: 'payments',
-      description: 'Pago en efectivo'
-    },
-    {
-      value: 'Tarjeta',
-      label: 'Tarjeta',
-      icon: 'credit_card',
-      description: 'Tarjeta de crédito o débito'
-    },
-    {
-      value: 'Transferencia',
-      label: 'Transferencia',
-      icon: 'account_balance',
-      description: 'Transferencia bancaria'
-    },
-    {
-      value: 'Cheque',
-      label: 'Cheque',
-      icon: 'receipt',
-      description: 'Pago con cheque'
-    }
-  ];
+  metodosPago: any[] = [];
 
   estados = [
     {
@@ -109,6 +84,7 @@ export class PaymentFormComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    this.initPaymentMethods();
     this.initForm();
     this.loadServiceCosts();
     this.loadUsers();
@@ -116,14 +92,43 @@ export class PaymentFormComponent implements OnInit {
     this.checkQueryParams();
   }
 
+  initPaymentMethods(): void {
+    const currentUser = this.authService.getCurrentUser();
+    const isAdmin = currentUser?.rol === UserRole.ADMINISTRADOR || currentUser?.rol === UserRole.SUPER_ADMIN;
+
+    if (isAdmin) {
+      // Admin solo puede registrar pagos en efectivo
+      this.metodosPago = [
+        {
+          value: 'Efectivo',
+          label: 'Efectivo',
+          icon: 'payments',
+          description: 'Pago en efectivo'
+        }
+      ];
+    } else {
+      // Residente solo puede pagar con tarjeta
+      this.metodosPago = [
+        {
+          value: 'Tarjeta',
+          label: 'Tarjeta',
+          icon: 'credit_card',
+          description: 'Tarjeta de crédito o débito'
+        }
+      ];
+    }
+  }
+
   initForm(): void {
     const currentUser = this.authService.getCurrentUser();
+    const isAdmin = currentUser?.rol === UserRole.ADMINISTRADOR || currentUser?.rol === UserRole.SUPER_ADMIN;
+    const defaultMetodo = isAdmin ? 'Efectivo' : 'Tarjeta';
 
     this.paymentForm = this.fb.group({
       usuario_id: [currentUser?.id, [Validators.required]],
       costo_servicio_id: [null, [Validators.required]],
       monto: ['', [Validators.required, Validators.min(0.01)]],
-      metodo_pago: ['Efectivo', [Validators.required]],
+      metodo_pago: [defaultMetodo, [Validators.required]],
       fecha_pago: [new Date(), [Validators.required]],
       referencia: [''],
       notas: [''],
@@ -136,12 +141,16 @@ export class PaymentFormComponent implements OnInit {
   }
 
   loadServiceCosts(): void {
-    this.getAllServiceCosts.execute({ page: 1, limit: 1000, estado: 'Pendiente' }).subscribe({
+    console.log('[PAYMENT-FORM] Loading service costs...');
+    // Cargar todos los costos de servicio, no solo pendientes
+    this.getAllServiceCosts.execute({ page: 1, limit: 1000 }).subscribe({
       next: (response) => {
         this.serviceCosts = response.data;
+        console.log('[PAYMENT-FORM] Service costs loaded:', this.serviceCosts.length);
       },
       error: (error) => {
-        console.error('Error loading service costs:', error);
+        console.error('[PAYMENT-FORM] Error loading service costs:', error);
+        this.notificationService.error('Error al cargar costos de servicio');
       }
     });
   }

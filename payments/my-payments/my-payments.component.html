@@ -170,11 +170,11 @@
               <button
                 mat-raised-button
                 color="primary"
-                [routerLink]="['/payments/new']"
-                [queryParams]="{costo_id: cost.id, usuario_id: authService.getCurrentUser()?.id}"
+                (click)="openCardPayment(cost)"
+                matTooltip="Pagar con tarjeta de crédito o débito"
               >
-                <mat-icon>payment</mat-icon>
-                Pagar
+                <mat-icon>credit_card</mat-icon>
+                Pagar con Tarjeta
               </button>
             </td>
           </ng-container>
