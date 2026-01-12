@@ -15,6 +15,69 @@
     </div>
   </div>
 
+  <!-- Residence Summary Card -->
+  <mat-card class="residence-summary-card" *ngIf="residence && !isLoadingResidence">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>home</mat-icon>
+        Mi Residencia
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="residence-info">
+        <div class="info-row">
+          <div class="info-item">
+            <mat-icon>apartment</mat-icon>
+            <div>
+              <span class="label">Unidad</span>
+              <span class="value">{{ residence.numero_unidad }}</span>
+            </div>
+          </div>
+          <div class="info-item" *ngIf="residence.bloque">
+            <mat-icon>domain</mat-icon>
+            <div>
+              <span class="label">Bloque</span>
+              <span class="value">{{ residence.bloque }}</span>
+            </div>
+          </div>
+          <div class="info-item" *ngIf="residence.area_m2">
+            <mat-icon>square_foot</mat-icon>
+            <div>
+              <span class="label">Área</span>
+              <span class="value">{{ residence.area_m2 }} m²</span>
+            </div>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Para Renta -->
+        <div class="property-type-info" *ngIf="isRenta()">
+          <div class="property-type-badge renta">
+            <mat-icon>event_repeat</mat-icon>
+            <span>Renta Mensual</span>
+          </div>
+          <div class="monthly-rent">
+            <span class="label">Pago Mensual:</span>
+            <span class="amount">{{ formatCurrency(getPrecioMensual()) }}</span>
+          </div>
+        </div>
+
+        <!-- Para Compra -->
+        <div class="property-type-info" *ngIf="isCompra()">
+          <div class="property-type-badge compra">
+            <mat-icon>shopping_cart</mat-icon>
+            <span>Compra</span>
+          </div>
+          <div class="purchase-price">
+            <span class="label">Precio de Compra:</span>
+            <span class="amount">{{ formatCurrency(getPrecioCompra()) }}</span>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
   <!-- Statistics Summary -->
   <div class="stats-summary">
     <div class="stat-card completed">
@@ -26,7 +89,8 @@
       </div>
     </div>
 
-    <div class="stat-card pending">
+    <!-- Solo mostrar pendientes para renta -->
+    <div class="stat-card pending" *ngIf="isRenta()">
       <mat-icon>schedule</mat-icon>
       <div class="stat-content">
         <span class="stat-label">Pendiente de Pagar</span>
@@ -45,8 +109,8 @@
     </div>
   </div>
 
-  <!-- Pending Costs Table -->
-  <mat-card class="table-card" *ngIf="pendingCosts.length > 0">
+  <!-- Pending Costs Table - Solo para renta -->
+  <mat-card class="table-card" *ngIf="isRenta() && pendingCosts.length > 0">
     <mat-card-header>
       <mat-card-title>
         <mat-icon>warning</mat-icon>

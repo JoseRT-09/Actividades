@@ -15,6 +15,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Payment, PaymentStatus, PaymentMethod } from '../../domain/models/payment.model';
 import { ServiceCost } from '../../domain/models/service-cost.model';
+import { Residence, PropertyType } from '../../domain/models/residence.model';
 import { GetPendingCostsByResidenceUseCase } from '../../domain/use-cases/service-cost/get-pending-costs-by-residence.usecase';
 import { GetAllResidencesUseCase } from '../../domain/use-cases/residence/get-all-residences.usecase';
 
@@ -48,12 +49,15 @@ export class MyPaymentsComponent implements OnInit {
 
   PaymentStatus = PaymentStatus;
   PaymentMethod = PaymentMethod;
+  PropertyType = PropertyType;
 
   payments: Payment[] = [];
   pendingCosts: ServiceCost[] = [];
+  residence: Residence | null = null;
   residenceId: number | null = null;
   isLoading = false;
   isLoadingCosts = false;
+  isLoadingResidence = false;
   totalPayments = 0;
   pageSize = 10;
   pageIndex = 0;
@@ -89,15 +93,23 @@ export class MyPaymentsComponent implements OnInit {
     const userId = this.authService.getCurrentUser()?.id;
     if (!userId) return;
 
+    this.isLoadingResidence = true;
     this.getAllResidences.execute({ residente_actual_id: userId, limit: 1 }).subscribe({
       next: (response) => {
         if (response.data && response.data.length > 0) {
-          this.residenceId = response.data[0].id;
-          this.loadPendingCosts();
+          this.residence = response.data[0];
+          this.residenceId = this.residence.id;
+
+          // Solo cargar costos pendientes si es renta
+          if (this.residence.tipo_propiedad === PropertyType.RENTA) {
+            this.loadPendingCosts();
+          }
         }
+        this.isLoadingResidence = false;
       },
       error: (error) => {
         console.error('Error al cargar residencia:', error);
+        this.isLoadingResidence = false;
       }
     });
   }
@@ -207,5 +219,22 @@ export class MyPaymentsComponent implements OnInit {
       [PaymentMethod.CHEQUE]: 'receipt'
     };
     return methodMap[method] || 'payment';
+  }
+
+  // Helpers para tipo de propiedad
+  isRenta(): boolean {
+    return this.residence?.tipo_propiedad === PropertyType.RENTA;
+  }
+
+  isCompra(): boolean {
+    return this.residence?.tipo_propiedad === PropertyType.COMPRA;
+  }
+
+  getPrecioMensual(): number {
+    return this.residence?.precio || 0;
+  }
+
+  getPrecioCompra(): number {
+    return this.residence?.precio || 0;
   }
 }

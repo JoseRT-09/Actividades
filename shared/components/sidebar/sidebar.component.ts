@@ -53,7 +53,8 @@ export class SidebarComponent implements OnInit {
     {
       icon: 'home',
       label: 'Residencias',
-      route: '/residences'
+      route: '/residences',
+      roles: [UserRole.ADMINISTRADOR, UserRole.SUPER_ADMIN]
     },
     {
       icon: 'payment',
