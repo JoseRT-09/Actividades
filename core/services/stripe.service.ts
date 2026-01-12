@@ -59,13 +59,17 @@ export class StripeService {
         // Crear el registro de pago en el sistema
         const paymentData: CreatePaymentData = {
           residente_id: residentId,
-          servicio_costo_id: serviceCostId,
           monto_pagado: amount,
           metodo_pago: 'Tarjeta',
           fecha_pago: new Date().toISOString().split('T')[0],
           referencia: transactionId,
           notas: `Pago procesado con tarjeta terminada en ${cardInfo.cardNumber.slice(-4)}`
         };
+
+        // Solo agregar servicio_costo_id si existe
+        if (serviceCostId && serviceCostId > 0) {
+          paymentData.servicio_costo_id = serviceCostId;
+        }
 
         this.paymentService.createPayment(paymentData).subscribe({
           next: (response) => {

@@ -15,9 +15,10 @@ import { MatTableModule } from '@angular/material/table';
 import { GetResidenceByIdUseCase } from '../../../domain/use-cases/residence/get-residence-by-id.usecase';
 import { DeleteResidenceUseCase } from '../../../domain/use-cases/residence/delete-residence.usecase';
 import { GetReassignmentHistoryUseCase } from '../../../domain/use-cases/residence/get-reassignment-history.usecase';
-import { Residence, ResidenceStatus, ReassignmentHistory } from '../../../domain/models/residence.model';
+import { Residence, ResidenceStatus, ReassignmentHistory, PropertyType } from '../../../domain/models/residence.model';
 import { NotificationService } from '../../../core/services/notification.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { PaymentService } from '../../../core/services/payment.service';
 
 @Component({
   selector: 'app-residence-detail',
@@ -48,12 +49,15 @@ export class ResidenceDetailComponent implements OnInit {
   private getReassignmentHistory = inject(GetReassignmentHistoryUseCase);
   private notificationService = inject(NotificationService);
   private authService = inject(AuthService);
+  private paymentService = inject(PaymentService);
 
+  PropertyType = PropertyType;
   residence: Residence | null = null;
   reassignmentHistory: ReassignmentHistory[] = [];
   isLoading = true;
   isLoadingHistory = false;
   residenceId!: number;
+  paymentsCount = 0;
 
   displayedColumns: string[] = ['fecha', 'tipo', 'residente_anterior', 'residente_nuevo', 'motivo'];
 
@@ -77,10 +81,11 @@ export class ResidenceDetailComponent implements OnInit {
 
   loadResidence(): void {
     this.isLoading = true;
-    
+
     this.getResidenceById.execute(this.residenceId).subscribe({
       next: (residence) => {
         this.residence = residence;
+        this.loadPaymentsCount();
         this.calculateStats();
         this.isLoading = false;
       },
@@ -88,6 +93,28 @@ export class ResidenceDetailComponent implements OnInit {
         this.notificationService.error('Error al cargar residencia');
         this.router.navigate(['/residences']);
         this.isLoading = false;
+      }
+    });
+  }
+
+  loadPaymentsCount(): void {
+    if (!this.residence?.residente_actual_id) {
+      console.log('[RESIDENCE-DETAIL] No hay residente actual asignado');
+      return;
+    }
+
+    console.log('[RESIDENCE-DETAIL] Loading payments for resident:', this.residence.residente_actual_id);
+
+    this.paymentService.getPaymentsByResident(this.residence.residente_actual_id).subscribe({
+      next: (response) => {
+        this.paymentsCount = response.count || 0;
+        console.log('[RESIDENCE-DETAIL] Payments count:', this.paymentsCount);
+        this.stats[2].value = this.paymentsCount;
+      },
+      error: (error) => {
+        console.error('[RESIDENCE-DETAIL] Error loading payments:', error);
+        this.paymentsCount = 0;
+        this.stats[2].value = 0;
       }
     });
   }
@@ -122,9 +149,10 @@ export class ResidenceDetailComponent implements OnInit {
     const years = Math.floor((now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24 * 365));
     this.stats[0].value = years > 0 ? years : 0;
 
+    // stats[2] (Pagos Recibidos) se actualiza en loadPaymentsCount()
     // Los demás valores se cargarían de otras fuentes en producción
-    this.stats[2].value = 12; // Ejemplo
-    this.stats[3].value = 3;  // Ejemplo
+    this.stats[1].value = this.reassignmentHistory.length; // Cambios de residente
+    this.stats[3].value = 0; // Reportes (placeholder)
   }
 
   onEdit(): void {

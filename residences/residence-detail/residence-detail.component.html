@@ -93,10 +93,22 @@
           </div>
         </div>
 
-        <mat-chip [class]="getStatusClass(residence.estado)" class="status-chip-large">
-          <mat-icon>{{ getStatusIcon(residence.estado) }}</mat-icon>
-          {{ residence.estado }}
-        </mat-chip>
+        <div class="header-badges">
+          <mat-chip [class]="getStatusClass(residence.estado)" class="status-chip-large">
+            <mat-icon>{{ getStatusIcon(residence.estado) }}</mat-icon>
+            {{ residence.estado }}
+          </mat-chip>
+
+          <!-- Property Type Badge -->
+          <mat-chip *ngIf="residence.tipo_propiedad === PropertyType.RENTA" class="property-type-chip renta">
+            <mat-icon>event_repeat</mat-icon>
+            Renta Mensual
+          </mat-chip>
+          <mat-chip *ngIf="residence.tipo_propiedad === PropertyType.COMPRA" class="property-type-chip compra">
+            <mat-icon>shopping_cart</mat-icon>
+            Propiedad Adquirida
+          </mat-chip>
+        </div>
       </div>
 
       <div class="info-grid">

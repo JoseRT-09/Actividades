@@ -300,4 +300,45 @@ export class MyPaymentsComponent implements OnInit {
       }
     });
   }
+
+  openRentPayment(): void {
+    if (!this.residence) {
+      this.notificationService.error('No se pudo cargar la información de la residencia');
+      return;
+    }
+
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) {
+      this.notificationService.error('Usuario no autenticado');
+      return;
+    }
+
+    console.log('[MY-PAYMENTS] Opening rent payment dialog:', {
+      amount: this.getPrecioMensual(),
+      residence: this.residence.numero_unidad
+    });
+
+    const dialogData: CardPaymentDialogData = {
+      amount: this.getPrecioMensual(),
+      serviceCostId: 0, // No hay costo de servicio específico para renta
+      residentId: currentUser.id,
+      serviceName: `Renta Mensual - Unidad ${this.residence.numero_unidad}`
+    };
+
+    const dialogRef = this.dialog.open(CardPaymentDialogComponent, {
+      width: '600px',
+      maxWidth: '95vw',
+      data: dialogData,
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('[MY-PAYMENTS] Rent payment dialog closed:', result);
+      if (result?.success) {
+        // Recargar datos después de un pago exitoso
+        this.loadUserResidence();
+        this.loadMyPayments();
+      }
+    });
+  }
 }

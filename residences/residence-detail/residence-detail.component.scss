@@ -590,3 +590,40 @@
     padding: 0;
   }
 }
+
+// Property Type Chips
+.header-badges {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.property-type-chip {
+  font-weight: 600;
+  font-size: 13px;
+  padding: 16px 20px;
+  height: auto;
+
+  mat-icon {
+    margin-right: 6px;
+  }
+
+  &.renta {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+
+    mat-icon {
+      color: white;
+    }
+  }
+
+  &.compra {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+
+    mat-icon {
+      color: white;
+    }
+  }
+}

@@ -10,69 +10,77 @@
           <mat-icon>receipt_long</mat-icon>
           Mis Pagos
         </h1>
-        <p class="subtitle">Historial de pagos y estado de cuenta</p>
+        <p class="subtitle">Gestiona tus pagos y consulta tu historial</p>
       </div>
     </div>
   </div>
 
-  <!-- Residence Summary Card -->
-  <mat-card class="residence-summary-card" *ngIf="residence && !isLoadingResidence">
-    <mat-card-header>
-      <mat-card-title>
-        <mat-icon>home</mat-icon>
-        Mi Residencia
-      </mat-card-title>
-    </mat-card-header>
+  <!-- Residence Summary Card with Payment Action -->
+  <mat-card class="residence-payment-card" *ngIf="residence && !isLoadingResidence">
     <mat-card-content>
-      <div class="residence-info">
-        <div class="info-row">
-          <div class="info-item">
-            <mat-icon>apartment</mat-icon>
+      <div class="residence-payment-layout">
+        <!-- Residence Info -->
+        <div class="residence-info-section">
+          <div class="residence-header">
+            <mat-icon class="home-icon">home</mat-icon>
             <div>
-              <span class="label">Unidad</span>
-              <span class="value">{{ residence.numero_unidad }}</span>
+              <h2>{{ residence.numero_unidad }}</h2>
+              <p class="residence-details">
+                <span *ngIf="residence.bloque">Bloque {{ residence.bloque }}</span>
+                <span *ngIf="residence.area_m2"> • {{ residence.area_m2 }} m²</span>
+              </p>
             </div>
           </div>
-          <div class="info-item" *ngIf="residence.bloque">
-            <mat-icon>domain</mat-icon>
-            <div>
-              <span class="label">Bloque</span>
-              <span class="value">{{ residence.bloque }}</span>
+
+          <mat-divider class="vertical-divider"></mat-divider>
+
+          <!-- Property Type Badge -->
+          <div class="property-type-section">
+            <!-- Para Renta -->
+            <div class="property-type-info" *ngIf="isRenta()">
+              <div class="property-type-badge renta">
+                <mat-icon>event_repeat</mat-icon>
+                <span>Renta Mensual</span>
+              </div>
+              <div class="price-display">
+                <span class="price-label">Pago Mensual</span>
+                <span class="price-amount">{{ formatCurrency(getPrecioMensual()) }}</span>
+              </div>
             </div>
-          </div>
-          <div class="info-item" *ngIf="residence.area_m2">
-            <mat-icon>square_foot</mat-icon>
-            <div>
-              <span class="label">Área</span>
-              <span class="value">{{ residence.area_m2 }} m²</span>
+
+            <!-- Para Compra -->
+            <div class="property-type-info" *ngIf="isCompra()">
+              <div class="property-type-badge compra">
+                <mat-icon>shopping_cart</mat-icon>
+                <span>Propiedad Adquirida</span>
+              </div>
+              <div class="price-display">
+                <span class="price-label">Precio de Compra</span>
+                <span class="price-amount">{{ formatCurrency(getPrecioCompra()) }}</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <mat-divider></mat-divider>
-
-        <!-- Para Renta -->
-        <div class="property-type-info" *ngIf="isRenta()">
-          <div class="property-type-badge renta">
-            <mat-icon>event_repeat</mat-icon>
-            <span>Renta Mensual</span>
-          </div>
-          <div class="monthly-rent">
-            <span class="label">Pago Mensual:</span>
-            <span class="amount">{{ formatCurrency(getPrecioMensual()) }}</span>
-          </div>
-        </div>
-
-        <!-- Para Compra -->
-        <div class="property-type-info" *ngIf="isCompra()">
-          <div class="property-type-badge compra">
-            <mat-icon>shopping_cart</mat-icon>
-            <span>Compra</span>
-          </div>
-          <div class="purchase-price">
-            <span class="label">Precio de Compra:</span>
-            <span class="amount">{{ formatCurrency(getPrecioCompra()) }}</span>
-          </div>
+        <!-- Payment Action Button - Solo para renta -->
+        <div class="payment-action-section" *ngIf="isRenta()">
+          <button
+            mat-raised-button
+            color="primary"
+            class="pay-rent-button"
+            (click)="openRentPayment()"
+            matTooltip="Pagar la renta mensual con tarjeta"
+          >
+            <mat-icon>credit_card</mat-icon>
+            <div class="button-content">
+              <span class="button-label">Pagar Renta del Mes</span>
+              <span class="button-amount">{{ formatCurrency(getPrecioMensual()) }}</span>
+            </div>
+          </button>
+          <p class="payment-hint">
+            <mat-icon>info</mat-icon>
+            Pago seguro con tarjeta de crédito o débito
+          </p>
         </div>
       </div>
     </mat-card-content>
@@ -110,12 +118,13 @@
   </div>
 
   <!-- Pending Costs Table - Solo para renta -->
-  <mat-card class="table-card" *ngIf="isRenta() && pendingCosts.length > 0">
+  <mat-card class="table-card pending-costs-card" *ngIf="isRenta() && pendingCosts.length > 0">
     <mat-card-header>
       <mat-card-title>
         <mat-icon>warning</mat-icon>
-        Costos Pendientes de Pago
+        Otros Cargos Pendientes
       </mat-card-title>
+      <p class="card-subtitle">Servicios adicionales por pagar</p>
     </mat-card-header>
     <mat-card-content>
       <div *ngIf="isLoadingCosts" class="loading-container">
@@ -146,7 +155,7 @@
 
           <!-- Fecha Vencimiento Column -->
           <ng-container matColumnDef="fecha_vencimiento">
-            <th mat-header-cell *matHeaderCellDef>Fecha de Vencimiento</th>
+            <th mat-header-cell *matHeaderCellDef>Vencimiento</th>
             <td mat-cell *matCellDef="let cost">
               <div class="vencimiento-info">
                 <mat-icon>event</mat-icon>
@@ -172,9 +181,10 @@
                 color="primary"
                 (click)="openCardPayment(cost)"
                 matTooltip="Pagar con tarjeta de crédito o débito"
+                class="pay-button-small"
               >
                 <mat-icon>credit_card</mat-icon>
-                Pagar con Tarjeta
+                Pagar
               </button>
             </td>
           </ng-container>
@@ -186,10 +196,15 @@
     </mat-card-content>
   </mat-card>
 
-  <mat-divider *ngIf="pendingCosts.length > 0"></mat-divider>
-
   <!-- Payments History Table -->
-  <mat-card class="table-card">
+  <mat-card class="table-card history-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>history</mat-icon>
+        Historial de Pagos
+      </mat-card-title>
+      <p class="card-subtitle">Todos tus pagos realizados</p>
+    </mat-card-header>
     <mat-card-content>
       <div *ngIf="isLoading" class="loading-container">
         <mat-spinner diameter="50"></mat-spinner>
@@ -200,7 +215,7 @@
         <table mat-table [dataSource]="payments" class="payments-table">
           <!-- Fecha Pago Column -->
           <ng-container matColumnDef="fecha_pago">
-            <th mat-header-cell *matHeaderCellDef>Fecha de Pago</th>
+            <th mat-header-cell *matHeaderCellDef>Fecha</th>
             <td mat-cell *matCellDef="let payment">
               <div class="fecha-info">
                 <mat-icon>event</mat-icon>
@@ -224,18 +239,13 @@
           <ng-container matColumnDef="monto">
             <th mat-header-cell *matHeaderCellDef>Monto</th>
             <td mat-cell *matCellDef="let payment">
-              <div class="monto-info">
-                <span class="monto-pagado">{{ formatCurrency(payment.monto_pagado) }}</span>
-                <small *ngIf="payment.monto !== payment.monto_pagado">
-                  de {{ formatCurrency(payment.monto) }}
-                </small>
-              </div>
+              <span class="monto-pagado">{{ formatCurrency(payment.monto_pagado) }}</span>
             </td>
           </ng-container>
 
           <!-- Método de Pago Column -->
           <ng-container matColumnDef="metodo_pago">
-            <th mat-header-cell *matHeaderCellDef>Método de Pago</th>
+            <th mat-header-cell *matHeaderCellDef>Método</th>
             <td mat-cell *matCellDef="let payment">
               <div class="metodo-info">
                 <mat-icon>{{ getPaymentMethodIcon(payment.metodo_pago) }}</mat-icon>
