@@ -18,7 +18,7 @@ const Payment = sequelize.define('Payment', {
   },
   servicio_costo_id: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true, // Permitir null para pagos directos de renta
     references: {
       model: 'service_costs',
       key: 'id'
@@ -40,6 +40,10 @@ const Payment = sequelize.define('Payment', {
   },
   comprobante_url: {
     type: DataTypes.STRING(255)
+  },
+  notas: {
+    type: DataTypes.TEXT,
+    allowNull: true
   }
 }, {
   tableName: 'payments',

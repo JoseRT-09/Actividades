@@ -92,8 +92,10 @@ exports.createPayment = async (req, res) => {
       servicio_costo_id,
       monto_pagado,
       metodo_pago,
+      fecha_pago,
       referencia,
-      comprobante_url
+      comprobante_url,
+      notas
     } = req.body;
 
     let serviceCost = null;
@@ -117,8 +119,10 @@ exports.createPayment = async (req, res) => {
       servicio_costo_id: servicio_costo_id || null,
       monto_pagado,
       metodo_pago,
+      fecha_pago: fecha_pago || new Date(),
       referencia,
-      comprobante_url
+      comprobante_url,
+      notas
     });
     console.log('[PAYMENTS] createPayment - Pago creado con ID:', payment.id);
 
