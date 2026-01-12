@@ -91,41 +91,60 @@ export class MyPaymentsComponent implements OnInit {
 
   loadUserResidence(): void {
     const userId = this.authService.getCurrentUser()?.id;
+    console.log('[MY-PAYMENTS] loadUserResidence - User ID:', userId);
     if (!userId) return;
 
     this.isLoadingResidence = true;
     this.getAllResidences.execute({ residente_actual_id: userId, limit: 1 }).subscribe({
       next: (response) => {
+        console.log('[MY-PAYMENTS] loadUserResidence - Response:', response);
         if (response.data && response.data.length > 0) {
           this.residence = response.data[0];
           this.residenceId = this.residence.id;
+          console.log('[MY-PAYMENTS] loadUserResidence - Residence loaded:', {
+            id: this.residence.id,
+            numero_unidad: this.residence.numero_unidad,
+            tipo_propiedad: this.residence.tipo_propiedad,
+            precio: this.residence.precio
+          });
 
           // Solo cargar costos pendientes si es renta
           if (this.residence.tipo_propiedad === PropertyType.RENTA) {
+            console.log('[MY-PAYMENTS] loadUserResidence - Es renta, cargando costos pendientes');
             this.loadPendingCosts();
+          } else {
+            console.log('[MY-PAYMENTS] loadUserResidence - Es compra, no se cargan costos pendientes');
           }
+        } else {
+          console.log('[MY-PAYMENTS] loadUserResidence - No residence found for user');
         }
         this.isLoadingResidence = false;
       },
       error: (error) => {
-        console.error('Error al cargar residencia:', error);
+        console.error('[MY-PAYMENTS] loadUserResidence - Error:', error);
         this.isLoadingResidence = false;
       }
     });
   }
 
   loadPendingCosts(): void {
-    if (!this.residenceId) return;
+    if (!this.residenceId) {
+      console.log('[MY-PAYMENTS] loadPendingCosts - No residence ID');
+      return;
+    }
 
+    console.log('[MY-PAYMENTS] loadPendingCosts - Loading for residence:', this.residenceId);
     this.isLoadingCosts = true;
     this.getPendingCosts.execute(this.residenceId).subscribe({
       next: (response) => {
+        console.log('[MY-PAYMENTS] loadPendingCosts - Response:', response);
         this.pendingCosts = response.pendingCosts;
         this.totalPendingCosts = response.totalPending;
+        console.log('[MY-PAYMENTS] loadPendingCosts - Loaded:', this.pendingCosts.length, 'pending costs');
         this.isLoadingCosts = false;
       },
       error: (error) => {
-        console.error('Error al cargar costos pendientes:', error);
+        console.error('[MY-PAYMENTS] loadPendingCosts - Error:', error);
         this.isLoadingCosts = false;
       }
     });
@@ -134,8 +153,10 @@ export class MyPaymentsComponent implements OnInit {
   loadMyPayments(): void {
     this.isLoading = true;
     const userId = this.authService.getCurrentUser()?.id;
+    console.log('[MY-PAYMENTS] loadMyPayments - User ID:', userId);
 
     if (!userId) {
+      console.log('[MY-PAYMENTS] loadMyPayments - No user ID');
       this.notificationService.error('Usuario no autenticado');
       this.isLoading = false;
       return;
@@ -143,13 +164,16 @@ export class MyPaymentsComponent implements OnInit {
 
     this.paymentRepository.getByResident(userId).subscribe({
       next: (response) => {
+        console.log('[MY-PAYMENTS] loadMyPayments - Response:', response);
         this.payments = response.payments;
         this.totalPayments = response.payments.length;
         this.totalPaid = response.totalPaid;
+        console.log('[MY-PAYMENTS] loadMyPayments - Loaded:', this.payments.length, 'payments, Total paid:', this.totalPaid);
         this.calculateStatistics();
         this.isLoading = false;
       },
       error: (error: any) => {
+        console.error('[MY-PAYMENTS] loadMyPayments - Error:', error);
         this.notificationService.error('Error al cargar pagos');
         this.isLoading = false;
       }

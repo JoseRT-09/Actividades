@@ -188,6 +188,7 @@ exports.updateOverdueCosts = async (req, res) => {
 exports.getPendingCostsByResidence = async (req, res) => {
   try {
     const { residencia_id } = req.params;
+    console.log("[SERVICE_COSTS] getPendingCostsByResidence - Residencia ID:", residencia_id);
 
     const pendingCosts = await ServiceCost.findAll({
       where: {
@@ -196,8 +197,10 @@ exports.getPendingCostsByResidence = async (req, res) => {
       },
       order: [['fecha_vencimiento', 'ASC']]
     });
+    console.log("[SERVICE_COSTS] getPendingCostsByResidence - Found:", pendingCosts.length, "pending costs");
 
     const totalPending = pendingCosts.reduce((sum, cost) => sum + parseFloat(cost.monto), 0);
+    console.log("[SERVICE_COSTS] getPendingCostsByResidence - Total pending:", totalPending);
 
     res.json({
       pendingCosts,

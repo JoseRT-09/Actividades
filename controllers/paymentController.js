@@ -7,11 +7,13 @@ const { Op } = require('sequelize'); // Importar Op para consistencia
 // Obtener todos los pagos
 exports.getAllPayments = async (req, res) => {
   try {
+    console.log('[PAYMENTS] getAllPayments - Query params:', req.query);
     const { residente_id, page = 1, limit = 10 } = req.query;
     const offset = (page - 1) * limit;
 
     const where = {};
     if (residente_id) where.residente_id = residente_id;
+    console.log('[PAYMENTS] getAllPayments - Where clause:', where);
 
     const { count, rows } = await Payment.findAndCountAll({
       where,
@@ -35,6 +37,7 @@ exports.getAllPayments = async (req, res) => {
       order: [['fecha_pago', 'DESC']]
     });
 
+    console.log('[PAYMENTS] getAllPayments - Found:', count, 'payments');
     res.json({
       total: count,
       pages: Math.ceil(count / limit),
@@ -42,7 +45,7 @@ exports.getAllPayments = async (req, res) => {
       payments: rows
     });
   } catch (error) {
-    console.error('Error al obtener pagos:', error);
+    console.error('[PAYMENTS] getAllPayments - Error:', error);
     res.status(500).json({ message: 'Error al obtener pagos', error: error.message });
   }
 };
@@ -83,6 +86,7 @@ exports.getPaymentById = async (req, res) => {
 // Registrar pago
 exports.createPayment = async (req, res) => {
   try {
+    console.log('[PAYMENTS] createPayment - Request body:', req.body);
     const {
       residente_id,
       servicio_costo_id,
@@ -93,10 +97,13 @@ exports.createPayment = async (req, res) => {
     } = req.body;
 
     // Verificar que el costo de servicio existe
+    console.log('[PAYMENTS] createPayment - Buscando servicio costo ID:', servicio_costo_id);
     const serviceCost = await ServiceCost.findByPk(servicio_costo_id);
     if (!serviceCost) {
+      console.log('[PAYMENTS] createPayment - Servicio costo no encontrado');
       return res.status(404).json({ message: 'Costo de servicio no encontrado' });
     }
+    console.log('[PAYMENTS] createPayment - Servicio costo encontrado:', serviceCost.nombre_servicio);
 
     // Crear el pago
     const payment = await Payment.create({
@@ -107,10 +114,12 @@ exports.createPayment = async (req, res) => {
       referencia,
       comprobante_url
     });
+    console.log('[PAYMENTS] createPayment - Pago creado con ID:', payment.id);
 
     // Actualizar el estado del costo de servicio si el monto pagado es >= al monto del servicio
     if (parseFloat(monto_pagado) >= parseFloat(serviceCost.monto)) {
       await serviceCost.update({ estado: ESTADOS_COSTO.PAGADO });
+      console.log('[PAYMENTS] createPayment - Estado del servicio actualizado a PAGADO');
     }
 
     const paymentWithDetails = await Payment.findByPk(payment.id, {
@@ -131,12 +140,13 @@ exports.createPayment = async (req, res) => {
       ]
     });
 
+    console.log('[PAYMENTS] createPayment - Pago registrado exitosamente');
     res.status(201).json({
       message: 'Pago registrado exitosamente',
       payment: paymentWithDetails
     });
   } catch (error) {
-    console.error('Error al registrar pago:', error);
+    console.error('[PAYMENTS] createPayment - Error:', error);
     res.status(500).json({ message: 'Error al registrar pago', error: error.message });
   }
 };
@@ -145,6 +155,7 @@ exports.createPayment = async (req, res) => {
 exports.getPaymentsByResident = async (req, res) => {
   try {
     const { residente_id } = req.params;
+    console.log('[PAYMENTS] getPaymentsByResident - Residente ID:', residente_id);
 
     const payments = await Payment.findAll({
       where: { residente_id },
@@ -165,7 +176,9 @@ exports.getPaymentsByResident = async (req, res) => {
       order: [['fecha_pago', 'DESC']]
     });
 
+    console.log('[PAYMENTS] getPaymentsByResident - Pagos encontrados:', payments.length);
     const totalPaid = payments.reduce((sum, payment) => sum + parseFloat(payment.monto_pagado), 0);
+    console.log('[PAYMENTS] getPaymentsByResident - Total pagado:', totalPaid);
 
     res.json({
       payments,
@@ -173,7 +186,7 @@ exports.getPaymentsByResident = async (req, res) => {
       count: payments.length
     });
   } catch (error) {
-    console.error('Error al obtener pagos del residente:', error);
+    console.error('[PAYMENTS] getPaymentsByResident - Error:', error);
     res.status(500).json({ message: 'Error al obtener pagos del residente', error: error.message });
   }
 };

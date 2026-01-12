@@ -6,6 +6,7 @@ const { Op } = require('sequelize');
 // Obtener todas las residencias
 exports.getAllResidences = async (req, res) => {
   try {
+    console.log('[RESIDENCES] getAllResidences - Query params:', req.query);
     const { estado, bloque, search, residente_actual_id, page = 1, limit = 10 } = req.query;
     const offset = (page - 1) * limit;
 
@@ -22,24 +23,26 @@ exports.getAllResidences = async (req, res) => {
       ];
     }
 
+    console.log('[RESIDENCES] getAllResidences - Where clause:', where);
+
     const { count, rows } = await Residence.findAndCountAll({
       where,
       include: [
-        { 
-          model: User, 
-          as: 'dueno', 
+        {
+          model: User,
+          as: 'dueno',
           attributes: ['id', 'nombre', 'apellido', 'email'],
           required: false
         },
-        { 
-          model: User, 
-          as: 'residenteActual', 
+        {
+          model: User,
+          as: 'residenteActual',
           attributes: ['id', 'nombre', 'apellido', 'email'],
           required: false
         },
-        { 
-          model: User, 
-          as: 'administrador', 
+        {
+          model: User,
+          as: 'administrador',
           attributes: ['id', 'nombre', 'apellido', 'email'],
           required: false
         }
@@ -50,6 +53,16 @@ exports.getAllResidences = async (req, res) => {
       distinct: true
     });
 
+    console.log('[RESIDENCES] getAllResidences - Found:', count, 'residences');
+    if (rows.length > 0) {
+      console.log('[RESIDENCES] getAllResidences - First residence:', {
+        id: rows[0].id,
+        numero_unidad: rows[0].numero_unidad,
+        tipo_propiedad: rows[0].tipo_propiedad,
+        precio: rows[0].precio
+      });
+    }
+
     res.json({
       residences: rows,
       total: count,
@@ -57,7 +70,7 @@ exports.getAllResidences = async (req, res) => {
       currentPage: parseInt(page)
     });
   } catch (error) {
-    console.error('Error al obtener residencias:', error);
+    console.error('[RESIDENCES] getAllResidences - Error:', error);
     res.status(500).json({ 
       message: 'Error al obtener residencias', 
       error: error.message,
