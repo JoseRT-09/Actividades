@@ -1,4 +1,4 @@
-import { Component, Inject, inject } from '@angular/core';
+import { Component, Inject, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -38,6 +38,7 @@ export class CardPaymentDialogComponent {
   private stripeService = inject(StripeService);
   private notificationService = inject(NotificationService);
   private dialogRef = inject(MatDialogRef<CardPaymentDialogComponent>);
+  private cdr = inject(ChangeDetectorRef);
 
   cardForm: FormGroup;
   isProcessing = false;
@@ -86,41 +87,46 @@ export class CardPaymentDialogComponent {
 
   onSubmit(): void {
     if (this.cardForm.valid && !this.isProcessing) {
-      this.isProcessing = true;
+      // Usar setTimeout para evitar ExpressionChangedAfterItHasBeenCheckedError
+      setTimeout(() => {
+        this.isProcessing = true;
+        this.cdr.detectChanges();
 
-      const cardInfo: CardInfo = {
-        cardNumber: this.cardForm.value.cardNumber,
-        cardHolder: this.cardForm.value.cardHolder.toUpperCase(),
-        expiryDate: this.cardForm.value.expiryDate,
-        cvv: this.cardForm.value.cvv
-      };
+        const cardInfo: CardInfo = {
+          cardNumber: this.cardForm.value.cardNumber,
+          cardHolder: this.cardForm.value.cardHolder.toUpperCase(),
+          expiryDate: this.cardForm.value.expiryDate,
+          cvv: this.cardForm.value.cvv
+        };
 
-      console.log('[CARD-PAYMENT] Processing payment:', {
-        amount: this.data.amount,
-        serviceName: this.data.serviceName
-      });
+        console.log('[CARD-PAYMENT] Processing payment:', {
+          amount: this.data.amount,
+          serviceName: this.data.serviceName
+        });
 
-      this.stripeService.processCardPayment(
-        cardInfo,
-        this.data.amount,
-        this.data.serviceCostId,
-        this.data.residentId
-      ).subscribe({
-        next: (result) => {
-          console.log('[CARD-PAYMENT] Payment successful:', result);
-          this.notificationService.success(
-            `¡Pago procesado exitosamente! ID: ${result.transactionId}`
-          );
-          this.dialogRef.close({ success: true, result });
-        },
-        error: (error) => {
-          console.error('[CARD-PAYMENT] Payment failed:', error);
-          this.notificationService.error(
-            error.error || 'Error al procesar el pago. Por favor, intente nuevamente.'
-          );
-          this.isProcessing = false;
-        }
-      });
+        this.stripeService.processCardPayment(
+          cardInfo,
+          this.data.amount,
+          this.data.serviceCostId,
+          this.data.residentId
+        ).subscribe({
+          next: (result) => {
+            console.log('[CARD-PAYMENT] Payment successful:', result);
+            this.notificationService.success(
+              `¡Pago procesado exitosamente! ID: ${result.transactionId}`
+            );
+            this.dialogRef.close({ success: true, result });
+          },
+          error: (error) => {
+            console.error('[CARD-PAYMENT] Payment failed:', error);
+            this.notificationService.error(
+              error.error || 'Error al procesar el pago. Por favor, intente nuevamente.'
+            );
+            this.isProcessing = false;
+            this.cdr.detectChanges();
+          }
+        });
+      }, 0);
     } else {
       this.markFormGroupTouched(this.cardForm);
       this.notificationService.warning('Por favor, complete todos los campos correctamente');

@@ -96,19 +96,25 @@ exports.createPayment = async (req, res) => {
       comprobante_url
     } = req.body;
 
-    // Verificar que el costo de servicio existe
-    console.log('[PAYMENTS] createPayment - Buscando servicio costo ID:', servicio_costo_id);
-    const serviceCost = await ServiceCost.findByPk(servicio_costo_id);
-    if (!serviceCost) {
-      console.log('[PAYMENTS] createPayment - Servicio costo no encontrado');
-      return res.status(404).json({ message: 'Costo de servicio no encontrado' });
+    let serviceCost = null;
+
+    // Verificar que el costo de servicio existe (solo si se proporciona)
+    if (servicio_costo_id) {
+      console.log('[PAYMENTS] createPayment - Buscando servicio costo ID:', servicio_costo_id);
+      serviceCost = await ServiceCost.findByPk(servicio_costo_id);
+      if (!serviceCost) {
+        console.log('[PAYMENTS] createPayment - Servicio costo no encontrado');
+        return res.status(404).json({ message: 'Costo de servicio no encontrado' });
+      }
+      console.log('[PAYMENTS] createPayment - Servicio costo encontrado:', serviceCost.nombre_servicio);
+    } else {
+      console.log('[PAYMENTS] createPayment - No se proporcionó servicio_costo_id, creando pago directo de renta');
     }
-    console.log('[PAYMENTS] createPayment - Servicio costo encontrado:', serviceCost.nombre_servicio);
 
     // Crear el pago
     const payment = await Payment.create({
       residente_id,
-      servicio_costo_id,
+      servicio_costo_id: servicio_costo_id || null,
       monto_pagado,
       metodo_pago,
       referencia,
@@ -116,8 +122,8 @@ exports.createPayment = async (req, res) => {
     });
     console.log('[PAYMENTS] createPayment - Pago creado con ID:', payment.id);
 
-    // Actualizar el estado del costo de servicio si el monto pagado es >= al monto del servicio
-    if (parseFloat(monto_pagado) >= parseFloat(serviceCost.monto)) {
+    // Actualizar el estado del costo de servicio si existe y el monto pagado es >= al monto del servicio
+    if (serviceCost && parseFloat(monto_pagado) >= parseFloat(serviceCost.monto)) {
       await serviceCost.update({ estado: ESTADOS_COSTO.PAGADO });
       console.log('[PAYMENTS] createPayment - Estado del servicio actualizado a PAGADO');
     }
@@ -129,6 +135,7 @@ exports.createPayment = async (req, res) => {
           model: ServiceCost,
           as: 'servicioCosto',
           attributes: ['id', 'nombre_servicio', 'monto'],
+          required: false, // LEFT JOIN para que funcione sin servicio costo
           include: [
             {
               model: Residence,

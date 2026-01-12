@@ -39,8 +39,8 @@
 
           <div class="form-grid">
             <!-- Usuario -->
-            <mat-form-field appearance="outline">
-              <mat-label>Usuario que Paga</mat-label>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Residente que Paga</mat-label>
               <mat-select formControlName="usuario_id">
                 <mat-option *ngFor="let user of users" [value]="user.id">
                   <div class="user-option">
@@ -52,59 +52,37 @@
                 </mat-option>
               </mat-select>
               <mat-icon matPrefix>person</mat-icon>
+              <mat-hint>Selecciona el residente para autocompletar el monto de renta</mat-hint>
               <mat-error *ngIf="paymentForm.get('usuario_id')?.invalid">
                 {{ getErrorMessage('usuario_id') }}
-              </mat-error>
-            </mat-form-field>
-
-            <!-- Costo de Servicio -->
-            <mat-form-field appearance="outline">
-              <mat-label>Costo de Servicio</mat-label>
-              <mat-select formControlName="costo_servicio_id">
-                <mat-option *ngFor="let cost of serviceCosts" [value]="cost.id">
-                  <div class="cost-option">
-                    <div class="cost-details">
-                      <span class="cost-name">{{ cost.nombre_servicio }}</span>
-                      <span class="cost-amount">${{ cost.monto | number:'1.2-2' }}</span>
-                    </div>
-                    <span class="cost-residence" *ngIf="cost.residencia">
-                      Unidad {{ cost.residencia.numero_unidad }}
-                    </span>
-                  </div>
-                </mat-option>
-              </mat-select>
-              <mat-icon matPrefix>receipt</mat-icon>
-              <mat-hint>Selecciona el concepto a pagar</mat-hint>
-              <mat-error *ngIf="paymentForm.get('costo_servicio_id')?.invalid">
-                {{ getErrorMessage('costo_servicio_id') }}
               </mat-error>
             </mat-form-field>
           </div>
         </div>
 
-        <!-- Detalles del Costo Seleccionado -->
-        <div class="cost-info-card" *ngIf="selectedCost">
+        <!-- Información de la Residencia -->
+        <div class="cost-info-card" *ngIf="selectedUserResidence">
           <h3>
-            <mat-icon>info</mat-icon>
-            Información del Costo Seleccionado
+            <mat-icon>home</mat-icon>
+            Información de la Residencia
           </h3>
           <mat-divider></mat-divider>
           <div class="cost-info-grid">
             <div class="info-item">
-              <span class="info-label">Concepto:</span>
-              <span class="info-value">{{ selectedCost.nombre_servicio }}</span>
+              <span class="info-label">Unidad:</span>
+              <span class="info-value">{{ selectedUserResidence.numero_unidad }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">Monto Original:</span>
-              <span class="info-value amount">${{ selectedCost.monto | number:'1.2-2' }}</span>
+              <span class="info-label">Renta Mensual:</span>
+              <span class="info-value amount">${{ selectedUserResidence.precio | number:'1.2-2' }}</span>
             </div>
-            <div class="info-item" *ngIf="selectedCost.descripcion">
-              <span class="info-label">Descripción:</span>
-              <span class="info-value">{{ selectedCost.descripcion }}</span>
+            <div class="info-item" *ngIf="selectedUserResidence.bloque">
+              <span class="info-label">Bloque:</span>
+              <span class="info-value">{{ selectedUserResidence.bloque }}</span>
             </div>
-            <div class="info-item">
-              <span class="info-label">Vencimiento:</span>
-              <span class="info-value">{{ selectedCost.fecha_vencimiento | date:'dd/MM/yyyy' }}</span>
+            <div class="info-item" *ngIf="selectedUserResidence.area_m2">
+              <span class="info-label">Área:</span>
+              <span class="info-value">{{ selectedUserResidence.area_m2 }} m²</span>
             </div>
           </div>
         </div>
@@ -156,9 +134,9 @@
             <!-- Fecha de Pago -->
             <mat-form-field appearance="outline">
               <mat-label>Fecha de Pago</mat-label>
-              <input 
-                matInput 
-                [matDatepicker]="pickerPago" 
+              <input
+                matInput
+                [matDatepicker]="pickerPago"
                 formControlName="fecha_pago"
               >
               <mat-datepicker-toggle matIconSuffix [for]="pickerPago"></mat-datepicker-toggle>
@@ -167,20 +145,6 @@
               <mat-error *ngIf="paymentForm.get('fecha_pago')?.invalid">
                 {{ getErrorMessage('fecha_pago') }}
               </mat-error>
-            </mat-form-field>
-
-            <!-- Estado -->
-            <mat-form-field appearance="outline">
-              <mat-label>Estado del Pago</mat-label>
-              <mat-select formControlName="estado">
-                <mat-option *ngFor="let estado of estados" [value]="estado.value">
-                  <div class="select-option">
-                    <mat-icon [style.color]="estado.color">{{ estado.icon }}</mat-icon>
-                    <span>{{ estado.label }}</span>
-                  </div>
-                </mat-option>
-              </mat-select>
-              <mat-icon matPrefix>check_circle</mat-icon>
             </mat-form-field>
           </div>
         </div>
@@ -238,10 +202,6 @@
             <div class="preview-item">
               <span class="preview-label">Fecha:</span>
               <span class="preview-value">{{ paymentForm.get('fecha_pago')?.value | date:'dd/MM/yyyy' }}</span>
-            </div>
-            <div class="preview-item">
-              <span class="preview-label">Estado:</span>
-              <span class="preview-value">{{ paymentForm.get('estado')?.value }}</span>
             </div>
           </div>
         </div>

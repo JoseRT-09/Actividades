@@ -15,8 +15,10 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { PaymentService } from '../../../core/services/payment.service';
 import { GetAllServiceCostsUseCase } from '../../../domain/use-cases/service-cost/get-all-service-costs.usecase';
 import { GetActiveResidentsUseCase } from '../../../domain/use-cases/user/get-active-residents.usecase';
+import { GetAllResidencesUseCase } from '../../../domain/use-cases/residence/get-all-residences.usecase';
 import { ServiceCost } from '../../../domain/models/service-cost.model';
 import { User, UserRole } from '../../../domain/models/user.model';
+import { Residence } from '../../../domain/models/residence.model';
 import { NotificationService } from '../../../core/services/notification.service';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -48,6 +50,7 @@ export class PaymentFormComponent implements OnInit {
   private paymentService = inject(PaymentService);
   private getAllServiceCosts = inject(GetAllServiceCostsUseCase);
   private getActiveResidents = inject(GetActiveResidentsUseCase);
+  private getAllResidences = inject(GetAllResidencesUseCase);
   private notificationService = inject(NotificationService);
   private authService = inject(AuthService);
 
@@ -59,6 +62,7 @@ export class PaymentFormComponent implements OnInit {
   serviceCosts: ServiceCost[] = [];
   users: User[] = [];
   selectedCost: ServiceCost | null = null;
+  selectedUserResidence: Residence | null = null;
 
   metodosPago: any[] = [];
 
@@ -125,18 +129,19 @@ export class PaymentFormComponent implements OnInit {
     const defaultMetodo = isAdmin ? 'Efectivo' : 'Tarjeta';
 
     this.paymentForm = this.fb.group({
-      usuario_id: [currentUser?.id, [Validators.required]],
-      costo_servicio_id: [null, [Validators.required]],
+      usuario_id: [null, [Validators.required]],
       monto: ['', [Validators.required, Validators.min(0.01)]],
       metodo_pago: [defaultMetodo, [Validators.required]],
       fecha_pago: [new Date(), [Validators.required]],
       referencia: [''],
-      notas: [''],
-      estado: ['Completado', [Validators.required]]
+      notas: ['']
     });
 
-    this.paymentForm.get('costo_servicio_id')?.valueChanges.subscribe(costoId => {
-      this.onServiceCostChange(costoId);
+    // Cuando cambie el usuario, autocompletar el monto de su renta
+    this.paymentForm.get('usuario_id')?.valueChanges.subscribe(userId => {
+      if (userId) {
+        this.onUserChange(userId);
+      }
     });
   }
 
@@ -196,13 +201,11 @@ export class PaymentFormComponent implements OnInit {
         const payment = response.payment || response;
         this.paymentForm.patchValue({
           usuario_id: payment.residente_id || payment.usuario_id,
-          costo_servicio_id: payment.costo_servicio_id,
           monto: payment.monto_pagado || payment.monto,
           metodo_pago: payment.metodo_pago,
           fecha_pago: new Date(payment.fecha_pago),
           referencia: payment.referencia || '',
-          notas: payment.notas || '',
-          estado: payment.estado
+          notas: payment.notas || ''
         });
         this.isLoading = false;
       },
@@ -215,12 +218,31 @@ export class PaymentFormComponent implements OnInit {
     });
   }
 
-  onServiceCostChange(costoId: number): void {
-    const cost = this.serviceCosts.find(c => c.id === costoId);
-    if (cost) {
-      this.selectedCost = cost;
-      this.paymentForm.patchValue({ monto: cost.monto });
-    }
+  onUserChange(userId: number): void {
+    console.log('[PAYMENT-FORM] User changed:', userId);
+    // Buscar la residencia del usuario
+    this.getAllResidences.execute({ residente_actual_id: userId, limit: 1 }).subscribe({
+      next: (response) => {
+        if (response.data && response.data.length > 0) {
+          this.selectedUserResidence = response.data[0];
+          console.log('[PAYMENT-FORM] Residence found:', this.selectedUserResidence);
+
+          // Autocompletar el monto con el precio de la residencia
+          if (this.selectedUserResidence.precio) {
+            this.paymentForm.patchValue({ monto: this.selectedUserResidence.precio });
+            console.log('[PAYMENT-FORM] Rent amount autocompleted:', this.selectedUserResidence.precio);
+          }
+        } else {
+          console.log('[PAYMENT-FORM] No residence found for user');
+          this.selectedUserResidence = null;
+          this.notificationService.warning('Este usuario no tiene una residencia asignada');
+        }
+      },
+      error: (error) => {
+        console.error('[PAYMENT-FORM] Error loading residence:', error);
+        this.selectedUserResidence = null;
+      }
+    });
   }
 
   onSubmit(): void {
@@ -235,10 +257,9 @@ export class PaymentFormComponent implements OnInit {
         formData.fecha_pago = `${year}-${month}-${day}`;
       }
 
-      // Map to backend expected field names
+      // Map to backend expected field names (sin servicio_costo_id y estado)
       const paymentData = {
         residente_id: formData.usuario_id,
-        servicio_costo_id: formData.costo_servicio_id,
         monto_pagado: formData.monto,
         metodo_pago: formData.metodo_pago,
         fecha_pago: formData.fecha_pago,
