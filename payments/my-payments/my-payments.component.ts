@@ -15,7 +15,7 @@ import { PaymentRepository } from '../../domain/repositories/payment.repository'
 import { PaymentApiRepository } from '../../data/repositories/payment-api.repository';
 import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '../../core/services/auth.service';
-import { Payment, PaymentStatus, PaymentMethod } from '../../domain/models/payment.model';
+import { Payment, PaymentMethod } from '../../domain/models/payment.model';
 import { ServiceCost } from '../../domain/models/service-cost.model';
 import { Residence, PropertyType } from '../../domain/models/residence.model';
 import { GetPendingCostsByResidenceUseCase } from '../../domain/use-cases/service-cost/get-pending-costs-by-residence.usecase';
@@ -53,7 +53,6 @@ export class MyPaymentsComponent implements OnInit {
   private getAllResidences = inject(GetAllResidencesUseCase);
   private dialog = inject(MatDialog);
 
-  PaymentStatus = PaymentStatus;
   PaymentMethod = PaymentMethod;
   PropertyType = PropertyType;
 
@@ -72,8 +71,7 @@ export class MyPaymentsComponent implements OnInit {
     'fecha_pago',
     'concepto',
     'monto',
-    'metodo_pago',
-    'estado'
+    'metodo_pago'
   ];
 
   pendingCostsColumns: string[] = [
@@ -187,14 +185,8 @@ export class MyPaymentsComponent implements OnInit {
   }
 
   calculateStatistics(): void {
-    this.totalPaid = this.payments
-      .filter(p => p.estado === PaymentStatus.COMPLETADO)
-      .reduce((sum, p) => sum + p.monto_pagado, 0);
-
-    this.totalPending = this.payments
-      .filter(p => p.estado === PaymentStatus.PENDIENTE)
-      .reduce((sum, p) => sum + (p.monto - p.monto_pagado), 0);
-
+    // El totalPaid ya viene del backend en loadMyPayments (línea 176)
+    // Todos los pagos están completados, así que no hay necesidad de filtrar
     this.paymentCount = this.payments.length;
   }
 
@@ -202,24 +194,6 @@ export class MyPaymentsComponent implements OnInit {
     this.pageIndex = event.pageIndex;
     this.pageSize = event.pageSize;
     this.loadMyPayments();
-  }
-
-  getStatusClass(status: PaymentStatus): string {
-    const statusMap: Record<PaymentStatus, string> = {
-      [PaymentStatus.COMPLETADO]: 'status-completed',
-      [PaymentStatus.PENDIENTE]: 'status-pending',
-      [PaymentStatus.RECHAZADO]: 'status-rejected'
-    };
-    return statusMap[status];
-  }
-
-  getStatusIcon(status: PaymentStatus): string {
-    const iconMap: Record<PaymentStatus, string> = {
-      [PaymentStatus.COMPLETADO]: 'check_circle',
-      [PaymentStatus.PENDIENTE]: 'schedule',
-      [PaymentStatus.RECHAZADO]: 'cancel'
-    };
-    return iconMap[status];
   }
 
   formatCurrency(amount: number): string {
@@ -230,15 +204,8 @@ export class MyPaymentsComponent implements OnInit {
   }
 
   getCompletedCount(): number {
-    return this.payments.filter(p => p.estado === PaymentStatus.COMPLETADO).length;
-  }
-
-  getPendingCount(): number {
-    return this.payments.filter(p => p.estado === PaymentStatus.PENDIENTE).length;
-  }
-
-  getRejectedCount(): number {
-    return this.payments.filter(p => p.estado === PaymentStatus.RECHAZADO).length;
+    // Todos los pagos registrados están completados
+    return this.payments.length;
   }
 
   getPaymentMethodIcon(method: PaymentMethod): string {

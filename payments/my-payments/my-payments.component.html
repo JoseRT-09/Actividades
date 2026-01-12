@@ -229,7 +229,7 @@
             <th mat-header-cell *matHeaderCellDef>Concepto</th>
             <td mat-cell *matCellDef="let payment">
               <div class="concepto-info">
-                <strong>{{ payment.costoServicio?.nombre_servicio || payment.servicioCosto?.nombre_servicio || 'Pago' }}</strong>
+                <strong>{{ payment.servicioCosto?.nombre_servicio || 'Renta' }}</strong>
                 <small *ngIf="payment.referencia">Ref: {{ payment.referencia }}</small>
               </div>
             </td>
@@ -251,17 +251,6 @@
                 <mat-icon>{{ getPaymentMethodIcon(payment.metodo_pago) }}</mat-icon>
                 <span>{{ payment.metodo_pago }}</span>
               </div>
-            </td>
-          </ng-container>
-
-          <!-- Estado Column -->
-          <ng-container matColumnDef="estado">
-            <th mat-header-cell *matHeaderCellDef>Estado</th>
-            <td mat-cell *matCellDef="let payment">
-              <mat-chip [ngClass]="getStatusClass(payment.estado)">
-                <mat-icon>{{ getStatusIcon(payment.estado) }}</mat-icon>
-                {{ payment.estado }}
-              </mat-chip>
             </td>
           </ng-container>
 
