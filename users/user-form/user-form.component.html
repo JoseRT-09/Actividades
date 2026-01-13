@@ -54,7 +54,6 @@
                 placeholder="Juan"
                 autocomplete="given-name"
               >
-              <mat-icon matPrefix>badge</mat-icon>
               <mat-error *ngIf="userForm.get('nombre')?.invalid">
                 {{ getErrorMessage('nombre') }}
               </mat-error>
@@ -69,7 +68,6 @@
                 placeholder="Pérez"
                 autocomplete="family-name"
               >
-              <mat-icon matPrefix>badge</mat-icon>
               <mat-error *ngIf="userForm.get('apellido')?.invalid">
                 {{ getErrorMessage('apellido') }}
               </mat-error>
@@ -85,7 +83,6 @@
                 placeholder="usuario@ejemplo.com"
                 autocomplete="email"
               >
-              <mat-icon matPrefix>email</mat-icon>
               <mat-error *ngIf="userForm.get('email')?.invalid">
                 {{ getErrorMessage('email') }}
               </mat-error>
@@ -100,7 +97,6 @@
                 placeholder="1234567890"
                 autocomplete="tel"
               >
-              <mat-icon matPrefix>phone</mat-icon>
               <mat-hint>10 dígitos sin espacios</mat-hint>
               <mat-error *ngIf="userForm.get('telefono')?.invalid">
                 {{ getErrorMessage('telefono') }}
@@ -128,7 +124,6 @@
                 placeholder="Mínimo 6 caracteres"
                 autocomplete="new-password"
               >
-              <mat-icon matPrefix>vpn_key</mat-icon>
               <button 
                 mat-icon-button 
                 matSuffix 
@@ -168,7 +163,6 @@
                   </div>
                 </mat-option>
               </mat-select>
-              <mat-icon matPrefix>admin_panel_settings</mat-icon>
               <mat-hint>Selecciona el nivel de acceso</mat-hint>
             </mat-form-field>
 
@@ -185,7 +179,6 @@
                   </div>
                 </mat-option>
               </mat-select>
-              <mat-icon matPrefix>check_circle</mat-icon>
             </mat-form-field>
           </div>
         </div>

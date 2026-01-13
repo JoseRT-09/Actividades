@@ -15,10 +15,6 @@
           <mat-icon>person_add</mat-icon>
           Nuevo Usuario
         </button>
-        <button mat-stroked-button (click)="exportToCSV()">
-          <mat-icon>download</mat-icon>
-          Exportar
-        </button>
       </div>
     </div>
   </div>
@@ -34,7 +30,6 @@
             formControlName="search" 
             placeholder="Nombre, apellido o email..."
           >
-          <mat-icon matPrefix>search</mat-icon>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
@@ -44,7 +39,6 @@
               {{ role.label }}
             </mat-option>
           </mat-select>
-          <mat-icon matPrefix>badge</mat-icon>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
@@ -54,7 +48,6 @@
               {{ estado.label }}
             </mat-option>
           </mat-select>
-          <mat-icon matPrefix>check_circle</mat-icon>
         </mat-form-field>
 
         <button 
