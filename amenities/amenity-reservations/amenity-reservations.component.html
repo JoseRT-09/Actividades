@@ -22,6 +22,27 @@
         <mat-form-field appearance="outline" class="filter-field">
           <mat-label>Buscar</mat-label>
           <input matInput formControlName="search" placeholder="Buscar por residente o amenidad...">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Estado</mat-label>
+          <mat-select formControlName="estado">
+            <mat-option *ngFor="let estado of estados" [value]="estado.value">
+              {{ estado.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Amenidad</mat-label>
+          <mat-select formControlName="amenidad_id">
+            <mat-option value="">Todas las amenidades</mat-option>
+            <!-- TODO: Load amenities dynamically -->
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-raised-button color="warn" type="button" (click)="clearFilters()" class="clear-button">
+          <mat-icon>clear</mat-icon>
           Limpiar Filtros
         </button>
       </form>

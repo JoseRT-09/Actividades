@@ -46,6 +46,20 @@
                 formControlName="titulo"
                 placeholder="Ej: Fuga de agua en área común"
               >
+              <mat-error *ngIf="reportForm.get('titulo')?.invalid">
+                {{ getErrorMessage('titulo') }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Descripción -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Descripción Detallada</mat-label>
+              <textarea 
+                matInput 
+                formControlName="descripcion"
+                rows="4"
+                placeholder="Describe el problema o incidencia con el mayor detalle posible..."
+              ></textarea>
               <mat-hint>Mínimo 10 caracteres</mat-hint>
               <mat-error *ngIf="reportForm.get('descripcion')?.invalid">
                 {{ getErrorMessage('descripcion') }}
@@ -77,6 +91,15 @@
                   </div>
                 </mat-option>
               </mat-select>
+            </mat-form-field>
+
+            <!-- Prioridad -->
+            <mat-form-field appearance="outline">
+              <mat-label>Prioridad</mat-label>
+              <mat-select formControlName="prioridad">
+                <mat-option *ngFor="let prioridad of prioridades" [value]="prioridad.value">
+                  <div class="select-option">
+                    <mat-icon [style.color]="prioridad.color">{{ prioridad.icon }}</mat-icon>
                     <div class="option-content">
                       <span class="option-label">{{ prioridad.label }}</span>
                       <span class="option-description">{{ prioridad.description }}</span>
@@ -84,6 +107,14 @@
                   </div>
                 </mat-option>
               </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Ubicación y Estado -->
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>location_on</mat-icon>
             <h2>Ubicación</h2>
           </div>
           <mat-divider></mat-divider>
@@ -99,6 +130,15 @@
                   <span *ngIf="residence.bloque"> - Bloque {{ residence.bloque }}</span>
                 </mat-option>
               </mat-select>
+              <mat-hint>Deja vacío si es un área común</mat-hint>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Preview Card -->
+        <div class="preview-card" *ngIf="reportForm.get('titulo')?.value">
+          <h3>
+            <mat-icon>visibility</mat-icon>
             Vista Previa del Reporte
           </h3>
           <div class="preview-content">

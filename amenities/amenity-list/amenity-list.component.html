@@ -51,11 +51,29 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline">
+          <mat-label>Tipo</mat-label>
+          <mat-select formControlName="tipo">
+            <mat-option *ngFor="let tipo of tipos" [value]="tipo.value">
+              {{ tipo.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
           <mat-label>Estado</mat-label>
           <mat-select formControlName="estado">
             <mat-option *ngFor="let estado of estados" [value]="estado.value">
               {{ estado.label }}
             </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Reservable</mat-label>
+          <mat-select formControlName="disponible">
+            <mat-option value="">Todas</mat-option>
+            <mat-option [value]="true">Sí</mat-option>
+            <mat-option [value]="false">No</mat-option>
           </mat-select>
         </mat-form-field>
 

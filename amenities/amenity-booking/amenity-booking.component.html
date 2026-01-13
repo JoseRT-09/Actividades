@@ -88,6 +88,20 @@
             <input matInput [matDatepicker]="picker" formControlName="fecha_reserva" [min]="minDate">
             <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
+            <mat-error *ngIf="bookingForm.get('fecha_reserva')?.invalid">
+              {{ getErrorMessage('fecha_reserva') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Time Section -->
+        <div class="form-section">
+          <h4>Horario</h4>
+
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Hora de Inicio</mat-label>
+              <input matInput type="time" formControlName="hora_inicio">
               <mat-error *ngIf="bookingForm.get('hora_inicio')?.invalid">
                 {{ getErrorMessage('hora_inicio') }}
               </mat-error>
@@ -96,6 +110,20 @@
             <mat-form-field appearance="outline">
               <mat-label>Hora de Fin</mat-label>
               <input matInput type="time" formControlName="hora_fin">
+              <mat-error *ngIf="bookingForm.get('hora_fin')?.invalid">
+                {{ getErrorMessage('hora_fin') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Number of People Section -->
+        <div class="form-section">
+          <h4>Número de Personas</h4>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Cantidad de personas</mat-label>
+            <input matInput type="number" formControlName="num_personas" min="1" [max]="getMaxCapacity()">
             <mat-hint *ngIf="amenity.capacidad_maxima || amenity.capacidad">
               Capacidad máxima: {{ getMaxCapacity() }} personas
             </mat-hint>
@@ -113,6 +141,17 @@
             <mat-label>Describe el motivo</mat-label>
             <textarea matInput formControlName="motivo" rows="4"
               placeholder="Ej: Reunión familiar, celebración de cumpleaños, evento deportivo..."></textarea>
+            <mat-hint>Mínimo 10 caracteres</mat-hint>
+            <mat-error *ngIf="bookingForm.get('motivo')?.invalid">
+              {{ getErrorMessage('motivo') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="summary-section" *ngIf="bookingForm.get('fecha_reserva')?.value && bookingForm.get('hora_inicio')?.value">
+          <h4>
+            <mat-icon>summarize</mat-icon>
             Resumen de la Reserva
           </h4>
           <div class="summary-content">

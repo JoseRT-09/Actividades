@@ -41,6 +41,25 @@
             (input)="formatCardNumber($event)"
             autocomplete="cc-number"
           >
+          <mat-hint *ngIf="cardType">{{ cardType }}</mat-hint>
+          <mat-error *ngIf="cardForm.get('cardNumber')?.hasError('required')">
+            El número de tarjeta es requerido
+          </mat-error>
+          <mat-error *ngIf="cardForm.get('cardNumber')?.hasError('pattern')">
+            Debe ser un número de 16 dígitos
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Card Holder -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Titular de la Tarjeta</mat-label>
+          <input
+            matInput
+            formControlName="cardHolder"
+            placeholder="NOMBRE COMO APARECE EN LA TARJETA"
+            style="text-transform: uppercase"
+            autocomplete="cc-name"
+          >
           <mat-error *ngIf="cardForm.get('cardHolder')?.hasError('required')">
             El nombre del titular es requerido
           </mat-error>
@@ -60,6 +79,25 @@
               maxlength="5"
               (input)="formatExpiryDate($event)"
               autocomplete="cc-exp"
+            >
+            <mat-error *ngIf="cardForm.get('expiryDate')?.hasError('required')">
+              Requerido
+            </mat-error>
+            <mat-error *ngIf="cardForm.get('expiryDate')?.hasError('pattern')">
+              Formato MM/YY
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>CVV</mat-label>
+            <input
+              matInput
+              formControlName="cvv"
+              placeholder="123"
+              maxlength="4"
+              type="password"
+              (input)="formatCVV($event)"
+              autocomplete="cc-csc"
             >
             <mat-error *ngIf="cardForm.get('cvv')?.hasError('required')">
               Requerido

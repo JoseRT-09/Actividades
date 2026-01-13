@@ -33,10 +33,28 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline">
+          <mat-label>Categoría</mat-label>
+          <mat-select formControlName="categoria">
+            <mat-option *ngFor="let cat of categorias" [value]="cat.value">
+              {{ cat.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
           <mat-label>Estado</mat-label>
           <mat-select formControlName="estado">
             <mat-option *ngFor="let estado of estados" [value]="estado.value">
               {{ estado.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Prioridad</mat-label>
+          <mat-select formControlName="prioridad">
+            <mat-option *ngFor="let prioridad of prioridades" [value]="prioridad.value">
+              {{ prioridad.label }}
             </mat-option>
           </mat-select>
         </mat-form-field>

@@ -33,12 +33,30 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline">
+          <mat-label>Estado</mat-label>
+          <mat-select formControlName="estado">
+            <mat-option *ngFor="let estado of estados" [value]="estado.value">
+              {{ estado.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
           <mat-label>Bloque</mat-label>
           <input 
             matInput 
             formControlName="bloque" 
             placeholder="A, B, C..."
           >
+        </mat-form-field>
+
+        <button 
+          mat-icon-button 
+          color="warn" 
+          (click)="clearFilters()"
+          matTooltip="Limpiar filtros"
+        >
+          <mat-icon>clear</mat-icon>
         </button>
       </form>
     </mat-card-content>

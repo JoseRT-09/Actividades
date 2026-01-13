@@ -104,6 +104,17 @@
                 </div>
               </mat-option>
             </mat-select>
+            <mat-hint>Selecciona el residente que ocupará la unidad</mat-hint>
+            <mat-error *ngIf="assignForm.get('residente_id')?.invalid">
+              {{ getErrorMessage('residente_id') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Información del Cambio -->
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>description</mat-icon>
             <h2>Información del Cambio</h2>
           </div>
           <mat-divider></mat-divider>
@@ -117,6 +128,21 @@
                 formControlName="motivo"
                 rows="3"
                 placeholder="Describe el motivo de este cambio..."
+              ></textarea>
+              <mat-hint>Mínimo 10 caracteres</mat-hint>
+              <mat-error *ngIf="assignForm.get('motivo')?.invalid">
+                {{ getErrorMessage('motivo') }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Notas Adicionales -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Notas Adicionales (Opcional)</mat-label>
+              <textarea 
+                matInput 
+                formControlName="notas"
+                rows="3"
+                placeholder="Información adicional sobre el cambio..."
               ></textarea>
               <mat-hint>Cualquier información relevante</mat-hint>
             </mat-form-field>
