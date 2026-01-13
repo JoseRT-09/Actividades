@@ -12,6 +12,8 @@ import { GetReportStatisticsUseCase } from '../../domain/use-cases/report/get-re
 import { GetAllResidencesUseCase } from '../../domain/use-cases/residence/get-all-residences.usecase';
 import { GetAllPaymentsUseCase } from '../../domain/use-cases/payment/get-all-payments.usecase';
 import { GetUpcomingActivitiesUseCase } from '../../domain/use-cases/activity/get-upcoming-activities.usecase';
+import { GetAllUsersUseCase } from '../../domain/use-cases/user/get-all-users.usecase';
+import { UserRole, UserStatus } from '../../domain/models/user.model';
 import { Observable, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { StatsCardComponent } from './components/stats-card/stats-card.component';
@@ -51,6 +53,7 @@ export class DashboardComponent implements OnInit {
   private getAllResidences = inject(GetAllResidencesUseCase);
   private getAllPayments = inject(GetAllPaymentsUseCase);
   private getUpcomingActivities = inject(GetUpcomingActivitiesUseCase);
+  private getAllUsers = inject(GetAllUsersUseCase);
 
   currentUser$!: Observable<User | null>;
   currentUser: User | null = null;
@@ -153,13 +156,21 @@ export class DashboardComponent implements OnInit {
         reportStats: this.getReportStatistics.execute(),
         residences: this.getAllResidences.execute({ page: 1, limit: 1 }),
         payments: this.getAllPayments.execute({ page: 1, limit: 100 }),
-        activities: this.getUpcomingActivities.execute()
+        activities: this.getUpcomingActivities.execute(),
+        users: this.getAllUsers.execute({ page: 1, limit: 1000 })
       }).subscribe({
         next: (results) => {
           // Actualizar estadísticas
           this.dashboardStats.totalResidences = results.residences.total;
           this.dashboardStats.pendingReports = results.reportStats.byStatus.abierto + results.reportStats.byStatus.enProgreso;
           this.dashboardStats.upcomingActivities = results.activities.length;
+
+          // Calcular residentes activos (usuarios con rol Residente y estado Activo)
+          const usersData = (results.users as any).data || (results.users as any).users || [];
+          const activeResidents = usersData.filter((user: any) =>
+            user.rol === 'Residente' && user.estado === 'Activo'
+          ).length;
+          this.dashboardStats.totalResidents = activeResidents;
 
           // Calcular ganancias totales del mes (suma de montos de pagos)
           const paymentsData = (results.payments as any).data || (results.payments as any).payments || [];

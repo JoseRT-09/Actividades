@@ -11,7 +11,8 @@
 
     <!-- Navegación Principal -->
     <div class="navbar-nav" *ngIf="currentUser$ | async as user">
-      <button mat-button routerLink="/dashboard" routerLinkActive="active">
+      <!-- Dashboard: Solo para administradores -->
+      <button mat-button routerLink="/dashboard" routerLinkActive="active" *ngIf="isAdmin(user)">
         <mat-icon>dashboard</mat-icon>
         <span>Dashboard</span>
       </button>
@@ -22,7 +23,8 @@
         <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
       </button>
 
-      <button mat-button [matMenuTriggerFor]="financeMenu">
+      <!-- Finanzas: Solo para administradores -->
+      <button mat-button [matMenuTriggerFor]="financeMenu" *ngIf="isAdmin(user)">
         <mat-icon>payments</mat-icon>
         <span>Finanzas</span>
         <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>

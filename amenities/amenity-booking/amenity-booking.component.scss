@@ -183,6 +183,11 @@
 .form-card {
   border-radius: 16px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 32px;
+
+  @media (max-width: 768px) {
+    padding: 24px;
+  }
 
   h3 {
     display: flex;

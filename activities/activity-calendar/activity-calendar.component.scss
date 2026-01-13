@@ -358,21 +358,21 @@
       .calendar-body {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
-        gap: 8px;
+        gap: 12px;
 
         .calendar-day {
-          min-height: 100px;
+          min-height: 110px;
           background: white;
           border: 2px solid #f0f0f0;
           border-radius: 8px;
-          padding: 8px;
+          padding: 12px;
           cursor: pointer;
           transition: all 0.3s ease;
           position: relative;
 
           @media (max-width: 768px) {
             min-height: 70px;
-            padding: 4px;
+            padding: 6px;
           }
 
           &:hover {
@@ -430,13 +430,13 @@
           .day-activities {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
 
             .activity-dot {
               display: flex;
               align-items: center;
-              gap: 6px;
-              padding: 6px 8px;
+              gap: 8px;
+              padding: 8px 10px;
               border-radius: 6px;
               font-size: 12px;
               cursor: pointer;
@@ -444,7 +444,7 @@
               text-decoration: none;
 
               @media (max-width: 768px) {
-                padding: 4px 6px;
+                padding: 6px 8px;
                 font-size: 10px;
               }
 
