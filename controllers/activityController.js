@@ -28,10 +28,16 @@ const updateCompletedActivities = async () => {
     console.log("\nðŸŸ¦ [Controller] getAllActivities() ejecutado");
     console.log("ðŸŸ¦ Query recibido:", req.query);
 
-    const { estado, page = 1, limit = 10, fecha_inicio, fecha_fin } = req.query;
+    const { tipo, estado, page = 1, limit = 10, fecha_inicio, fecha_fin } = req.query;
 
     const offset = (page - 1) * limit;
     const where = {};
+
+    // Filtro por tipo
+    if (tipo) {
+      where.tipo = tipo;
+      console.log("ðŸŸ§ Filtro tipo aplicado:", tipo);
+    }
 
     // Filtro por estado
     if (estado) {

@@ -25,12 +25,11 @@
       <form [formGroup]="filterForm" class="filters-form">
         <mat-form-field appearance="outline" class="search-field">
           <mat-label>Buscar</mat-label>
-          <input 
-            matInput 
-            formControlName="search" 
+          <input
+            matInput
+            formControlName="search"
             placeholder="Usuario, concepto, referencia..."
           >
-          <mat-icon matPrefix>search</mat-icon>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
@@ -40,7 +39,6 @@
               {{ metodo.label }}
             </mat-option>
           </mat-select>
-          <mat-icon matPrefix>credit_card</mat-icon>
         </mat-form-field>
 
         <mat-form-field appearance="outline">

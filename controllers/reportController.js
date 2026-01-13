@@ -5,7 +5,7 @@ const { Op, fn, col } = require('sequelize'); // Importar fn y col de Sequelize
 // Obtener todos los reportes
 exports.getAllReports = async (req, res) => {
   try {
-    const { tipo, estado, prioridad, residencia_id, page = 1, limit = 10, search } = req.query;
+    const { tipo, estado, prioridad, residencia_id, page = 1, limit = 10, search, fecha_inicio, fecha_fin } = req.query;
     const offset = (page - 1) * limit;
 
     const where = {};
@@ -25,6 +25,17 @@ exports.getAllReports = async (req, res) => {
         { titulo: { [Op.iLike]: `%${search}%` } },
         { descripcion: { [Op.iLike]: `%${search}%` } }
       ];
+    }
+
+    // Filtro de fechas
+    if (fecha_inicio || fecha_fin) {
+      where.fecha_reporte = {};
+      if (fecha_inicio) {
+        where.fecha_reporte[Op.gte] = fecha_inicio;
+      }
+      if (fecha_fin) {
+        where.fecha_reporte[Op.lte] = fecha_fin;
+      }
     }
 
     // Si es residente, solo puede ver sus propios reportes

@@ -30,17 +30,6 @@
             formControlName="search" 
             placeholder="Título, descripción..."
           >
-          <mat-icon matPrefix>search</mat-icon>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Tipo</mat-label>
-          <mat-select formControlName="tipo">
-            <mat-option *ngFor="let tipo of tipos" [value]="tipo.value">
-              {{ tipo.label }}
-            </mat-option>
-          </mat-select>
-          <mat-icon matPrefix>category</mat-icon>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
@@ -50,17 +39,6 @@
               {{ estado.label }}
             </mat-option>
           </mat-select>
-          <mat-icon matPrefix>sync</mat-icon>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Prioridad</mat-label>
-          <mat-select formControlName="prioridad">
-            <mat-option *ngFor="let prioridad of prioridades" [value]="prioridad.value">
-              {{ prioridad.label }}
-            </mat-option>
-          </mat-select>
-          <mat-icon matPrefix>flag</mat-icon>
         </mat-form-field>
 
         <mat-form-field appearance="outline">

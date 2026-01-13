@@ -48,17 +48,6 @@
             formControlName="search" 
             placeholder="Nombre, ubicación..."
           >
-          <mat-icon matPrefix>search</mat-icon>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Tipo</mat-label>
-          <mat-select formControlName="tipo">
-            <mat-option *ngFor="let tipo of tipos" [value]="tipo.value">
-              {{ tipo.label }}
-            </mat-option>
-          </mat-select>
-          <mat-icon matPrefix>category</mat-icon>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
@@ -68,17 +57,6 @@
               {{ estado.label }}
             </mat-option>
           </mat-select>
-          <mat-icon matPrefix>sync</mat-icon>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Reservable</mat-label>
-          <mat-select formControlName="disponible">
-            <mat-option value="">Todas</mat-option>
-            <mat-option [value]="true">Sí</mat-option>
-            <mat-option [value]="false">No</mat-option>
-          </mat-select>
-          <mat-icon matPrefix>event_available</mat-icon>
         </mat-form-field>
 
         <button 

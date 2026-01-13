@@ -46,21 +46,6 @@
                 formControlName="numero_unidad"
                 placeholder="101, A-202, etc."
               >
-              <mat-icon matPrefix>home</mat-icon>
-              <mat-error *ngIf="residenceForm.get('numero_unidad')?.invalid">
-                {{ getErrorMessage('numero_unidad') }}
-              </mat-error>
-            </mat-form-field>
-
-            <!-- Bloque -->
-            <mat-form-field appearance="outline">
-              <mat-label>Bloque (Opcional)</mat-label>
-              <input 
-                matInput 
-                formControlName="bloque"
-                placeholder="A, B, Torre Norte..."
-              >
-              <mat-icon matPrefix>apartment</mat-icon>
             </mat-form-field>
 
             <!-- Piso -->
@@ -72,20 +57,6 @@
                 formControlName="piso"
                 placeholder="1, 2, 3..."
               >
-              <mat-icon matPrefix>layers</mat-icon>
-              <mat-hint>Solo números enteros</mat-hint>
-              <mat-error *ngIf="residenceForm.get('piso')?.invalid">
-                {{ getErrorMessage('piso') }}
-              </mat-error>
-            </mat-form-field>
-
-            <!-- Estado -->
-            <mat-form-field appearance="outline">
-              <mat-label>Estado</mat-label>
-              <mat-select formControlName="estado">
-                <mat-option *ngFor="let estado of estados" [value]="estado.value">
-                  <div class="select-option">
-                    <mat-icon [style.color]="estado.color">{{ estado.icon }}</mat-icon>
                     <div class="option-content">
                       <span class="option-label">{{ estado.label }}</span>
                       <span class="option-description">{{ estado.description }}</span>
@@ -93,15 +64,6 @@
                   </div>
                 </mat-option>
               </mat-select>
-              <mat-icon matPrefix>check_circle</mat-icon>
-            </mat-form-field>
-          </div>
-        </div>
-
-        <!-- Características -->
-        <div class="form-section">
-          <div class="section-header">
-            <mat-icon>straighten</mat-icon>
             <h2>Características</h2>
           </div>
           <mat-divider></mat-divider>
@@ -117,24 +79,6 @@
                 formControlName="area_m2"
                 placeholder="85.5"
               >
-              <mat-icon matPrefix>square_foot</mat-icon>
-              <span matSuffix>m²</span>
-              <mat-hint>Área construida en metros cuadrados</mat-hint>
-              <mat-error *ngIf="residenceForm.get('area_m2')?.invalid">
-                {{ getErrorMessage('area_m2') }}
-              </mat-error>
-            </mat-form-field>
-
-            <!-- Habitaciones -->
-            <mat-form-field appearance="outline">
-              <mat-label>Habitaciones</mat-label>
-              <input 
-                matInput 
-                type="number"
-                formControlName="habitaciones"
-                placeholder="2, 3, 4..."
-              >
-              <mat-icon matPrefix>bed</mat-icon>
               <mat-hint>Número de recámaras</mat-hint>
               <mat-error *ngIf="residenceForm.get('habitaciones')?.invalid">
                 {{ getErrorMessage('habitaciones') }}
@@ -151,23 +95,6 @@
                 formControlName="banos"
                 placeholder="1, 1.5, 2..."
               >
-              <mat-icon matPrefix>bathtub</mat-icon>
-              <mat-hint>Puede incluir medios baños (ej: 1.5)</mat-hint>
-              <mat-error *ngIf="residenceForm.get('banos')?.invalid">
-                {{ getErrorMessage('banos') }}
-              </mat-error>
-            </mat-form-field>
-
-            <!-- Estacionamientos -->
-            <mat-form-field appearance="outline">
-              <mat-label>Estacionamientos</mat-label>
-              <input 
-                matInput 
-                type="number"
-                formControlName="estacionamientos"
-                placeholder="1, 2, 3..."
-              >
-              <mat-icon matPrefix>local_parking</mat-icon>
               <mat-hint>Número de cajones asignados</mat-hint>
               <mat-error *ngIf="residenceForm.get('estacionamientos')?.invalid">
                 {{ getErrorMessage('estacionamientos') }}
@@ -200,21 +127,6 @@
                   </div>
                 </mat-option>
               </mat-select>
-              <mat-icon matPrefix>business</mat-icon>
-              <mat-hint>Indica si es para renta o compra</mat-hint>
-            </mat-form-field>
-
-            <!-- Precio -->
-            <mat-form-field appearance="outline">
-              <mat-label>{{ getPrecioLabel() }} (Opcional)</mat-label>
-              <input
-                matInput
-                type="number"
-                step="0.01"
-                formControlName="precio"
-                placeholder="15000.00"
-              >
-              <mat-icon matPrefix>payments</mat-icon>
               <span matSuffix>$</span>
               <mat-hint>
                 {{ residenceForm.get('tipo_propiedad')?.value === 'Renta' ? 'Monto mensual de renta' :
@@ -246,20 +158,6 @@
                   {{ resident.nombre }} {{ resident.apellido }} - {{ resident.email }}
                 </mat-option>
               </mat-select>
-              <mat-icon matPrefix>account_circle</mat-icon>
-              <mat-hint>Dueño legal de la propiedad</mat-hint>
-            </mat-form-field>
-
-            <!-- Residente Actual -->
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Residente Actual (Opcional)</mat-label>
-              <mat-select formControlName="residente_actual_id">
-                <mat-option [value]="null">Sin asignar</mat-option>
-                <mat-option *ngFor="let resident of residents" [value]="resident.id">
-                  {{ resident.nombre }} {{ resident.apellido }} - {{ resident.email }}
-                </mat-option>
-              </mat-select>
-              <mat-icon matPrefix>person</mat-icon>
               <mat-hint>Persona que actualmente habita la unidad</mat-hint>
             </mat-form-field>
           </div>
@@ -283,20 +181,6 @@
                 rows="3"
                 placeholder="Características especiales, ubicación, vista..."
               ></textarea>
-              <mat-icon matPrefix>article</mat-icon>
-              <mat-hint>Descripción general de la unidad</mat-hint>
-            </mat-form-field>
-
-            <!-- Notas Adicionales -->
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Notas Adicionales (Opcional)</mat-label>
-              <textarea 
-                matInput 
-                formControlName="notas_adicionales"
-                rows="3"
-                placeholder="Observaciones internas, restricciones, pendientes..."
-              ></textarea>
-              <mat-icon matPrefix>notes</mat-icon>
               <mat-hint>Notas internas para el equipo administrativo</mat-hint>
             </mat-form-field>
           </div>

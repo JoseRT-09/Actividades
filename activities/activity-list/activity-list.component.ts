@@ -230,7 +230,7 @@ export class ActivityListComponent implements OnInit {
   getStatusClass(status: string): string {
     const statusMap: Record<string, string> = {
       'Programada': 'status-scheduled',
-      'En Curso': 'status-in-progress',
+      'En Curso': 'status-ongoing',
       'Completada': 'status-completed',
       'Cancelada': 'status-cancelled'
     };

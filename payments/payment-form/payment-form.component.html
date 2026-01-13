@@ -51,19 +51,6 @@
                   </div>
                 </mat-option>
               </mat-select>
-              <mat-icon matPrefix>person</mat-icon>
-              <mat-hint>Selecciona el residente para autocompletar el monto de renta</mat-hint>
-              <mat-error *ngIf="paymentForm.get('usuario_id')?.invalid">
-                {{ getErrorMessage('usuario_id') }}
-              </mat-error>
-            </mat-form-field>
-          </div>
-        </div>
-
-        <!-- Información de la Residencia -->
-        <div class="cost-info-card" *ngIf="selectedUserResidence">
-          <h3>
-            <mat-icon>home</mat-icon>
             Información de la Residencia
           </h3>
           <mat-divider></mat-divider>
@@ -106,31 +93,6 @@
                 formControlName="monto"
                 placeholder="0.00"
               >
-              <mat-icon matPrefix>attach_money</mat-icon>
-              <span matSuffix>MXN</span>
-              <mat-hint>Monto en pesos mexicanos</mat-hint>
-              <mat-error *ngIf="paymentForm.get('monto')?.invalid">
-                {{ getErrorMessage('monto') }}
-              </mat-error>
-            </mat-form-field>
-
-            <!-- Método de Pago -->
-            <mat-form-field appearance="outline">
-              <mat-label>Método de Pago</mat-label>
-              <!-- Si es admin, mostrar campo de texto deshabilitado -->
-              <input
-                *ngIf="metodosPago.length === 1"
-                matInput
-                [value]="metodosPago[0].label"
-                disabled
-              >
-              <!-- Si no es admin, mostrar selector -->
-              <mat-select
-                *ngIf="metodosPago.length > 1"
-                formControlName="metodo_pago">
-                <mat-option *ngFor="let metodo of metodosPago" [value]="metodo.value">
-                  <div class="select-option">
-                    <mat-icon>{{ metodo.icon }}</mat-icon>
                     <div class="option-content">
                       <span class="option-label">{{ metodo.label }}</span>
                       <span class="option-description">{{ metodo.description }}</span>
@@ -138,20 +100,6 @@
                   </div>
                 </mat-option>
               </mat-select>
-              <mat-icon matPrefix>{{ metodosPago[0]?.icon || 'credit_card' }}</mat-icon>
-            </mat-form-field>
-
-            <!-- Fecha de Pago -->
-            <mat-form-field appearance="outline">
-              <mat-label>Fecha de Pago</mat-label>
-              <input
-                matInput
-                [matDatepicker]="pickerPago"
-                formControlName="fecha_pago"
-              >
-              <mat-datepicker-toggle matIconSuffix [for]="pickerPago"></mat-datepicker-toggle>
-              <mat-datepicker #pickerPago></mat-datepicker>
-              <mat-icon matPrefix>event</mat-icon>
               <mat-error *ngIf="paymentForm.get('fecha_pago')?.invalid">
                 {{ getErrorMessage('fecha_pago') }}
               </mat-error>
@@ -176,20 +124,6 @@
                 formControlName="referencia"
                 placeholder="Número de referencia, folio, etc."
               >
-              <mat-icon matPrefix>tag</mat-icon>
-              <mat-hint>Número de comprobante, folio o referencia bancaria</mat-hint>
-            </mat-form-field>
-
-            <!-- Notas -->
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Notas (Opcional)</mat-label>
-              <textarea 
-                matInput 
-                formControlName="notas"
-                rows="3"
-                placeholder="Observaciones o comentarios adicionales..."
-              ></textarea>
-              <mat-icon matPrefix>notes</mat-icon>
             </mat-form-field>
           </div>
         </div>

@@ -37,17 +37,6 @@
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Asunto</mat-label>
               <input matInput formControlName="asunto" placeholder="Ej: Ruido excesivo en horas de descanso">
-              <mat-icon matPrefix>title</mat-icon>
-              <mat-error *ngIf="complaintForm.get('asunto')?.invalid">
-                {{ getErrorMessage('asunto') }}
-              </mat-error>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Descripción Detallada</mat-label>
-              <textarea matInput formControlName="descripcion" rows="5" 
-                placeholder="Describe en detalle la situación que motiva tu queja..."></textarea>
-              <mat-icon matPrefix>description</mat-icon>
               <mat-hint>Mínimo 20 caracteres</mat-hint>
               <mat-error *ngIf="complaintForm.get('descripcion')?.invalid">
                 {{ getErrorMessage('descripcion') }}
@@ -67,15 +56,6 @@
                   </div>
                 </mat-option>
               </mat-select>
-              <mat-icon matPrefix>category</mat-icon>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Prioridad</mat-label>
-              <mat-select formControlName="prioridad">
-                <mat-option *ngFor="let prioridad of prioridades" [value]="prioridad.value">
-                  <div class="select-option">
-                    <mat-icon [style.color]="prioridad.color">{{ prioridad.icon }}</mat-icon>
                     <div class="option-content">
                       <span class="option-label">{{ prioridad.label }}</span>
                       <span class="option-description">{{ prioridad.description }}</span>
@@ -83,27 +63,10 @@
                   </div>
                 </mat-option>
               </mat-select>
-              <mat-icon matPrefix>flag</mat-icon>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" *ngIf="canEditStatus()">
-              <mat-label>Estado</mat-label>
-              <mat-select formControlName="estado">
-                <mat-option *ngFor="let estado of estados" [value]="estado.value">
-                  <div class="select-option">
-                    <mat-icon>{{ estado.icon }}</mat-icon>
                     <span>{{ estado.label }}</span>
                   </div>
                 </mat-option>
               </mat-select>
-              <mat-icon matPrefix>sync</mat-icon>
-            </mat-form-field>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <div class="section-header">
-            <mat-icon>home</mat-icon>
             <h2>Ubicación (Opcional)</h2>
           </div>
           <mat-divider></mat-divider>
@@ -117,14 +80,6 @@
                 <span *ngIf="residence.bloque"> - Bloque {{ residence.bloque }}</span>
               </mat-option>
             </mat-select>
-            <mat-icon matPrefix>location_on</mat-icon>
-            <mat-hint>Selecciona una residencia si la queja está relacionada con una unidad específica</mat-hint>
-          </mat-form-field>
-        </div>
-
-        <div class="form-section">
-          <div class="section-header">
-            <mat-icon>privacy_tip</mat-icon>
             <h2>Privacidad</h2>
           </div>
           <mat-divider></mat-divider>
