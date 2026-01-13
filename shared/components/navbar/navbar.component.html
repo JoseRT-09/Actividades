@@ -17,10 +17,17 @@
         <span>Dashboard</span>
       </button>
 
-      <button mat-button [matMenuTriggerFor]="residencesMenu">
+      <!-- Residencias: Solo para administradores -->
+      <button mat-button [matMenuTriggerFor]="residencesMenu" *ngIf="isAdmin(user)">
         <mat-icon>home</mat-icon>
         <span>Residencias</span>
         <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+      </button>
+
+      <!-- Mis Pagos: Solo para residentes -->
+      <button mat-button routerLink="/payments/my-payments" routerLinkActive="active" *ngIf="isResident(user)">
+        <mat-icon>account_balance_wallet</mat-icon>
+        <span>Mis Pagos</span>
       </button>
 
       <!-- Finanzas: Solo para administradores -->

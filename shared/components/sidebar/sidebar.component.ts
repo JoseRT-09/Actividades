@@ -41,8 +41,9 @@ export class SidebarComponent implements OnInit {
   menuItems: MenuItem[] = [
     {
       icon: 'dashboard',
-      label: 'Dashboard',
-      route: '/dashboard'
+      label: 'Inicio',
+      route: '/dashboard',
+      roles: [UserRole.ADMINISTRADOR, UserRole.SUPER_ADMIN]
     },
     {
       icon: 'people',
@@ -57,7 +58,7 @@ export class SidebarComponent implements OnInit {
       roles: [UserRole.ADMINISTRADOR, UserRole.SUPER_ADMIN]
     },
     {
-      icon: 'payment',
+      icon: 'account_balance_wallet',
       label: 'Mis Pagos',
       route: '/payments/my-payments',
       roles: [UserRole.RESIDENTE]
@@ -71,8 +72,7 @@ export class SidebarComponent implements OnInit {
     {
       icon: 'report_problem',
       label: 'Reportes',
-      route: '/reports',
-      badge: 5
+      route: '/reports'
     },
     {
       icon: 'feedback',
