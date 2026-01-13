@@ -1,0 +1,209 @@
+<div class="user-detail-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <button mat-icon-button class="back-button" routerLink="/users">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>person</mat-icon>
+          Detalle de Usuario
+        </h1>
+        <p class="page-subtitle">Información completa del perfil</p>
+      </div>
+
+      <div class="header-actions" *ngIf="user">
+        <button 
+          mat-raised-button 
+          color="primary"
+          (click)="onEdit()"
+          [disabled]="!canEdit()"
+        >
+          <mat-icon>edit</mat-icon>
+          Editar
+        </button>
+
+        <button 
+          mat-button 
+          [matMenuTriggerFor]="menu"
+        >
+          <mat-icon>more_vert</mat-icon>
+        </button>
+
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="sendEmail()">
+            <mat-icon>email</mat-icon>
+            <span>Enviar Email</span>
+          </button>
+          <button mat-menu-item (click)="callPhone()" [disabled]="!user.telefono">
+            <mat-icon>phone</mat-icon>
+            <span>Llamar</span>
+          </button>
+          <button mat-menu-item (click)="printProfile()">
+            <mat-icon>print</mat-icon>
+            <span>Imprimir Perfil</span>
+          </button>
+          <button mat-menu-item (click)="exportProfile()">
+            <mat-icon>download</mat-icon>
+            <span>Exportar Datos</span>
+          </button>
+          <mat-divider></mat-divider>
+          <button 
+            mat-menu-item 
+            (click)="onDelete()"
+            [disabled]="!canDelete()"
+            class="delete-option"
+          >
+            <mat-icon>delete</mat-icon>
+            <span>Eliminar Usuario</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando información del usuario...</p>
+  </div>
+
+  <!-- User Detail Content -->
+  <div class="detail-wrapper" *ngIf="!isLoading && user">
+    <!-- Profile Card -->
+    <mat-card class="profile-card">
+      <div class="profile-header">
+        <div class="avatar-section">
+          <div class="user-avatar-large">
+            {{ getUserInitials() }}
+          </div>
+          <div class="status-indicator" [class]="getStatusClass(user.estado)"></div>
+        </div>
+
+        <div class="user-info">
+          <h2 class="user-name">{{ user.nombre }} {{ user.apellido }}</h2>
+          <p class="user-email">
+            <mat-icon>email</mat-icon>
+            {{ user.email }}
+          </p>
+          <p class="user-phone" *ngIf="user.telefono">
+            <mat-icon>phone</mat-icon>
+            {{ user.telefono }}
+          </p>
+
+          <div class="user-badges">
+            <mat-chip [class]="getRoleClass(user.rol)" class="role-chip">
+              <mat-icon>{{ getRoleIcon(user.rol) }}</mat-icon>
+              {{ user.rol }}
+            </mat-chip>
+            
+            <mat-chip [class]="getStatusClass(user.estado)" class="status-chip">
+              <mat-icon>{{ user.estado === 'Activo' ? 'check_circle' : 'cancel' }}</mat-icon>
+              {{ user.estado }}
+            </mat-chip>
+          </div>
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <mat-card 
+        *ngFor="let stat of stats" 
+        class="stat-card"
+        [style.border-top]="'4px solid ' + stat.color"
+      >
+        <div class="stat-icon" [style.background]="stat.color + '20'">
+          <mat-icon [style.color]="stat.color">{{ stat.icon }}</mat-icon>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-value">{{ stat.value }}</h3>
+          <p class="stat-label">{{ stat.label }}</p>
+        </div>
+      </mat-card>
+    </div>
+
+    <!-- Tabs Content -->
+    <mat-card class="tabs-card">
+      <mat-tab-group animationDuration="300ms" class="user-tabs">
+        <!-- Información General -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>info</mat-icon>
+            Información General
+          </ng-template>
+          
+          <div class="tab-content">
+            <div class="info-grid">
+              <div class="info-item">
+                <mat-icon>badge</mat-icon>
+                <div class="info-details">
+                  <span class="info-label">Nombre Completo</span>
+                  <span class="info-value">{{ user.nombre }} {{ user.apellido }}</span>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <mat-icon>email</mat-icon>
+                <div class="info-details">
+                  <span class="info-label">Correo Electrónico</span>
+                  <span class="info-value">{{ user.email }}</span>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <mat-icon>phone</mat-icon>
+                <div class="info-details">
+                  <span class="info-label">Teléfono</span>
+                  <span class="info-value">{{ user.telefono || 'No registrado' }}</span>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <mat-icon>{{ getRoleIcon(user.rol) }}</mat-icon>
+                <div class="info-details">
+                  <span class="info-label">Rol en el Sistema</span>
+                  <span class="info-value">{{ user.rol }}</span>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <mat-icon>check_circle</mat-icon>
+                <div class="info-details">
+                  <span class="info-label">Estado de Cuenta</span>
+                  <span class="info-value">{{ user.estado }}</span>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <mat-icon>calendar_today</mat-icon>
+                <div class="info-details">
+                  <span class="info-label">Fecha de Registro</span>
+                  <span class="info-value">{{ user.fecha_registro | date: 'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <mat-icon>update</mat-icon>
+                <div class="info-details">
+                  <span class="info-label">Última Actualización</span>
+                  <span class="info-value">{{ user.updated_at | date: 'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <mat-icon>fingerprint</mat-icon>
+                <div class="info-details">
+                  <span class="info-label">ID de Usuario</span>
+                  <span class="info-value">#{{ user.id }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card>
+  </div>
+</div>

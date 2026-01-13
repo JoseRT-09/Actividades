@@ -1,0 +1,274 @@
+<div class="users-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>people</mat-icon>
+          Gestión de Usuarios
+        </h1>
+        <p class="page-subtitle">Administra todos los usuarios del sistema</p>
+      </div>
+
+      <div class="header-actions">
+        <button mat-raised-button color="primary" routerLink="/users/new">
+          <mat-icon>person_add</mat-icon>
+          Nuevo Usuario
+        </button>
+        <button mat-stroked-button (click)="exportToCSV()">
+          <mat-icon>download</mat-icon>
+          Exportar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters Card -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <form [formGroup]="filterForm" class="filters-form">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Buscar</mat-label>
+          <input 
+            matInput 
+            formControlName="search" 
+            placeholder="Nombre, apellido o email..."
+          >
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Rol</mat-label>
+          <mat-select formControlName="rol">
+            <mat-option *ngFor="let role of roles" [value]="role.value">
+              {{ role.label }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>badge</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Estado</mat-label>
+          <mat-select formControlName="estado">
+            <mat-option *ngFor="let estado of estados" [value]="estado.value">
+              {{ estado.label }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>check_circle</mat-icon>
+        </mat-form-field>
+
+        <button 
+          mat-icon-button 
+          color="warn" 
+          (click)="clearFilters()"
+          matTooltip="Limpiar filtros"
+        >
+          <mat-icon>clear</mat-icon>
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Stats Summary -->
+  <div class="stats-summary">
+    <div class="stat-item">
+      <mat-icon>people</mat-icon>
+      <div class="stat-content">
+        <span class="stat-value">{{ totalUsers }}</span>
+        <span class="stat-label">Total Usuarios</span>
+      </div>
+    </div>
+    <div class="stat-item">
+      <mat-icon class="icon-success">check_circle</mat-icon>
+      <div class="stat-content">
+        <span class="stat-value">{{ (dataSource.data | filter: 'estado' : 'Activo').length }}</span>
+        <span class="stat-label">Activos</span>
+      </div>
+    </div>
+    <div class="stat-item">
+      <mat-icon class="icon-warn">pending</mat-icon>
+      <div class="stat-content">
+        <span class="stat-value">{{ (dataSource.data | filter: 'estado' : 'Inactivo').length }}</span>
+        <span class="stat-label">Inactivos</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <mat-card class="table-card">
+    <!-- Loading State -->
+    <div class="loading-overlay" *ngIf="isLoading">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Cargando usuarios...</p>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container" *ngIf="!isLoading">
+      <table mat-table [dataSource]="dataSource" matSort class="users-table">
+        
+        <!-- Avatar Column -->
+        <ng-container matColumnDef="avatar">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let user">
+            <div class="user-avatar">
+              {{ getUserInitials(user) }}
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Nombre Column -->
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre</th>
+          <td mat-cell *matCellDef="let user">
+            <div class="user-name-cell">
+              <span class="name-text">{{ user.nombre }} {{ user.apellido }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Email Column -->
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+          <td mat-cell *matCellDef="let user">
+            <div class="email-cell">
+              <mat-icon>email</mat-icon>
+              {{ user.email }}
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Teléfono Column -->
+        <ng-container matColumnDef="telefono">
+          <th mat-header-cell *matHeaderCellDef>Teléfono</th>
+          <td mat-cell *matCellDef="let user">
+            <div class="phone-cell" *ngIf="user.telefono">
+              <mat-icon>phone</mat-icon>
+              {{ user.telefono }}
+            </div>
+            <span class="no-data" *ngIf="!user.telefono">-</span>
+          </td>
+        </ng-container>
+
+        <!-- Rol Column -->
+        <ng-container matColumnDef="rol">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Rol</th>
+          <td mat-cell *matCellDef="let user">
+            <mat-chip [class]="getRoleClass(user.rol)" class="role-chip">
+              {{ user.rol }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Estado Column -->
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+          <td mat-cell *matCellDef="let user">
+            <mat-chip [class]="getStatusClass(user.estado)" class="status-chip">
+              <mat-icon>{{ user.estado === 'Activo' ? 'check_circle' : 'cancel' }}</mat-icon>
+              {{ user.estado }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Fecha Registro Column -->
+        <ng-container matColumnDef="fecha_registro">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha Registro</th>
+          <td mat-cell *matCellDef="let user">
+            {{ user.fecha_registro | date: 'dd/MM/yyyy' }}
+          </td>
+        </ng-container>
+
+        <!-- Acciones Column -->
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let user">
+            <div class="action-buttons">
+              <button 
+                mat-icon-button 
+                color="primary"
+                [routerLink]="['/users', user.id]"
+                matTooltip="Ver detalles"
+              >
+                <mat-icon>visibility</mat-icon>
+              </button>
+
+              <button 
+                mat-icon-button 
+                color="accent"
+                [routerLink]="['/users', user.id, 'edit']"
+                [disabled]="!canEdit(user)"
+                matTooltip="Editar"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+
+              <button 
+                mat-icon-button 
+                color="warn"
+                (click)="onDelete(user)"
+                [disabled]="!canDelete(user)"
+                matTooltip="Eliminar"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+
+              <button 
+                mat-icon-button 
+                [matMenuTriggerFor]="menu"
+                matTooltip="Más opciones"
+              >
+                <mat-icon>more_vert</mat-icon>
+              </button>
+
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item [routerLink]="['/users', user.id]">
+                  <mat-icon>info</mat-icon>
+                  <span>Ver perfil completo</span>
+                </button>
+                <button mat-menu-item>
+                  <mat-icon>email</mat-icon>
+                  <span>Enviar email</span>
+                </button>
+                <button mat-menu-item>
+                  <mat-icon>history</mat-icon>
+                  <span>Ver historial</span>
+                </button>
+              </mat-menu>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr 
+          mat-row 
+          *matRowDef="let row; columns: displayedColumns;"
+          class="table-row"
+        ></tr>
+
+        <!-- No Data Row -->
+        <tr class="mat-row no-data-row" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+            <div class="no-data-message">
+              <mat-icon>search_off</mat-icon>
+              <p>No se encontraron usuarios</p>
+              <button mat-button color="primary" (click)="clearFilters()">
+                Limpiar filtros
+              </button>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Paginator -->
+    <mat-paginator
+      [length]="totalUsers"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[5, 10, 25, 50]"
+      [pageIndex]="pageIndex"
+      (page)="onPageChange($event)"
+      showFirstLastButtons
+    >
+    </mat-paginator>
+  </mat-card>
+</div>

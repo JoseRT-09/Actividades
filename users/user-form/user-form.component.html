@@ -1,0 +1,219 @@
+<div class="user-form-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <button mat-icon-button class="back-button" routerLink="/users">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>{{ isEditMode ? 'edit' : 'person_add' }}</mat-icon>
+          {{ isEditMode ? 'Editar Usuario' : 'Nuevo Usuario' }}
+        </h1>
+        <p class="page-subtitle">
+          {{ isEditMode ? 'Modifica los datos del usuario' : 'Completa el formulario para crear un nuevo usuario' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando datos...</p>
+  </div>
+
+  <!-- Form -->
+  <div class="form-wrapper" *ngIf="!isLoading">
+    <mat-card class="form-card">
+      <!-- Avatar Preview -->
+      <div class="avatar-preview">
+        <div class="avatar-large">
+          {{ getUserInitials() || 'US' }}
+        </div>
+        <p class="avatar-hint">Foto de perfil basada en iniciales</p>
+      </div>
+
+      <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+        <!-- Información Personal -->
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>person</mat-icon>
+            <h2>Información Personal</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="form-grid">
+            <!-- Nombre -->
+            <mat-form-field appearance="outline">
+              <mat-label>Nombre</mat-label>
+              <input 
+                matInput 
+                formControlName="nombre"
+                placeholder="Juan"
+                autocomplete="given-name"
+              >
+              <mat-icon matPrefix>badge</mat-icon>
+              <mat-error *ngIf="userForm.get('nombre')?.invalid">
+                {{ getErrorMessage('nombre') }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Apellido -->
+            <mat-form-field appearance="outline">
+              <mat-label>Apellido</mat-label>
+              <input 
+                matInput 
+                formControlName="apellido"
+                placeholder="Pérez"
+                autocomplete="family-name"
+              >
+              <mat-icon matPrefix>badge</mat-icon>
+              <mat-error *ngIf="userForm.get('apellido')?.invalid">
+                {{ getErrorMessage('apellido') }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Email -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Correo Electrónico</mat-label>
+              <input 
+                matInput 
+                type="email"
+                formControlName="email"
+                placeholder="usuario@ejemplo.com"
+                autocomplete="email"
+              >
+              <mat-icon matPrefix>email</mat-icon>
+              <mat-error *ngIf="userForm.get('email')?.invalid">
+                {{ getErrorMessage('email') }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Teléfono -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Teléfono (Opcional)</mat-label>
+              <input 
+                matInput 
+                formControlName="telefono"
+                placeholder="1234567890"
+                autocomplete="tel"
+              >
+              <mat-icon matPrefix>phone</mat-icon>
+              <mat-hint>10 dígitos sin espacios</mat-hint>
+              <mat-error *ngIf="userForm.get('telefono')?.invalid">
+                {{ getErrorMessage('telefono') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Credenciales -->
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>lock</mat-icon>
+            <h2>Credenciales</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="form-grid">
+            <!-- Contraseña -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{ isEditMode ? 'Nueva Contraseña (Opcional)' : 'Contraseña' }}</mat-label>
+              <input 
+                matInput 
+                [type]="hidePassword ? 'password' : 'text'"
+                formControlName="password"
+                placeholder="Mínimo 6 caracteres"
+                autocomplete="new-password"
+              >
+              <mat-icon matPrefix>vpn_key</mat-icon>
+              <button 
+                mat-icon-button 
+                matSuffix 
+                type="button"
+                (click)="togglePasswordVisibility()"
+              >
+                <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              <mat-hint *ngIf="isEditMode">Déjalo vacío para mantener la contraseña actual</mat-hint>
+              <mat-error *ngIf="userForm.get('password')?.invalid">
+                {{ getErrorMessage('password') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Configuración de Cuenta -->
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>settings</mat-icon>
+            <h2>Configuración de Cuenta</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="form-grid">
+            <!-- Rol -->
+            <mat-form-field appearance="outline">
+              <mat-label>Rol</mat-label>
+              <mat-select formControlName="rol">
+                <mat-option *ngFor="let role of roles" [value]="role.value">
+                  <div class="select-option">
+                    <mat-icon>{{ role.icon }}</mat-icon>
+                    <div class="option-content">
+                      <span class="option-label">{{ role.label }}</span>
+                      <span class="option-description">{{ role.description }}</span>
+                    </div>
+                  </div>
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>admin_panel_settings</mat-icon>
+              <mat-hint>Selecciona el nivel de acceso</mat-hint>
+            </mat-form-field>
+
+            <!-- Estado -->
+            <mat-form-field appearance="outline">
+              <mat-label>Estado</mat-label>
+              <mat-select formControlName="estado">
+                <mat-option *ngFor="let estado of estados" [value]="estado.value">
+                  <div class="select-option">
+                    <mat-icon [style.color]="estado.color === 'success' ? '#4caf50' : '#f44336'">
+                      {{ estado.icon }}
+                    </mat-icon>
+                    <span>{{ estado.label }}</span>
+                  </div>
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>check_circle</mat-icon>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button 
+            mat-stroked-button 
+            type="button"
+            (click)="onCancel()"
+            [disabled]="isSaving"
+          >
+            <mat-icon>close</mat-icon>
+            Cancelar
+          </button>
+
+          <button 
+            mat-raised-button 
+            color="primary"
+            type="submit"
+            [disabled]="userForm.invalid || isSaving"
+          >
+            <mat-spinner *ngIf="isSaving" diameter="20"></mat-spinner>
+            <mat-icon *ngIf="!isSaving">{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+            <span *ngIf="!isSaving">{{ isEditMode ? 'Guardar Cambios' : 'Crear Usuario' }}</span>
+          </button>
+        </div>
+      </form>
+    </mat-card>
+  </div>
+</div>
