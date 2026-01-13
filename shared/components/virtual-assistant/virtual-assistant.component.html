@@ -1,0 +1,80 @@
+<!-- Botón flotante -->
+<button class="assistant-fab" (click)="toggleChat()" [class.open]="isOpen">
+  <mat-icon *ngIf="!isOpen">support_agent</mat-icon>
+  <mat-icon *ngIf="isOpen">close</mat-icon>
+</button>
+
+<!-- Ventana de chat -->
+<div class="chat-window" [class.open]="isOpen">
+  <!-- Header del chat -->
+  <div class="chat-header">
+    <div class="header-content">
+      <div class="assistant-avatar">
+        <mat-icon>smart_toy</mat-icon>
+      </div>
+      <div class="header-info">
+        <h3>Asistente Virtual</h3>
+        <span class="status">En línea</span>
+      </div>
+    </div>
+    <button mat-icon-button (click)="toggleChat()" class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Mensajes -->
+  <div class="chat-messages">
+    <div *ngFor="let message of messages"
+         class="message"
+         [class.user-message]="message.isUser"
+         [class.assistant-message]="!message.isUser">
+      <div class="message-avatar" *ngIf="!message.isUser">
+        <mat-icon>smart_toy</mat-icon>
+      </div>
+      <div class="message-content">
+        <p>{{ message.text }}</p>
+        <span class="message-time">{{ message.timestamp | date:'short' }}</span>
+      </div>
+      <div class="message-avatar" *ngIf="message.isUser">
+        <mat-icon>person</mat-icon>
+      </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div *ngIf="isLoading" class="message assistant-message loading">
+      <div class="message-avatar">
+        <mat-icon>smart_toy</mat-icon>
+      </div>
+      <div class="message-content">
+        <div class="typing-indicator">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input de mensaje -->
+  <div class="chat-input">
+    <mat-form-field appearance="outline" class="message-field">
+      <mat-label>Escribe tu mensaje...</mat-label>
+      <input
+        matInput
+        [(ngModel)]="userMessage"
+        (keypress)="onKeyPress($event)"
+        [disabled]="isLoading"
+        placeholder="Pregunta algo sobre ResidenceHub"
+      >
+    </mat-form-field>
+    <button
+      mat-fab
+      color="primary"
+      (click)="sendMessage()"
+      [disabled]="!userMessage.trim() || isLoading"
+      class="send-button"
+    >
+      <mat-icon>send</mat-icon>
+    </button>
+  </div>
+</div>

@@ -52,9 +52,6 @@
     <div class="navbar-actions" *ngIf="currentUser$ | async as user">
       <!-- Perfil de Usuario -->
       <button mat-button [matMenuTriggerFor]="userMenu" class="user-button">
-        <div class="user-avatar">
-          {{ getUserInitials(user) }}
-        </div>
         <div class="user-info">
           <span class="user-name">{{ user.nombre }} {{ user.apellido }}</span>
           <span class="user-role">{{ user.rol }}</span>

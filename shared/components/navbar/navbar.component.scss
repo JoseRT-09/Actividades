@@ -137,31 +137,17 @@
     .user-button {
       display: flex;
       align-items: center;
-      gap: 16px;
-      padding: 8px 20px 8px 8px;
-      border-radius: 50px;
+      gap: 12px;
+      padding: 10px 16px;
+      border-radius: 8px;
       background-color: rgba(255, 255, 255, 0.1);
       transition: all 0.3s ease;
       color: white;
-      height: 56px;
+      height: auto;
       line-height: 1;
 
       &:hover {
         background-color: rgba(255, 255, 255, 0.2);
-      }
-
-      .user-avatar {
-        width: 42px;
-        height: 42px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: 16px;
-        color: white;
-        flex-shrink: 0;
       }
 
       .user-info {
@@ -170,26 +156,18 @@
         align-items: flex-start;
         justify-content: center;
         text-align: left;
-        gap: 6px;
-        line-height: 1;
-        min-width: 130px;
-        max-width: 200px;
-        padding: 2px 0;
+        gap: 4px;
+        line-height: 1.2;
 
         .user-name {
-          font-size: 15px;
+          font-size: 14px;
           font-weight: 600;
-          line-height: 1.4;
           white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          width: 100%;
         }
 
         .user-role {
-          font-size: 13px;
-          opacity: 0.95;
-          line-height: 1.4;
+          font-size: 12px;
+          opacity: 0.9;
           white-space: nowrap;
           text-transform: capitalize;
           font-weight: 500;
@@ -197,10 +175,9 @@
       }
 
       mat-icon {
-        font-size: 24px;
-        width: 24px;
-        height: 24px;
-        margin-left: 0;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
       }
     }
   }
