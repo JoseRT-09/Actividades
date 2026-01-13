@@ -41,13 +41,6 @@
 
     <!-- Acciones de Usuario -->
     <div class="navbar-actions" *ngIf="currentUser$ | async as user">
-      <!-- Notificaciones -->
-      <button mat-icon-button class="action-button">
-        <mat-icon [matBadge]="notificationCount" matBadgeColor="warn" matBadgeSize="small" aria-hidden="false">
-          notifications
-        </mat-icon>
-      </button>
-
       <!-- Perfil de Usuario -->
       <button mat-button [matMenuTriggerFor]="userMenu" class="user-button">
         <div class="user-avatar">
@@ -107,13 +100,6 @@
     </div>
   </div>
   
-  <mat-divider></mat-divider>
-  
-  <button mat-menu-item (click)="navigateToProfile()">
-    <mat-icon>person</mat-icon>
-    <span>Mi Perfil</span>
-  </button>
-
   <mat-divider></mat-divider>
 
   <button mat-menu-item (click)="onLogout()" class="logout-button">
