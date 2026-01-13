@@ -128,9 +128,19 @@ Por favor responde la pregunta del usuario:`
       }
 
       return 'No pude generar una respuesta. Por favor, intenta de nuevo.';
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error calling Gemini API:', error);
-      throw error;
+
+      // Manejar errores específicos de la API
+      if (error.status === 401 || error.status === 403) {
+        return 'La API Key de Google Gemini parece ser inválida o ha expirado. Por favor, verifica la configuración en environments/environment.ts o genera una nueva API Key en https://makersuite.google.com/app/apikey';
+      }
+
+      if (error.status === 429) {
+        return 'Has excedido el límite de solicitudes de la API de Gemini. Por favor, espera un momento e intenta de nuevo.';
+      }
+
+      return 'Hubo un problema al conectar con el asistente virtual. Por favor, verifica tu conexión a internet e intenta de nuevo.';
     }
   }
 

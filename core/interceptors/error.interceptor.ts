@@ -12,6 +12,11 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
+      // Ignorar errores de la API de Gemini (Google AI)
+      if (req.url.includes('generativelanguage.googleapis.com')) {
+        return throwError(() => error);
+      }
+
       let errorMessage = 'Ha ocurrido un error';
 
       if (error.error instanceof ErrorEvent) {
