@@ -162,9 +162,10 @@ export class DashboardComponent implements OnInit {
           this.dashboardStats.upcomingActivities = results.activities.length;
 
           // Calcular ganancias totales del mes (suma de montos de pagos)
-          const totalEarnings = results.payments.payments?.reduce((sum: number, payment: any) => {
+          const paymentsData = (results.payments as any).data || (results.payments as any).payments || [];
+          const totalEarnings = paymentsData.reduce((sum: number, payment: any) => {
             return sum + (Number(payment.monto_pagado) || 0);
-          }, 0) || 0;
+          }, 0);
 
           // Actualizar cards
           this.statsCards[0].value = this.dashboardStats.totalResidences;
