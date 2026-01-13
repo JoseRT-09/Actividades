@@ -92,9 +92,9 @@ export class DashboardComponent implements OnInit {
       changeType: 'negative'
     },
     {
-      title: 'Pagos del Mes',
+      title: 'Ganancias del Mes',
       value: 0,
-      icon: 'payments',
+      icon: 'attach_money',
       color: 'success',
       route: '/payments',
       change: '+15%',
@@ -159,14 +159,18 @@ export class DashboardComponent implements OnInit {
           // Actualizar estadísticas
           this.dashboardStats.totalResidences = results.residences.total;
           this.dashboardStats.pendingReports = results.reportStats.byStatus.abierto + results.reportStats.byStatus.enProgreso;
-          this.dashboardStats.totalPayments = results.payments.total;
           this.dashboardStats.upcomingActivities = results.activities.length;
+
+          // Calcular ganancias totales del mes (suma de montos de pagos)
+          const totalEarnings = results.payments.payments?.reduce((sum: number, payment: any) => {
+            return sum + (Number(payment.monto_pagado) || 0);
+          }, 0) || 0;
 
           // Actualizar cards
           this.statsCards[0].value = this.dashboardStats.totalResidences;
           this.statsCards[1].value = this.dashboardStats.totalResidents;
           this.statsCards[2].value = this.dashboardStats.pendingReports;
-          this.statsCards[3].value = this.dashboardStats.totalPayments;
+          this.statsCards[3].value = Math.round(totalEarnings); // Ganancias del mes
 
           this.isLoading = false;
         },

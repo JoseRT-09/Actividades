@@ -109,35 +109,41 @@
   .navbar-actions {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 20px;
     flex-shrink: 0;
     height: 100%;
 
     .action-button {
       color: white;
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+      }
 
       mat-icon {
-        font-size: 22px;
-        width: 22px;
-        height: 22px;
+        font-size: 26px;
+        width: 26px;
+        height: 26px;
       }
     }
 
     .user-button {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 5px 12px 5px 5px;
+      gap: 12px;
+      padding: 6px 14px 6px 6px;
       border-radius: 50px;
       background-color: rgba(255, 255, 255, 0.1);
       transition: all 0.3s ease;
       color: white;
-      height: 48px;
+      height: 50px;
       line-height: 1;
 
       &:hover {
@@ -164,20 +170,24 @@
         align-items: flex-start;
         justify-content: center;
         text-align: left;
-        gap: 2px;
+        gap: 4px;
         line-height: 1;
+        max-width: 150px;
 
         .user-name {
           font-size: 14px;
           font-weight: 600;
-          line-height: 1.1;
+          line-height: 1.2;
           white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          width: 100%;
         }
 
         .user-role {
           font-size: 11px;
           opacity: 0.85;
-          line-height: 1.1;
+          line-height: 1.2;
           white-space: nowrap;
           text-transform: capitalize;
         }

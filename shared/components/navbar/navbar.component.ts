@@ -46,10 +46,7 @@ export class NavbarComponent implements OnInit {
   }
 
   navigateToProfile(): void {
-    this.router.navigate(['/profile']);
-  }
-
-  navigateToSettings(): void {
-    this.router.navigate(['/settings']);
+    // Por ahora mostrar datos en el menú, en el futuro se puede crear una página de perfil completa
+    this.router.navigate(['/dashboard']);
   }
 }
