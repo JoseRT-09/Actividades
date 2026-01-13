@@ -1,0 +1,505 @@
+===========================================
+MANUAL DE USUARIO - RESIDENCEHUB
+Sistema de Gestión de Residencias
+===========================================
+
+ÍNDICE
+1. Introducción
+2. Inicio de Sesión
+3. Roles de Usuario
+4. Dashboard (Panel Principal)
+5. Gestión de Usuarios
+6. Gestión de Residencias
+7. Sistema de Pagos
+8. Reportes y Quejas
+9. Actividades
+10. Amenidades
+11. Preguntas Frecuentes
+
+===========================================
+1. INTRODUCCIÓN
+===========================================
+
+ResidenceHub es un sistema integral para la administración de residencias y condominios.
+Permite gestionar residentes, pagos, actividades, amenidades, reportes y más desde una
+interfaz moderna e intuitiva.
+
+El sistema está diseñado para tres tipos de usuarios:
+- Super Administrador: Control total del sistema
+- Administrador: Gestión de residencias y residentes
+- Residente: Acceso a servicios y consulta de información personal
+
+===========================================
+2. INICIO DE SESIÓN
+===========================================
+
+Para acceder al sistema:
+1. Ingresa a la página de inicio
+2. Introduce tu correo electrónico
+3. Introduce tu contraseña
+4. Haz clic en "Iniciar Sesión"
+
+Si olvidaste tu contraseña, contacta al administrador del sistema.
+
+===========================================
+3. ROLES DE USUARIO
+===========================================
+
+SUPER ADMINISTRADOR
+- Acceso completo a todas las funcionalidades
+- Gestión de usuarios administradores
+- Configuración global del sistema
+- Acceso a todas las residencias
+
+ADMINISTRADOR
+- Gestión de residencias asignadas
+- Gestión de residentes
+- Aprobación de reservas de amenidades
+- Gestión de pagos y costos de servicio
+- Visualización de reportes y quejas
+- Gestión de actividades
+
+RESIDENTE
+- Consulta de información personal
+- Visualización y pago de cuotas mensuales
+- Creación de reportes y quejas
+- Reserva de amenidades
+- Consulta de actividades del condominio
+- Visualización de su residencia
+
+===========================================
+4. DASHBOARD (PANEL PRINCIPAL)
+===========================================
+
+VISTA DE ADMINISTRADOR:
+
+El dashboard muestra estadísticas en tiempo real:
+
+1. Total Residencias
+   - Número total de residencias registradas en el sistema
+   - Clic en la tarjeta para ver todas las residencias
+
+2. Residentes Activos
+   - Cantidad de residentes con estado "Activo"
+   - Clic en la tarjeta para ver la lista de usuarios
+
+3. Reportes Pendientes
+   - Número de reportes que requieren atención
+   - Incluye reportes abiertos y en progreso
+
+4. Ganancias del Mes
+   - Suma total de pagos recibidos en el mes actual
+   - Muestra el monto en la moneda local
+
+ACCIONES RÁPIDAS:
+- Nueva Residencia: Crear una nueva residencia
+- Nuevo Usuario: Registrar un nuevo residente
+- Crear Reporte: Reportar una incidencia
+- Nueva Actividad: Programar una actividad
+
+VISTA DE RESIDENTE:
+
+Los residentes no tienen acceso al dashboard. Al iniciar sesión,
+son dirigidos automáticamente a la sección "Mis Pagos" donde pueden:
+- Ver sus pagos pendientes y realizados
+- Realizar pagos en línea
+- Descargar comprobantes
+
+===========================================
+5. GESTIÓN DE USUARIOS
+===========================================
+
+SOLO PARA ADMINISTRADORES
+
+CREAR NUEVO USUARIO:
+1. Ve a "Usuarios" en el menú lateral
+2. Haz clic en "Nuevo Usuario"
+3. Completa el formulario:
+   - Nombre
+   - Apellido
+   - Email (será el usuario de acceso)
+   - Contraseña
+   - Teléfono (opcional)
+   - Rol (Residente/Administrador)
+4. Haz clic en "Guardar"
+
+EDITAR USUARIO:
+1. En la lista de usuarios, haz clic en el usuario a editar
+2. Modifica los campos necesarios
+3. No puedes cambiar el email una vez creado
+4. Puedes cambiar el rol del usuario
+5. Puedes cambiar el estado (Activo/Inactivo)
+6. Haz clic en "Guardar cambios"
+
+FILTRAR USUARIOS:
+- Buscar: Introduce nombre, apellido o email
+- Filtrar por Rol: Selecciona Residente, Administrador o Super Admin
+- Filtrar por Estado: Selecciona Activo o Inactivo
+
+===========================================
+6. GESTIÓN DE RESIDENCIAS
+===========================================
+
+SOLO PARA ADMINISTRADORES
+
+CREAR NUEVA RESIDENCIA:
+1. Ve a "Residencias" en el menú
+2. Haz clic en "Nueva Residencia"
+3. Completa el formulario:
+   - Número de unidad (ej: 101, A-202)
+   - Nombre del residente propietario
+   - Área en m²
+   - Número de habitaciones
+   - Número de baños
+   - Descripción (opcional)
+4. Haz clic en "Guardar"
+
+ASIGNAR RESIDENTE A RESIDENCIA:
+1. Ve al detalle de la residencia
+2. Haz clic en "Asignar Residente"
+3. Selecciona el residente de la lista
+4. Define si es propietario o inquilino
+5. Confirma la asignación
+
+VER DETALLES DE RESIDENCIA:
+- Información general (unidad, área, habitaciones)
+- Residentes asignados
+- Historial de pagos
+- Reportes relacionados
+- Estado de la residencia
+
+EDITAR RESIDENCIA:
+1. Haz clic en la residencia a editar
+2. Haz clic en el botón "Editar"
+3. Modifica los campos necesarios
+4. Guarda los cambios
+
+===========================================
+7. SISTEMA DE PAGOS
+===========================================
+
+PARA ADMINISTRADORES:
+
+VER TODOS LOS PAGOS:
+1. Ve a "Finanzas" > "Pagos"
+2. Visualiza la lista completa de pagos
+3. Filtra por:
+   - Estado (Pendiente, Pagado, Vencido)
+   - Concepto (Renta Mensual, Mantenimiento, etc.)
+   - Rango de fechas
+   - Residencia
+
+REGISTRAR PAGO MANUAL:
+1. Ve a "Pagos" > "Registrar Pago"
+2. Selecciona la residencia
+3. Selecciona el concepto
+4. Introduce el monto
+5. Selecciona la fecha de pago
+6. Agrega notas si es necesario
+7. Guarda el registro
+
+GESTIONAR COSTOS DE SERVICIO:
+1. Ve a "Finanzas" > "Costos de Servicio"
+2. Define los costos mensuales por tipo:
+   - Mantenimiento general
+   - Agua
+   - Gas
+   - Otros servicios
+3. Estos costos se aplicarán automáticamente
+
+PARA RESIDENTES:
+
+VER MIS PAGOS:
+1. Al iniciar sesión, serás dirigido a "Mis Pagos"
+2. También puedes acceder desde el menú lateral
+3. Visualiza:
+   - Pagos pendientes
+   - Historial de pagos
+   - Próximos vencimientos
+
+REALIZAR PAGO:
+1. En "Mis Pagos", haz clic en un pago pendiente
+2. Haz clic en "Pagar con Tarjeta"
+3. Completa los datos de tu tarjeta:
+   - Número de tarjeta
+   - Titular de la tarjeta
+   - Fecha de expiración
+   - CVV
+4. Confirma el pago
+5. Descarga tu comprobante
+
+===========================================
+8. REPORTES Y QUEJAS
+===========================================
+
+CREAR UN REPORTE:
+1. Ve a "Reportes" en el menú
+2. Haz clic en "Nuevo Reporte"
+3. Completa el formulario:
+   - Título del reporte
+   - Descripción detallada
+   - Prioridad (Baja, Media, Alta)
+   - Categoría (Mantenimiento, Seguridad, Limpieza, etc.)
+   - Ubicación (opcional)
+4. Adjunta fotos si es necesario
+5. Envía el reporte
+
+VER ESTADO DE REPORTES:
+- Abierto: Reporte recién creado
+- En Progreso: Se está trabajando en la solución
+- Resuelto: Problema solucionado
+- Cerrado: Reporte finalizado
+
+PARA ADMINISTRADORES - GESTIONAR REPORTES:
+1. Ve a "Reportes"
+2. Haz clic en un reporte para ver detalles
+3. Puedes:
+   - Cambiar el estado del reporte
+   - Cambiar la prioridad
+   - Asignar a un responsable
+   - Agregar comentarios
+   - Adjuntar evidencias de la solución
+
+QUEJAS:
+Similar a los reportes, pero específicamente para:
+- Quejas sobre otros residentes
+- Problemas de convivencia
+- Ruidos excesivos
+- Mascotas
+- Uso indebido de áreas comunes
+
+===========================================
+9. ACTIVIDADES
+===========================================
+
+CALENDARIO DE ACTIVIDADES:
+
+VER ACTIVIDADES:
+1. Ve a "Actividades" en el menú
+2. Se muestra un calendario mensual
+3. Las actividades aparecen en sus fechas correspondientes
+4. Haz clic en una actividad para ver detalles
+
+TIPOS DE ACTIVIDADES:
+- Reunión: Juntas de residentes
+- Evento: Celebraciones y festividades
+- Mantenimiento: Trabajos programados
+- Asamblea: Reuniones formales
+- Celebración: Eventos sociales
+- Otro: Otras actividades
+
+PARA ADMINISTRADORES - CREAR ACTIVIDAD:
+1. Ve a "Actividades"
+2. Haz clic en "Nueva Actividad"
+3. Completa:
+   - Título de la actividad
+   - Descripción
+   - Tipo de actividad
+   - Fecha y hora de inicio
+   - Fecha y hora de fin
+   - Ubicación
+   - Capacidad máxima (opcional)
+4. Guarda la actividad
+
+PARTICIPAR EN ACTIVIDADES:
+- Los residentes pueden ver todas las actividades
+- Algunas actividades requieren confirmación de asistencia
+- Recibirás notificaciones de próximas actividades
+
+===========================================
+10. AMENIDADES
+===========================================
+
+VER AMENIDADES DISPONIBLES:
+1. Ve a "Amenidades" en el menú
+2. Visualiza todas las amenidades del condominio:
+   - Piscina
+   - Gimnasio
+   - Salón de eventos
+   - Cancha deportiva
+   - Área de juegos
+   - Otros espacios comunes
+
+INFORMACIÓN DE CADA AMENIDAD:
+- Nombre y descripción
+- Ubicación dentro del condominio
+- Horarios disponibles
+- Capacidad máxima
+- Costo por uso (si aplica)
+- Reglas de uso
+- Requiere aprobación del administrador
+
+RESERVAR UNA AMENIDAD:
+1. Ve a "Amenidades"
+2. Selecciona la amenidad que deseas reservar
+3. Haz clic en "Reservar"
+4. Completa el formulario:
+   - Fecha de reserva
+   - Hora de inicio
+   - Hora de fin
+   - Número de personas
+   - Motivo de la reserva
+5. Envía la solicitud
+6. Espera la aprobación del administrador
+
+PARA ADMINISTRADORES - GESTIONAR AMENIDADES:
+
+Crear Nueva Amenidad:
+1. Ve a "Amenidades"
+2. Haz clic en "Nueva Amenidad"
+3. Completa:
+   - Nombre
+   - Tipo (piscina, gimnasio, salón, etc.)
+   - Ubicación
+   - Capacidad máxima
+   - Horario disponible
+   - Costo por uso
+   - Requiere aprobación (sí/no)
+   - Descripción y reglas
+4. Guarda la amenidad
+
+Aprobar/Rechazar Reservas:
+1. Ve a "Amenidades" > "Reservas Pendientes"
+2. Revisa cada solicitud
+3. Verifica disponibilidad
+4. Aprueba o rechaza con comentarios
+5. El residente recibe notificación automática
+
+VER RESERVAS:
+- Calendario de reservas por amenidad
+- Lista de reservas pendientes
+- Historial de reservas
+- Estado de cada reserva (Pendiente, Aprobada, Rechazada)
+
+===========================================
+11. PREGUNTAS FRECUENTES
+===========================================
+
+P: ¿Cómo cambio mi contraseña?
+R: Contacta al administrador del sistema para restablecer tu contraseña.
+
+P: ¿Puedo hacer pagos desde mi celular?
+R: Sí, el sistema es completamente responsivo y funciona en dispositivos móviles.
+
+P: ¿Cómo sé si mi pago fue procesado correctamente?
+R: Recibirás un comprobante digital que puedes descargar. También aparecerá
+   en tu historial de pagos con estado "Pagado".
+
+P: ¿Cuánto tiempo tarda la aprobación de una reserva de amenidad?
+R: Depende del administrador, pero generalmente en 24-48 horas recibirás
+   una respuesta.
+
+P: ¿Puedo ver los reportes de otros residentes?
+R: Los residentes solo pueden ver sus propios reportes. Los administradores
+   pueden ver todos los reportes.
+
+P: ¿Qué hago si tengo un problema técnico con el sistema?
+R: Puedes crear un reporte en el sistema o contactar al administrador.
+
+P: ¿Cómo puedo ver las actividades del mes?
+R: Ve a la sección "Actividades" donde encontrarás un calendario con todas
+   las actividades programadas.
+
+P: ¿Los residentes pueden crear actividades?
+R: No, solo los administradores pueden crear actividades. Los residentes
+   pueden visualizarlas y participar.
+
+P: ¿Puedo modificar una reserva de amenidad después de enviarla?
+R: No directamente. Debes cancelar la reserva actual y crear una nueva,
+   o contactar al administrador.
+
+P: ¿Qué métodos de pago están disponibles?
+R: Actualmente el sistema acepta pagos con tarjeta de crédito/débito a
+   través de una pasarela de pago segura.
+
+P: ¿Cómo puedo descargar mis comprobantes de pago?
+R: En la sección "Mis Pagos", cada pago tiene un botón para descargar
+   el comprobante en formato PDF.
+
+P: ¿Puedo ver el historial de pagos de años anteriores?
+R: Sí, en "Mis Pagos" puedes filtrar por rango de fechas para ver
+   pagos de cualquier período.
+
+P: ¿Qué hago si veo información incorrecta en mi perfil?
+R: Contacta al administrador para actualizar tu información personal.
+
+P: ¿El sistema envía recordatorios de pago?
+R: Sí, recibirás notificaciones automáticas de pagos próximos a vencer
+   y pagos vencidos.
+
+P: ¿Puedo reservar una amenidad para varias fechas a la vez?
+R: No, debes hacer una reserva individual para cada fecha. Esto evita
+   reservas excesivas.
+
+P: ¿Qué información ven los administradores de mi residencia?
+R: Los administradores pueden ver tu información básica de contacto,
+   tu residencia asignada, historial de pagos, reportes y reservas de
+   amenidades. No tienen acceso a información de tu tarjeta de pago.
+
+===========================================
+NAVEGACIÓN DEL SISTEMA
+===========================================
+
+MENÚ LATERAL (SIDEBAR):
+El menú lateral cambia según tu rol:
+
+Para Administradores:
+- Inicio (Dashboard)
+- Usuarios
+- Residencias
+- Pagos
+- Reportes
+- Quejas
+- Actividades
+- Amenidades
+
+Para Residentes:
+- Mis Pagos
+- Reportes
+- Quejas
+- Actividades
+- Amenidades
+
+BARRA SUPERIOR (NAVBAR):
+La barra superior contiene:
+- Logo de ResidenceHub
+- Accesos rápidos según rol
+- Información del usuario (nombre y rol)
+- Menú desplegable con opción de cerrar sesión
+
+ASISTENTE VIRTUAL:
+En la esquina inferior derecha encontrarás un botón morado con el ícono
+de un agente. Al hacer clic, se abre un chat donde puedes hacer preguntas
+sobre cómo usar el sistema. El asistente puede ayudarte con:
+- Dudas sobre funcionalidades
+- Cómo realizar tareas específicas
+- Explicaciones de términos
+- Guía paso a paso
+
+===========================================
+SEGURIDAD Y PRIVACIDAD
+===========================================
+
+- Todas las contraseñas están encriptadas
+- Los pagos se procesan a través de pasarelas seguras
+- La información personal está protegida
+- Solo los administradores pueden ver datos sensibles
+- Sesiones con tiempo de expiración automático
+- Respaldo automático de datos
+
+===========================================
+SOPORTE TÉCNICO
+===========================================
+
+Para problemas técnicos o dudas:
+1. Utiliza el asistente virtual (botón morado en esquina inferior derecha)
+2. Crea un reporte en el sistema
+3. Contacta al administrador de tu residencia
+4. Envía un correo a soporte@residencehub.com
+
+Horario de soporte: Lunes a Viernes, 9:00 AM - 6:00 PM
+
+===========================================
+FIN DEL MANUAL
+Versión 1.0 - 2026
+===========================================

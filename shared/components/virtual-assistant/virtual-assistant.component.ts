@@ -35,31 +35,29 @@ export class VirtualAssistantComponent implements OnInit {
   messages: Message[] = [];
   userMessage = '';
   isLoading = false;
-  pdfContent = '';
+  manualContent = '';
 
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.loadPdfContent();
-    this.addMessage('¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?', false);
+    this.loadManualContent();
+    this.addMessage('¡Hola! Soy tu asistente virtual de ResidenceHub. Puedo ayudarte con dudas sobre cómo usar el sistema. ¿En qué puedo ayudarte?', false);
   }
 
   toggleChat(): void {
     this.isOpen = !this.isOpen;
   }
 
-  async loadPdfContent(): Promise<void> {
+  async loadManualContent(): Promise<void> {
     try {
-      // Cargar el contenido del PDF
-      const response = await fetch('/assets/manual.pdf');
-      const blob = await response.blob();
-
-      // Aquí deberías implementar la lectura del PDF
-      // Por ahora, establecemos un mensaje de contexto
-      this.pdfContent = 'Manual de usuario cargado correctamente.';
+      // Cargar el contenido del manual.txt
+      const response = await fetch('/assets/manual.txt');
+      const text = await response.text();
+      this.manualContent = text;
+      console.log('Manual cargado correctamente');
     } catch (error) {
-      console.error('Error cargando el PDF:', error);
-      this.pdfContent = 'Error al cargar el manual.';
+      console.error('Error cargando el manual:', error);
+      this.manualContent = 'Manual de usuario de ResidenceHub no disponible.';
     }
   }
 
@@ -104,11 +102,21 @@ export class VirtualAssistantComponent implements OnInit {
       const payload = {
         contents: [{
           parts: [{
-            text: `Contexto: Eres un asistente virtual para ResidenceHub, un sistema de gestión de residencias. ${this.pdfContent}
+            text: `Eres un asistente virtual para ResidenceHub, un sistema de gestión de residencias y condominios.
 
-Usuario pregunta: ${message}
+MANUAL DEL SISTEMA:
+${this.manualContent}
 
-Por favor responde de manera clara y concisa, basándote en la información del manual cuando sea relevante.`
+INSTRUCCIONES:
+- Responde de manera clara, concisa y amigable
+- Basate en la información del manual anterior
+- Si la pregunta no está en el manual, usa tu conocimiento sobre sistemas de gestión
+- Proporciona pasos específicos cuando sea necesario
+- Si no sabes algo, admítelo honestamente
+
+PREGUNTA DEL USUARIO: ${message}
+
+Por favor responde la pregunta del usuario:`
           }]
         }]
       };

@@ -22,9 +22,9 @@ export const environment = {
 };
 ```
 
-### 3. Agregar el manual.pdf
-1. Crea una carpeta `assets` en la raíz del proyecto si no existe
-2. Coloca tu archivo `manual.pdf` en `/assets/manual.pdf`
+### 3. Verificar el manual.txt
+El archivo `manual.txt` ya está incluido en `/assets/manual.txt` con toda la documentación del sistema.
+Este archivo contiene información completa sobre todas las funcionalidades de ResidenceHub.
 
 ### 4. Integrar el componente
 
@@ -89,7 +89,7 @@ export const appConfig: ApplicationConfig = {
 - **Botón flotante**: Aparece en la esquina inferior derecha
 - **Chat en tiempo real**: Interfaz de chat moderna y responsiva
 - **IA conversacional**: Respuestas inteligentes basadas en Google Gemini
-- **Contexto del manual**: Lee y comprende el contenido del manual.pdf
+- **Contexto del manual**: Lee y comprende el contenido del manual.txt
 - **Animaciones suaves**: Transiciones y efectos visuales atractivos
 
 ## Uso
@@ -125,13 +125,14 @@ Por favor responde...`
 
 - La API Key de Gemini tiene límites de uso gratuitos
 - El componente es completamente standalone y no requiere módulos adicionales
-- El manual.pdf debe estar en la carpeta assets para ser accesible
-- Se recomienda implementar lectura real del PDF usando una librería como pdf.js
+- El manual.txt debe estar en la carpeta assets para ser accesible
+- El manual se carga automáticamente al iniciar el componente
+- Todas las respuestas están basadas en el contenido del manual.txt
 
 ## Próximas mejoras
 
-- [ ] Implementar lectura real del contenido del PDF
 - [ ] Agregar histórico de conversaciones
-- [ ] Soporte para archivos adjuntos
+- [ ] Soporte para adjuntar capturas de pantalla
 - [ ] Modo oscuro
 - [ ] Personalización del avatar
+- [ ] Guardar conversaciones del usuario
